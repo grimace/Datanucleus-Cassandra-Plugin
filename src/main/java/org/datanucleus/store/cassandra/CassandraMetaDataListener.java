@@ -27,15 +27,15 @@ import org.datanucleus.util.Localiser;
  * Listener for the load of metadata for classes.
  * Allows us to reject metadata when it isn't supported by this datastore.
  */
-public class HBaseMetaDataListener implements MetaDataListener
+public class CassandraMetaDataListener implements MetaDataListener
 {
     /** Localiser for messages. */
     protected static final Localiser LOCALISER = Localiser.getInstance(
-        "org.datanucleus.store.hbase.Localisation", HBaseStoreManager.class.getClassLoader());
+        "org.datanucleus.store.hbase.Localisation", CassandraStoreManager.class.getClassLoader());
 
-    private HBaseStoreManager storeManager;
+    private CassandraStoreManager storeManager;
     
-    HBaseMetaDataListener(HBaseStoreManager storeManager)
+    CassandraMetaDataListener(CassandraStoreManager storeManager)
     {
         this.storeManager = storeManager;
     }
@@ -52,7 +52,7 @@ public class HBaseMetaDataListener implements MetaDataListener
         }
         if (storeManager.isAutoCreateTables() || storeManager.isAutoCreateColumns())
         {
-            HBaseUtils.createSchema(storeManager.getHbaseConfig(), cmd, storeManager.isAutoCreateColumns());
+            CassandraUtils.createSchema(storeManager.getHbaseConfig(), cmd, storeManager.isAutoCreateColumns());
         }
         
     }

@@ -24,35 +24,35 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class HBaseConnectionPool
+public class CassandraConnectionPool
 {
 
-    private final List<HBaseManagedConnection> connections;
+    private final List<CassandraManagedConnection> connections;
 
-    private final ThreadLocal<WeakReference<HBaseManagedConnection>> connectionForCurrentThread;
+    private final ThreadLocal<WeakReference<CassandraManagedConnection>> connectionForCurrentThread;
 
     private final Timer evictorThread;
 
     private int timeBetweenEvictionRunsMillis = 15 * 1000; // default, 15 secs
 
-    public HBaseConnectionPool()
+    public CassandraConnectionPool()
     {
-        connectionForCurrentThread = new ThreadLocal<WeakReference<HBaseManagedConnection>>();
-        connections = new CopyOnWriteArrayList<HBaseManagedConnection>();
+        connectionForCurrentThread = new ThreadLocal<WeakReference<CassandraManagedConnection>>();
+        connections = new CopyOnWriteArrayList<CassandraManagedConnection>();
 
         evictorThread = new Timer("HBase Connection Evictor", true);
         startConnectionEvictorThread(evictorThread);
     }
 
-    public void registerConnection(HBaseManagedConnection managedConnection)
+    public void registerConnection(CassandraManagedConnection managedConnection)
     {
         connections.add(managedConnection);
-        connectionForCurrentThread.set(new WeakReference<HBaseManagedConnection>(managedConnection));
+        connectionForCurrentThread.set(new WeakReference<CassandraManagedConnection>(managedConnection));
     }
 
-    public HBaseManagedConnection getPooledConnection()
+    public CassandraManagedConnection getPooledConnection()
     {
-        WeakReference<HBaseManagedConnection> ref = connectionForCurrentThread.get();
+        WeakReference<CassandraManagedConnection> ref = connectionForCurrentThread.get();
 
         if (ref == null)
         {
@@ -60,7 +60,7 @@ public class HBaseConnectionPool
         }
         else
         {
-            HBaseManagedConnection managedConnection = ref.get();
+            CassandraManagedConnection managedConnection = ref.get();
 
             if (managedConnection != null && !managedConnection.isDisposed())
             {
@@ -80,9 +80,9 @@ public class HBaseConnectionPool
 
     private void disposeTimedOutConnections()
     {
-        List<HBaseManagedConnection> timedOutConnections = new ArrayList<HBaseManagedConnection>();
+        List<CassandraManagedConnection> timedOutConnections = new ArrayList<CassandraManagedConnection>();
 
-        for (HBaseManagedConnection managedConnection : connections)
+        for (CassandraManagedConnection managedConnection : connections)
         {
             if (managedConnection.isExpired())
             {
@@ -90,7 +90,7 @@ public class HBaseConnectionPool
             }
         }
 
-        for (HBaseManagedConnection managedConnection : timedOutConnections)
+        for (CassandraManagedConnection managedConnection : timedOutConnections)
         {
             managedConnection.dispose();
             connections.remove(managedConnection);

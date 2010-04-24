@@ -31,7 +31,7 @@ import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.ColumnMetaData;
 
-public class HBaseUtils
+public class CassandraUtils
 {
     public static String getTableName(AbstractClassMetaData acmd)
     {
@@ -56,7 +56,7 @@ public class HBaseUtils
         if (columnName == null)
         {
             // Fallback to the field/property name
-            columnName = HBaseUtils.getTableName(acmd);
+            columnName = CassandraUtils.getTableName(acmd);
         }
         else if (columnName.indexOf(":")>-1)
         {
@@ -111,7 +111,7 @@ public class HBaseUtils
             {
                 public Object run() throws Exception
                 {
-                    String tableName = HBaseUtils.getTableName(acmd);
+                    String tableName = CassandraUtils.getTableName(acmd);
                     HTableDescriptor hTable;
                     try
                     {
@@ -129,9 +129,9 @@ public class HBaseUtils
             if (autoCreateColumns)
             {
                 boolean modified = false;
-                if (!hTable.hasFamily(HBaseUtils.getTableName(acmd).getBytes()))
+                if (!hTable.hasFamily(CassandraUtils.getTableName(acmd).getBytes()))
                 {
-                    HColumnDescriptor hColumn = new HColumnDescriptor(HBaseUtils.getTableName(acmd));
+                    HColumnDescriptor hColumn = new HColumnDescriptor(CassandraUtils.getTableName(acmd));
                     hTable.addFamily(hColumn);
                     modified = true;
                 }

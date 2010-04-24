@@ -30,11 +30,11 @@ import org.datanucleus.store.AbstractStoreManager;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.NucleusConnection;
 
-public class HBaseStoreManager extends AbstractStoreManager
+public class CassandraStoreManager extends AbstractStoreManager
 {
     MetaDataListener metadataListener;
 
-    private HBaseConfiguration hbaseConfig; 
+    //private HBaseConfiguration hbaseConfig; 
     
     private boolean autoCreateTables = false;
     private boolean autoCreateColumns = false;
@@ -47,16 +47,16 @@ public class HBaseStoreManager extends AbstractStoreManager
      * @param clr ClassLoader resolver
      * @param omfContext ObjectManagerFactory context
      */
-    public HBaseStoreManager(ClassLoaderResolver clr, OMFContext omfContext)
+    public CassandraStoreManager(ClassLoaderResolver clr, OMFContext omfContext)
     {
         super("hbase", clr, omfContext);
                 
         // Handler for metadata
-        metadataListener = new HBaseMetaDataListener(this);
+        metadataListener = new CassandraMetaDataListener(this);
         omfContext.getMetaDataManager().registerListener(metadataListener);
 
         // Handler for persistence process
-        persistenceHandler2 = new HBasePersistenceHandler(this);
+        persistenceHandler2 = new CassandraPersistenceHandler(this);
 
         hbaseConfig = new HBaseConfiguration();
 

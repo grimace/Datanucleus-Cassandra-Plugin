@@ -28,7 +28,7 @@ import org.datanucleus.store.connection.ManagedConnection;
  */
 public class ConnectionFactoryImpl extends AbstractConnectionFactory
 {
-    private HBaseConnectionPool connectionPool;
+    private CassandraConnectionPool connectionPool;
 
     /**
      * Constructor.
@@ -38,8 +38,8 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory
     public ConnectionFactoryImpl(OMFContext omfContext, String resourceType)
     {
         super(omfContext, resourceType);
-        HBaseStoreManager storeManager = (HBaseStoreManager) omfContext.getStoreManager();
-        connectionPool = new HBaseConnectionPool();
+        CassandraStoreManager storeManager = (CassandraStoreManager) omfContext.getStoreManager();
+        connectionPool = new CassandraConnectionPool();
         connectionPool.setTimeBetweenEvictionRunsMillis(storeManager.getPoolTimeBetweenEvictionRunsMillis());
     }
 
@@ -52,12 +52,12 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory
      */
     public ManagedConnection createManagedConnection(Object poolKey, Map transactionOptions)
     {
-        HBaseStoreManager storeManager = (HBaseStoreManager) omfContext.getStoreManager();
+        CassandraStoreManager storeManager = (CassandraStoreManager) omfContext.getStoreManager();
                
-        HBaseManagedConnection managedConnection = connectionPool.getPooledConnection();
+        CassandraManagedConnection managedConnection = connectionPool.getPooledConnection();
         if (managedConnection == null) 
         {
-            managedConnection = new HBaseManagedConnection(storeManager.getHbaseConfig());
+            managedConnection = new CassandraManagedConnection(storeManager.getHbaseConfig());
             managedConnection.setIdleTimeoutMills(storeManager.getPoolMinEvictableIdleTimeMillis());
             connectionPool.registerConnection(managedConnection);
         }

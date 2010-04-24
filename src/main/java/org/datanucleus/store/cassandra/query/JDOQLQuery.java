@@ -26,7 +26,7 @@ import java.util.Map;
 import org.datanucleus.query.evaluator.JDOQLEvaluator;
 import org.datanucleus.query.evaluator.JavaQueryEvaluator;
 import org.datanucleus.store.ExecutionContext;
-import org.datanucleus.store.cassandra.HBaseManagedConnection;
+import org.datanucleus.store.cassandra.CassandraManagedConnection;
 import org.datanucleus.store.query.AbstractJDOQLQuery;
 import org.datanucleus.util.NucleusLogger;
 
@@ -66,7 +66,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery
 
     protected Object performExecute(Map parameters)
     {
-        HBaseManagedConnection mconn = (HBaseManagedConnection) ec.getStoreManager().getConnection(ec);
+        CassandraManagedConnection mconn = (CassandraManagedConnection) ec.getStoreManager().getConnection(ec);
         try
         {
             long startTime = System.currentTimeMillis();
@@ -90,7 +90,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery
             }
             else
             {
-                candidates = HBaseQueryUtils.getObjectsOfCandidateType(ec, mconn, candidateClass, subclasses,
+                candidates = CassandraQueryUtils.getObjectsOfCandidateType(ec, mconn, candidateClass, subclasses,
                     ignoreCache);
             }
 

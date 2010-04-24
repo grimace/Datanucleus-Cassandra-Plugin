@@ -36,11 +36,11 @@ import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.FieldValues2;
 import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.Type;
-import org.datanucleus.store.cassandra.HBaseFetchFieldManager;
-import org.datanucleus.store.cassandra.HBaseManagedConnection;
-import org.datanucleus.store.cassandra.HBaseUtils;
+import org.datanucleus.store.cassandra.CassandraFetchFieldManager;
+import org.datanucleus.store.cassandra.CassandraManagedConnection;
+import org.datanucleus.store.cassandra.CassandraUtils;
 
-class HBaseQueryUtils
+class CassandraQueryUtils
 {
     /**
      * Convenience method to get all objects of the candidate type (and optional subclasses) from the 
@@ -52,7 +52,7 @@ class HBaseQueryUtils
      * @param ignoreCache Whether to ignore the cache
      * @return List of objects of the candidate type (or subclass)
      */
-    static List getObjectsOfCandidateType(final ExecutionContext om, final HBaseManagedConnection mconn,
+    static List getObjectsOfCandidateType(final ExecutionContext om, final CassandraManagedConnection mconn,
             Class candidateClass, boolean subclasses, boolean ignoreCache)
     {
         List results = new ArrayList();
@@ -65,14 +65,14 @@ class HBaseQueryUtils
             {
                 public Object run() throws Exception
                 {
-                    HTable table = mconn.getHTable(HBaseUtils.getTableName(acmd));
+                    HTable table = mconn.getHTable(CassandraUtils.getTableName(acmd));
 
                     Scan scan = new Scan();
                     int[] fieldNumbers =  acmd.getAllMemberPositions();
                     for(int i=0; i<fieldNumbers.length; i++)
                     {
-                        byte[] familyNames = HBaseUtils.getFamilyName(acmd,fieldNumbers[i]).getBytes();
-                        byte[] columnNames = HBaseUtils.getQualifierName(acmd, fieldNumbers[i]).getBytes();
+                        byte[] familyNames = CassandraUtils.getFamilyName(acmd,fieldNumbers[i]).getBytes();
+                        byte[] columnNames = CassandraUtils.getQualifierName(acmd, fieldNumbers[i]).getBytes();
                         scan.addColumn(familyNames,columnNames);
                     }
                     ResultScanner scanner = table.getScanner(scan);
@@ -89,13 +89,13 @@ class HBaseQueryUtils
                     // StateManager calls the fetchFields method
                     public void fetchFields(ObjectProvider sm)
                     {
-                        sm.replaceFields(acmd.getPKMemberPositions(), new HBaseFetchFieldManager(acmd, result));
-                        sm.replaceFields(acmd.getBasicMemberPositions(clr, om.getMetaDataManager()), new HBaseFetchFieldManager(acmd, result));
+                        sm.replaceFields(acmd.getPKMemberPositions(), new CassandraFetchFieldManager(acmd, result));
+                        sm.replaceFields(acmd.getBasicMemberPositions(clr, om.getMetaDataManager()), new CassandraFetchFieldManager(acmd, result));
                     }
 
                     public void fetchNonLoadedFields(ObjectProvider sm)
                     {
-                        sm.replaceNonLoadedFields(acmd.getAllMemberPositions(), new HBaseFetchFieldManager(acmd, result));
+                        sm.replaceNonLoadedFields(acmd.getAllMemberPositions(), new CassandraFetchFieldManager(acmd, result));
                     }
 
                     public FetchPlan getFetchPlanForLoading()

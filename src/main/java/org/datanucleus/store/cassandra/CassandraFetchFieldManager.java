@@ -26,12 +26,12 @@ import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
 
-public class HBaseFetchFieldManager extends AbstractFieldManager
+public class CassandraFetchFieldManager extends AbstractFieldManager
 {
     Result result;
     AbstractClassMetaData acmd;
 
-    public HBaseFetchFieldManager(AbstractClassMetaData acmd, Result result)
+    public CassandraFetchFieldManager(AbstractClassMetaData acmd, Result result)
     {
         this.acmd = acmd;
         this.result = result;
@@ -39,8 +39,8 @@ public class HBaseFetchFieldManager extends AbstractFieldManager
 
     public boolean fetchBooleanField(int fieldNumber)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         boolean value;
         try
         {
@@ -60,8 +60,8 @@ public class HBaseFetchFieldManager extends AbstractFieldManager
     
     public byte fetchByteField(int fieldNumber)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         byte value;
         try
         {
@@ -81,8 +81,8 @@ public class HBaseFetchFieldManager extends AbstractFieldManager
     
     public char fetchCharField(int fieldNumber)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         char value;
         try
         {
@@ -102,8 +102,8 @@ public class HBaseFetchFieldManager extends AbstractFieldManager
     
     public double fetchDoubleField(int fieldNumber)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         double value;
         try
         {
@@ -123,8 +123,8 @@ public class HBaseFetchFieldManager extends AbstractFieldManager
     
     public float fetchFloatField(int fieldNumber)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         float value;
         try
         {
@@ -144,8 +144,8 @@ public class HBaseFetchFieldManager extends AbstractFieldManager
     
     public int fetchIntField(int fieldNumber)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         int value;
         try
         {
@@ -165,8 +165,8 @@ public class HBaseFetchFieldManager extends AbstractFieldManager
     
     public long fetchLongField(int fieldNumber)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         long value;
         try
         {
@@ -186,8 +186,8 @@ public class HBaseFetchFieldManager extends AbstractFieldManager
     
     public Object fetchObjectField(int fieldNumber)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         Object value;
         try
         {
@@ -218,8 +218,8 @@ public class HBaseFetchFieldManager extends AbstractFieldManager
     
     public short fetchShortField(int fieldNumber)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         short value;
         try
         {
@@ -239,8 +239,8 @@ public class HBaseFetchFieldManager extends AbstractFieldManager
     
     public String fetchStringField(int fieldNumber)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         String value;
         try
         {

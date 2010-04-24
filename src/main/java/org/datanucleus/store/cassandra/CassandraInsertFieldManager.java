@@ -27,13 +27,13 @@ import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
 
-public class HBaseInsertFieldManager extends AbstractFieldManager
+public class CassandraInsertFieldManager extends AbstractFieldManager
 {
     Put put;
     Delete delete;
     AbstractClassMetaData acmd;
 
-    public HBaseInsertFieldManager(AbstractClassMetaData acmd, Put put, Delete delete)
+    public CassandraInsertFieldManager(AbstractClassMetaData acmd, Put put, Delete delete)
     {
         this.acmd = acmd;
         this.put = put;
@@ -42,8 +42,8 @@ public class HBaseInsertFieldManager extends AbstractFieldManager
     
     public void storeBooleanField(int fieldNumber, boolean value)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
 
         try
         {
@@ -63,15 +63,15 @@ public class HBaseInsertFieldManager extends AbstractFieldManager
     
     public void storeByteField(int fieldNumber, byte value)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         put.add(familyName.getBytes(), columnName.getBytes(), new byte[]{value});
     }
 
     public void storeCharField(int fieldNumber, char value)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         try
         {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -90,8 +90,8 @@ public class HBaseInsertFieldManager extends AbstractFieldManager
     
     public void storeDoubleField(int fieldNumber, double value)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         try
         {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -110,8 +110,8 @@ public class HBaseInsertFieldManager extends AbstractFieldManager
     
     public void storeFloatField(int fieldNumber, float value)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         try
         {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -130,8 +130,8 @@ public class HBaseInsertFieldManager extends AbstractFieldManager
     
     public void storeIntField(int fieldNumber, int value)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         try
         {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -150,8 +150,8 @@ public class HBaseInsertFieldManager extends AbstractFieldManager
     
     public void storeLongField(int fieldNumber, long value)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         try
         {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -170,8 +170,8 @@ public class HBaseInsertFieldManager extends AbstractFieldManager
     
     public void storeObjectField(int fieldNumber, Object value)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         if(value==null)
         {
             delete.deleteColumn(familyName.getBytes(), columnName.getBytes());
@@ -196,8 +196,8 @@ public class HBaseInsertFieldManager extends AbstractFieldManager
     
     public void storeShortField(int fieldNumber, short value)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         try
         {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -216,8 +216,8 @@ public class HBaseInsertFieldManager extends AbstractFieldManager
     
     public void storeStringField(int fieldNumber, String value)
     {
-        String familyName = HBaseUtils.getFamilyName(acmd,fieldNumber);
-        String columnName = HBaseUtils.getQualifierName(acmd,fieldNumber);
+        String familyName = CassandraUtils.getFamilyName(acmd,fieldNumber);
+        String columnName = CassandraUtils.getQualifierName(acmd,fieldNumber);
         if(value==null)
         {
             delete.deleteColumn(familyName.getBytes(), columnName.getBytes());

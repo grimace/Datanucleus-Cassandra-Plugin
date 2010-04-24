@@ -36,17 +36,17 @@ import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.StoreManager;
 import org.datanucleus.util.Localiser;
 
-public class HBasePersistenceHandler extends AbstractPersistenceHandler2
+public class CassandraPersistenceHandler extends AbstractPersistenceHandler2
 {
     /** Localiser for messages. */
     protected static final Localiser LOCALISER = Localiser.getInstance(
-        "org.datanucleus.store.hbase.Localisation", HBaseStoreManager.class.getClassLoader());
+        "org.datanucleus.store.hbase.Localisation", CassandraStoreManager.class.getClassLoader());
 
-    protected final HBaseStoreManager storeMgr;
+    protected final CassandraStoreManager storeMgr;
 
-    HBasePersistenceHandler(StoreManager storeMgr)
+    CassandraPersistenceHandler(StoreManager storeMgr)
     {
-        this.storeMgr = (HBaseStoreManager) storeMgr;
+        this.storeMgr = (CassandraStoreManager) storeMgr;
     }
     
     public void close()
@@ -60,11 +60,11 @@ public class HBasePersistenceHandler extends AbstractPersistenceHandler2
         // Check if read-only so update not permitted
         storeMgr.assertReadOnlyForUpdateOfObject(sm);
         
-        HBaseManagedConnection mconn = (HBaseManagedConnection) storeMgr.getConnection(sm.getExecutionContext());
+        CassandraManagedConnection mconn = (CassandraManagedConnection) storeMgr.getConnection(sm.getExecutionContext());
         try
         {
             AbstractClassMetaData acmd = sm.getClassMetaData();
-            HTable table = mconn.getHTable(HBaseUtils.getTableName(acmd));
+            HTable table = mconn.getHTable(CassandraUtils.getTableName(acmd));
             
             table.delete(newDelete(sm));
         }
@@ -80,17 +80,17 @@ public class HBasePersistenceHandler extends AbstractPersistenceHandler2
 
     public void fetchObject(ObjectProvider sm, int[] fieldNumbers)
     {
-        HBaseManagedConnection mconn = (HBaseManagedConnection) storeMgr.getConnection(sm.getExecutionContext());
+        CassandraManagedConnection mconn = (CassandraManagedConnection) storeMgr.getConnection(sm.getExecutionContext());
         try
         {
             AbstractClassMetaData acmd = sm.getClassMetaData();
-            HTable table = mconn.getHTable(HBaseUtils.getTableName(acmd));
+            HTable table = mconn.getHTable(CassandraUtils.getTableName(acmd));
             Result result = getResult(sm,table);
             if(result.getRow()==null)
             {
                 throw new NucleusObjectNotFoundException();
             }
-            HBaseFetchFieldManager fm = new HBaseFetchFieldManager(acmd, result);
+            CassandraFetchFieldManager fm = new CassandraFetchFieldManager(acmd, result);
             sm.replaceFields(acmd.getAllMemberPositions(), fm);
             table.close();
         }
@@ -133,14 +133,14 @@ public class HBasePersistenceHandler extends AbstractPersistenceHandler2
             // Do nothing since object with this id doesn't exist
         }
         
-        HBaseManagedConnection mconn = (HBaseManagedConnection) storeMgr.getConnection(sm.getExecutionContext());
+        CassandraManagedConnection mconn = (CassandraManagedConnection) storeMgr.getConnection(sm.getExecutionContext());
         try
         {
             AbstractClassMetaData acmd = sm.getClassMetaData();
-            HTable table = mconn.getHTable(HBaseUtils.getTableName(acmd));
+            HTable table = mconn.getHTable(CassandraUtils.getTableName(acmd));
             Put put = newPut(sm);
             Delete delete = newDelete(sm);
-            HBaseInsertFieldManager fm = new HBaseInsertFieldManager(acmd, put, delete);
+            CassandraInsertFieldManager fm = new CassandraInsertFieldManager(acmd, put, delete);
             sm.provideFields(acmd.getAllMemberPositions(), fm);
             table.put(put);
             table.close();
@@ -207,11 +207,11 @@ public class HBasePersistenceHandler extends AbstractPersistenceHandler2
 
     public void locateObject(ObjectProvider sm)
     {
-        HBaseManagedConnection mconn = (HBaseManagedConnection) storeMgr.getConnection(sm.getExecutionContext());
+        CassandraManagedConnection mconn = (CassandraManagedConnection) storeMgr.getConnection(sm.getExecutionContext());
         try
         {
             AbstractClassMetaData acmd = sm.getClassMetaData();
-            HTable table = mconn.getHTable(HBaseUtils.getTableName(acmd));
+            HTable table = mconn.getHTable(CassandraUtils.getTableName(acmd));
             if(!exists(sm,table))
             {
                 throw new NucleusObjectNotFoundException();
@@ -233,14 +233,14 @@ public class HBasePersistenceHandler extends AbstractPersistenceHandler2
         // Check if read-only so update not permitted
         storeMgr.assertReadOnlyForUpdateOfObject(sm);
         
-        HBaseManagedConnection mconn = (HBaseManagedConnection) storeMgr.getConnection(sm.getExecutionContext());
+        CassandraManagedConnection mconn = (CassandraManagedConnection) storeMgr.getConnection(sm.getExecutionContext());
         try
         {
             AbstractClassMetaData acmd = sm.getClassMetaData();
-            HTable table = mconn.getHTable(HBaseUtils.getTableName(acmd));
+            HTable table = mconn.getHTable(CassandraUtils.getTableName(acmd));
             Put put = newPut(sm);
             Delete delete = newDelete(sm); // we will ignore the delete object
-            HBaseInsertFieldManager fm = new HBaseInsertFieldManager(acmd, put, delete);
+            CassandraInsertFieldManager fm = new CassandraInsertFieldManager(acmd, put, delete);
             sm.provideFields(fieldNumbers, fm);
             if( !put.isEmpty() )
             {

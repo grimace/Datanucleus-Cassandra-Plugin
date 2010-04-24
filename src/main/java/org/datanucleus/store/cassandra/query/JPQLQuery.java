@@ -27,7 +27,7 @@ import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.query.evaluator.JPQLEvaluator;
 import org.datanucleus.query.evaluator.JavaQueryEvaluator;
 import org.datanucleus.store.ExecutionContext;
-import org.datanucleus.store.cassandra.HBaseManagedConnection;
+import org.datanucleus.store.cassandra.CassandraManagedConnection;
 import org.datanucleus.store.query.AbstractJPQLQuery;
 import org.datanucleus.util.NucleusLogger;
 
@@ -67,7 +67,7 @@ public class JPQLQuery extends AbstractJPQLQuery
 
     protected Object performExecute(Map parameters)
     {
-        HBaseManagedConnection mconn = (HBaseManagedConnection) ec.getStoreManager().getConnection(ec);
+        CassandraManagedConnection mconn = (CassandraManagedConnection) ec.getStoreManager().getConnection(ec);
         try
         {
             long startTime = System.currentTimeMillis();
@@ -78,7 +78,7 @@ public class JPQLQuery extends AbstractJPQLQuery
             List candidates = null;
             if (candidateCollection == null)
             {
-                candidates = HBaseQueryUtils.getObjectsOfCandidateType(ec, mconn, candidateClass, subclasses,
+                candidates = CassandraQueryUtils.getObjectsOfCandidateType(ec, mconn, candidateClass, subclasses,
                     ignoreCache);
             }
             else

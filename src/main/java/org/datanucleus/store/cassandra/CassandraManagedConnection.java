@@ -32,7 +32,7 @@ import org.datanucleus.store.connection.ManagedConnectionResourceListener;
 /**
  * Implementation of a ManagedConnection.
  */
-public class HBaseManagedConnection extends AbstractManagedConnection
+public class CassandraManagedConnection extends AbstractManagedConnection
 {
 	private HBaseConfiguration config;
 	
@@ -46,7 +46,7 @@ public class HBaseManagedConnection extends AbstractManagedConnection
 	
 	private boolean isDisposed = false;
 	
-    public HBaseManagedConnection(HBaseConfiguration config)
+    public CassandraManagedConnection(HBaseConfiguration config)
     {
     	this.config = config; 
     	this.tables = new HashMap<String, HTable>();
