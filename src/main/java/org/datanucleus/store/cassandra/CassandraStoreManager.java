@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 2009 Erik Bengtson and others. All rights reserved.
+Copyright (c) 2010 Todd Nine. All rights reserved.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -24,17 +24,15 @@ import java.util.Set;
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.OMFContext;
 import org.datanucleus.PersistenceConfiguration;
-import org.datanucleus.metadata.MetaDataListener;
 import org.datanucleus.store.AbstractStoreManager;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.NucleusConnection;
 
 public class CassandraStoreManager extends AbstractStoreManager
 {
-    MetaDataListener metadataListener;
-
-    //private HBaseConfiguration hbaseConfig; 
-    
+	
+	//    MetaDataListener metadataListener;
+ 
     private boolean autoCreateTables = false;
     private boolean autoCreateColumns = false;
 
@@ -52,7 +50,7 @@ public class CassandraStoreManager extends AbstractStoreManager
         
         // Handler for metadata
 //        metadataListener = new HBaseMetaDataListener(this);
-        omfContext.getMetaDataManager().registerListener(metadataListener);
+       // omfContext.getMetaDataManager().registerListener(metadataListener);
 
         // Handler for persistence process
 //        persistenceHandler2 = new HBasePersistenceHandler(this);
@@ -84,7 +82,9 @@ public class CassandraStoreManager extends AbstractStoreManager
         {
             poolMinEvictableIdleTimeMillis = 30 * 1000; // default, 30 secs
         }
-                
+        
+      
+        
         logConfiguration();
     }
 
@@ -100,7 +100,7 @@ public class CassandraStoreManager extends AbstractStoreManager
      */
     public void close()
     {
-        omfContext.getMetaDataManager().deregisterListener(metadataListener);
+//        omfContext.getMetaDataManager().deregisterListener(metadataListener);
         super.close();
     }
 
@@ -117,6 +117,8 @@ public class CassandraStoreManager extends AbstractStoreManager
         Set set = new HashSet();
         set.add("ApplicationIdentity");
         set.add("TransactionIsolationLevel.read-committed");
+        //could happen if writing to "one" or reading from "one" node
+        set.add("TransactionIsolationLevel.read-uncommitted");
         return set;
     }
     
