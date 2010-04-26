@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.OMFContext;
 import org.datanucleus.PersistenceConfiguration;
@@ -49,16 +48,16 @@ public class CassandraStoreManager extends AbstractStoreManager
      */
     public CassandraStoreManager(ClassLoaderResolver clr, OMFContext omfContext)
     {
-        super("hbase", clr, omfContext);
-                
+        super("cassandra", clr, omfContext);
+        
         // Handler for metadata
-        metadataListener = new CassandraMetaDataListener(this);
+//        metadataListener = new HBaseMetaDataListener(this);
         omfContext.getMetaDataManager().registerListener(metadataListener);
 
         // Handler for persistence process
-        persistenceHandler2 = new CassandraPersistenceHandler(this);
+//        persistenceHandler2 = new HBasePersistenceHandler(this);
 
-        hbaseConfig = new HBaseConfiguration();
+//        hbaseConfig = new HBaseConfiguration();
 
         PersistenceConfiguration conf = omfContext.getPersistenceConfiguration();
         boolean autoCreateSchema = conf.getBooleanProperty("datanucleus.autoCreateSchema");
@@ -121,10 +120,10 @@ public class CassandraStoreManager extends AbstractStoreManager
         return set;
     }
     
-    public HBaseConfiguration getHbaseConfig()
-    {
-        return hbaseConfig;
-    }
+//    public HBaseConfiguration getHbaseConfig()
+//    {
+//        return hbaseConfig;
+//    }
     
     public boolean isAutoCreateColumns()
     {
