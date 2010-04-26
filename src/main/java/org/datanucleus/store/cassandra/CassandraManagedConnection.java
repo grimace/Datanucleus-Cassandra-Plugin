@@ -53,5 +53,9 @@ public class CassandraManagedConnection extends AbstractManagedConnection {
 	public Object getConnection() {
 		return client;
 	}
+	
+	public CassandraClient cassandraClient(){
+		return client;
+	}
 
 }

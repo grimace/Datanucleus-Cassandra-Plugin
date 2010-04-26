@@ -35,11 +35,14 @@ import org.datanucleus.store.connection.ManagedConnection;
  */
 public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 
+	//matches the pattern cassandra:<keyspace>:host1:port, host2:port, host3:port etc
 	private static final Pattern URL = Pattern
-			.compile("cassandra:(\\s*\\w+:\\d+[\\s*,\\s*\\w+:\\d+]*)");
+			.compile("cassandra:(\\w+):(\\s*\\w+:\\d+[\\s*,\\s*\\w+:\\d+]*)");
 
 	// create our pool
 	private CassandraClientPool pool = null;
+	
+	private String keyspace = null;
 
 	/**
 	 * Constructor.
@@ -64,10 +67,13 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 			throw new UnsupportedOperationException(
 					"Your URL must be in the format of cassandra:host1:port[,hostN:port]");
 		}
+		
+		//set our keyspace
+		keyspace = hostMatcher.group(0);
 
 		// now we're configured our cassandra hosts, put them into a pool
 		CassandraHostConfigurator casHostConfigurator = new CassandraHostConfigurator(
-				hostMatcher.group());
+				hostMatcher.group(1));
 
 		// create our pool
 		this.pool = CassandraClientPoolFactory.INSTANCE
@@ -107,4 +113,13 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 		return null;
 
 	}
+
+	/**
+	 * @return the keyspace of this connection
+	 */
+	public String getKeyspace() {
+		return keyspace;
+	}
+	
+	
 }
