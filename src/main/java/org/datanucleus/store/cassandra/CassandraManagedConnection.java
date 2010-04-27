@@ -19,7 +19,8 @@ package org.datanucleus.store.cassandra;
 
 import javax.transaction.xa.XAResource;
 
-import me.prettyprint.cassandra.service.CassandraClient;
+import me.prettyprint.cassandra.service.CassandraClientPool;
+import me.prettyprint.cassandra.service.Keyspace;
 
 import org.datanucleus.store.connection.AbstractManagedConnection;
 
@@ -28,15 +29,20 @@ import org.datanucleus.store.connection.AbstractManagedConnection;
  */
 public class CassandraManagedConnection extends AbstractManagedConnection {
 
-	private CassandraClient client;
+	private String keySpaceName;
+	
+	private Keyspace keySpace;
 
-	public CassandraManagedConnection(CassandraClient client) {
+	private CassandraClientPool client;
+
+	public CassandraManagedConnection(CassandraClientPool client, String keySpace) {
 		this.client = client;
+		this.keySpaceName = keySpace;
 	}
 
 	@Override
 	public void close() {
-		// do nothing, handled internally via hector
+		//do nothing at the momennt
 
 	}
 
@@ -53,9 +59,39 @@ public class CassandraManagedConnection extends AbstractManagedConnection {
 	public Object getConnection() {
 		return client;
 	}
-	
-	public CassandraClient cassandraClient(){
-		return client;
+
+	/**
+	 * Get a connection to the application's keyspace
+	 * @return
+	 */
+	public Keyspace getKeyspace(){
+		
+		try {
+			this.keySpace =  client.borrowClient().getKeyspace(keySpaceName);
+			return this.keySpace;
+		} catch (Exception e) {
+
+			throw new RuntimeException(e);
+			
+		}	
+		
 	}
+	
+	/**
+	 * Release the connection to the current keyspace
+	 */
+	public void release(){
+		if(this.keySpace == null){
+			throw new RuntimeException("You are calling release before a keyspace has been created");
+		}
+		
+		try {
+			this.client.releaseClient(this.keySpace.getClient());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	
 
 }

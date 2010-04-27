@@ -1,4 +1,4 @@
-r/**********************************************************************
+/**********************************************************************
 Copyright (c) 2010 Todd Nine and others. All rights reserved.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@ Contributors :
 ***********************************************************************/
 package org.datanucleus.store.cassandra;
 
-import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.Keyspace;
 
+import org.apache.cassandra.thrift.ColumnPath;
 import org.datanucleus.store.AbstractPersistenceHandler;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
@@ -35,13 +35,25 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler
 
 	@Override
 	public void close() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void deleteObject(ObjectProvider op) {
 		
+		CassandraManagedConnection conn = null;
+		
+		try {
+			//delete the whole row
+			conn = getConnection(op);
+			conn.getKeyspace().remove(getKey(op), getClassColumnFamily(op));
+		} catch (Exception e) {
+			throw new RuntimeException();
+		}finally{
+			if(conn != null){
+				conn.close();
+			}
+		}
 	}
 
 	@Override
@@ -74,11 +86,40 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler
 		
 	}
 	
-	private Keyspace getKeyspace(ObjectProvider op){
-		CassandraManagedConnection conn = (CassandraManagedConnection) manager.getConnection(op.getExecutionContext());
-		String keySpace = ((ConnectionFactoryImpl)manager.getConnectionFactory2()).getKeyspace();
+	private CassandraManagedConnection getConnection(ObjectProvider op){
+		return (CassandraManagedConnection) manager.getConnection(op.getExecutionContext());
 		
-		return conn.cassandraClient().getKeyspace(keySpace);	
+	}
+	
+	
+	
+	
+	
+	/**
+	 * Get the primary key field of this class.  Allows the user to define more than one field for a PK
+	 * @param op
+	 * @return
+	 */
+	private String getKey(ObjectProvider op){	
+		
+		StringBuffer buffer = new StringBuffer();
+		
+		for (int index : op.getClassMetaData().getPKMemberPositions()) {
+			buffer.append(op.provideField(index));
+		}
+		
+		 return buffer.toString();
+	}
+	
+	/**
+	 * Get the column path to the entire class
+	 * @param op
+	 * @return
+	 */
+	private ColumnPath getClassColumnFamily(ObjectProvider op){
+		
+		return new ColumnPath(op.getClassMetaData().getFullClassName());
+		  
 	}
    
     

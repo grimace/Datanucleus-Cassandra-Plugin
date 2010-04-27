@@ -35,13 +35,14 @@ import org.datanucleus.store.connection.ManagedConnection;
  */
 public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 
-	//matches the pattern cassandra:<keyspace>:host1:port, host2:port, host3:port etc
+	// matches the pattern cassandra:<keyspace>:host1:port, host2:port,
+	// host3:port etc
 	private static final Pattern URL = Pattern
 			.compile("cassandra:(\\w+):(\\s*\\w+:\\d+[\\s*,\\s*\\w+:\\d+]*)");
 
 	// create our pool
 	private CassandraClientPool pool = null;
-	
+
 	private String keyspace = null;
 
 	/**
@@ -67,8 +68,8 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 			throw new UnsupportedOperationException(
 					"Your URL must be in the format of cassandra:host1:port[,hostN:port]");
 		}
-		
-		//set our keyspace
+
+		// set our keyspace
 		keyspace = hostMatcher.group(0);
 
 		// now we're configured our cassandra hosts, put them into a pool
@@ -96,21 +97,13 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 	public ManagedConnection createManagedConnection(Object poolKey,
 			Map transactionOptions) {
 
-		//TODO T.N. clean this up
+		// TODO T.N. clean this up
 		try {
-			return new CassandraManagedConnection(this.pool.borrowClient());
-		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (PoolExhaustedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return new CassandraManagedConnection(this.pool, this.keyspace);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-		
-		return null;
+
 
 	}
 
@@ -120,6 +113,5 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 	public String getKeyspace() {
 		return keyspace;
 	}
-	
-	
+
 }
