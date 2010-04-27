@@ -14,43 +14,47 @@ limitations under the License.
 
 Contributors :
     ...
-***********************************************************************/
+ ***********************************************************************/
 package org.datanucleus.store.cassandra;
 
-import me.prettyprint.cassandra.service.Keyspace;
+import java.util.List;
 
+import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.SlicePredicate;
+import org.apache.cassandra.thrift.SliceRange;
+import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.store.AbstractPersistenceHandler;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
 
-public class CassandraPersistenceHandler extends AbstractPersistenceHandler
-{
-	
+public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
+
 	private CassandraStoreManager manager;
-	
-	public CassandraPersistenceHandler(CassandraStoreManager manager){
+
+	public CassandraPersistenceHandler(CassandraStoreManager manager) {
 		this.manager = manager;
 	}
 
 	@Override
 	public void close() {
-		
+
 	}
 
 	@Override
 	public void deleteObject(ObjectProvider op) {
-		
+
 		CassandraManagedConnection conn = null;
-		
+
 		try {
-			//delete the whole row
+			// delete the whole column family for this key
 			conn = getConnection(op);
-			conn.getKeyspace().remove(getKey(op), getClassColumnFamily(op));
+			conn.getKeyspace().remove(getKey(op), getClassColumnFamily(op.getClassMetaData()));
 		} catch (Exception e) {
 			throw new RuntimeException();
-		}finally{
-			if(conn != null){
+		} finally {
+			if (conn != null) {
 				conn.close();
 			}
 		}
@@ -58,8 +62,28 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler
 
 	@Override
 	public void fetchObject(ObjectProvider op, int[] fieldNumbers) {
-		// TODO Auto-generated method stub
+
+		CassandraManagedConnection conn = null;
+
+		try {
+			// delete the whole column family for this key
+			conn = getConnection(op);
+			AbstractClassMetaData metaData = op.getClassMetaData();
+			List<Column> columns = conn.getKeyspace().getSlice(getKey(op), getColumnParent(metaData), getSliceprediCate(metaData));
+			
+			CassandraFetchFieldManager manager = new CassandraFetchFieldManager(columns, metaData);
+			op.replaceFields(metaData.getAllMemberPositions(), manager);
+	            
+		} catch (Exception e) {
+			throw new RuntimeException();
+		} finally {
+			if (conn != null) {
+				conn.close();
+			}
+		}
 		
+		
+
 	}
 
 	@Override
@@ -71,56 +95,78 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler
 	@Override
 	public void insertObject(ObjectProvider op) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void locateObject(ObjectProvider op) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void updateObject(ObjectProvider op, int[] fieldNumbers) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
-	private CassandraManagedConnection getConnection(ObjectProvider op){
-		return (CassandraManagedConnection) manager.getConnection(op.getExecutionContext());
-		
+
+	private CassandraManagedConnection getConnection(ObjectProvider op) {
+		return (CassandraManagedConnection) manager.getConnection(op
+				.getExecutionContext());
+
 	}
-	
-	
-	
-	
 	
 	/**
-	 * Get the primary key field of this class.  Allows the user to define more than one field for a PK
+	 * Get the primary key field of this class. Allows the user to define more
+	 * than one field for a PK
+	 * 
 	 * @param op
 	 * @return
 	 */
-	private String getKey(ObjectProvider op){	
-		
+	private String getKey(ObjectProvider op) {
+
 		StringBuffer buffer = new StringBuffer();
-		
+
 		for (int index : op.getClassMetaData().getPKMemberPositions()) {
 			buffer.append(op.provideField(index));
 		}
-		
-		 return buffer.toString();
+
+		return buffer.toString();
 	}
-	
+
 	/**
 	 * Get the column path to the entire class
+	 * 
+	 * @param metaData
+	 * @return
+	 */
+	private ColumnPath getClassColumnFamily(AbstractClassMetaData metaData) {
+		return new ColumnPath(metaData.getTable());
+
+	}
+
+	/**
+	 * Get the column parent for the given class metadata. Matches the
+	 * "table name" on the class meta data
+	 * 
 	 * @param op
 	 * @return
 	 */
-	private ColumnPath getClassColumnFamily(ObjectProvider op){
-		
-		return new ColumnPath(op.getClassMetaData().getFullClassName());
-		  
+	private ColumnParent getColumnParent(AbstractClassMetaData metaData) {
+		return new ColumnParent(metaData.getTable());
 	}
-   
-    
+	
+	/**
+	 * Return a slice predicate that will read all of the managed columns in the class meta data and it's parent class
+	 * @param op
+	 * @return
+	 */
+	private SlicePredicate getSliceprediCate(AbstractClassMetaData metaData){
+		//start and 0 and 0 to not limit the result set, keep the in ascending order and get the number of columns from the meta data
+		SliceRange sr = new SliceRange(new byte[0], new byte[0], false, metaData.getMemberCount());
+		SlicePredicate sp = new SlicePredicate();
+		sp.setSlice_range(sr);
+		
+		return sp;
+	}
 }
