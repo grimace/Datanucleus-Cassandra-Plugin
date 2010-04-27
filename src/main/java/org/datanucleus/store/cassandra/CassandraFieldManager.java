@@ -19,6 +19,7 @@ package org.datanucleus.store.cassandra;
 
 import java.io.UnsupportedEncodingException;
 
+import org.apache.cassandra.thrift.ColumnPath;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.ColumnMetaData;
@@ -32,7 +33,7 @@ public class CassandraFieldManager extends AbstractFieldManager {
 
 	private static final String UTF8_ENCODING = "UTF-8";
 
-	public static String getColumnName(AbstractClassMetaData metaData,
+	protected static String getColumnName(AbstractClassMetaData metaData,
 			int absoluteFieldNumber) {
 
 		AbstractMemberMetaData memberMetaData = metaData
@@ -51,13 +52,17 @@ public class CassandraFieldManager extends AbstractFieldManager {
 		}
 
 	}
+	
+
+	
+	
 
 	/**
 	 * Get the UTF8 bytes of a string
 	 * @param value
 	 * @return
 	 */
-	public byte[] getBytes(String value) {
+	protected static byte[] getBytes(String value) {
 		try {
 			return value.getBytes(UTF8_ENCODING);
 		} catch (UnsupportedEncodingException e) {
@@ -71,7 +76,7 @@ public class CassandraFieldManager extends AbstractFieldManager {
 	 * @param bytes
 	 * @return
 	 */
-	public String getString(byte[] bytes) {
+	protected static String getString(byte[] bytes) {
 		try {
 			return new String(bytes, UTF8_ENCODING);
 		} catch (UnsupportedEncodingException e) {

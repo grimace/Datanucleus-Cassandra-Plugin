@@ -19,11 +19,20 @@ package org.datanucleus.store.cassandra;
 
 import java.util.List;
 
+import me.prettyprint.cassandra.service.BatchMutation;
+
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
+import org.apache.cassandra.thrift.TimedOutException;
+import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.thrift.TException;
+import org.datanucleus.exceptions.NucleusDataStoreException;
+import org.datanucleus.exceptions.NucleusObjectNotFoundException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.store.AbstractPersistenceHandler;
 import org.datanucleus.store.ExecutionContext;
@@ -50,9 +59,10 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		try {
 			// delete the whole column family for this key
 			conn = getConnection(op);
-			conn.getKeyspace().remove(getKey(op), getClassColumnFamily(op.getClassMetaData()));
+			conn.getKeyspace().remove(getKey(op),
+					getClassColumnFamily(op.getClassMetaData()));
 		} catch (Exception e) {
-			throw new RuntimeException();
+			throw new NucleusDataStoreException(e.getMessage(), e);
 		} finally {
 			if (conn != null) {
 				conn.close();
@@ -69,44 +79,104 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 			// delete the whole column family for this key
 			conn = getConnection(op);
 			AbstractClassMetaData metaData = op.getClassMetaData();
-			List<Column> columns = conn.getKeyspace().getSlice(getKey(op), getColumnParent(metaData), getSliceprediCate(metaData));
-			
-			CassandraFetchFieldManager manager = new CassandraFetchFieldManager(columns, metaData);
+			List<Column> columns = conn.getKeyspace().getSlice(getKey(op),
+					getColumnParent(metaData), getSliceprediCate(metaData));
+
+			CassandraFetchFieldManager manager = new CassandraFetchFieldManager(
+					columns, metaData);
 			op.replaceFields(metaData.getAllMemberPositions(), manager);
-	            
+
 		} catch (Exception e) {
-			throw new RuntimeException();
+			throw new NucleusDataStoreException(e.getMessage(), e);
 		} finally {
 			if (conn != null) {
 				conn.close();
 			}
 		}
-		
-		
 
 	}
 
 	@Override
 	public Object findObject(ExecutionContext ectx, Object id) {
-		// TODO Auto-generated method stub
+		// don't want to generate objects. We want them fetched above
 		return null;
 	}
 
 	@Override
 	public void insertObject(ObjectProvider op) {
-		// TODO Auto-generated method stub
+
+		//don't allow updates if this persistance manager isn't configured for it
+		this.manager.assertReadOnlyForUpdateOfObject(op);
+
+		 
+		CassandraManagedConnection conn = null;
+
+		try {
+			// delete the whole column family for this key
+			conn = getConnection(op);
+			AbstractClassMetaData metaData = op.getClassMetaData();
+			
+//			conn.getKeyspace().
+			
+			conn.getKeyspace().b
+			
+			BatchMutation mutation = new BatchMutation();
+			mutation.addInsertion(key, columnFamilies, column)
+			mutation.a
+			
+			CassandraFetchFieldManager manager = new CassandraFetchFieldManager(columns, metaData);
+			op.replaceFields(metaData.getAllMemberPositions(), manager);
+	            
+		} catch (Exception e) {
+			throw new NucleusDataStoreException (e.getMessage(), e);
+		} finally {
+			if (conn != null) {
+				conn.close();
+			}
+		}
 
 	}
 
 	@Override
 	public void locateObject(ObjectProvider op) {
-		// TODO Auto-generated method stub
+		CassandraManagedConnection conn = null;
+
+		try {
+			// delete the whole column family for this key
+			conn = getConnection(op);
+			AbstractClassMetaData metaData = op.getClassMetaData();
+
+			String key = getKey(op);
+			List<Column> columns = conn.getKeyspace().getSlice(key,
+					getColumnParent(metaData), getSliceprediCate(metaData));
+
+			if (columns == null || columns.size() == 0) {
+				throw new NucleusObjectNotFoundException(String.format(
+						"Couldn't find object %s with key %s", metaData
+								.getName(), key));
+			}
+
+		} catch (InvalidRequestException e) {
+			throw new NucleusDataStoreException(e.getMessage(), e);
+		} catch (NotFoundException e) {
+			throw new NucleusDataStoreException(e.getMessage(), e);
+		} catch (UnavailableException e) {
+			throw new NucleusDataStoreException(e.getMessage(), e);
+		} catch (TException e) {
+			throw new NucleusDataStoreException(e.getMessage(), e);
+		} catch (TimedOutException e) {
+			throw new NucleusDataStoreException(e.getMessage(), e);
+		} finally {
+			if (conn != null) {
+				conn.close();
+			}
+		}
 
 	}
 
 	@Override
 	public void updateObject(ObjectProvider op, int[] fieldNumbers) {
-		// TODO Auto-generated method stub
+		this.manager.assertReadOnlyForUpdateOfObject(op);
 
 	}
 
@@ -115,7 +185,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 				.getExecutionContext());
 
 	}
-	
+
 	/**
 	 * Get the primary key field of this class. Allows the user to define more
 	 * than one field for a PK
@@ -155,18 +225,22 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 	private ColumnParent getColumnParent(AbstractClassMetaData metaData) {
 		return new ColumnParent(metaData.getTable());
 	}
-	
+
 	/**
-	 * Return a slice predicate that will read all of the managed columns in the class meta data and it's parent class
+	 * Return a slice predicate that will read all of the managed columns in the
+	 * class meta data and it's parent class
+	 * 
 	 * @param op
 	 * @return
 	 */
-	private SlicePredicate getSliceprediCate(AbstractClassMetaData metaData){
-		//start and 0 and 0 to not limit the result set, keep the in ascending order and get the number of columns from the meta data
-		SliceRange sr = new SliceRange(new byte[0], new byte[0], false, metaData.getMemberCount());
+	private SlicePredicate getSliceprediCate(AbstractClassMetaData metaData) {
+		// start and 0 and 0 to not limit the result set, keep the in ascending
+		// order and get the number of columns from the meta data
+		SliceRange sr = new SliceRange(new byte[0], new byte[0], false,
+				metaData.getMemberCount());
 		SlicePredicate sp = new SlicePredicate();
 		sp.setSlice_range(sr);
-		
+
 		return sp;
 	}
 }
