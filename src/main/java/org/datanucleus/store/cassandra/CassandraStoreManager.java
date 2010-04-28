@@ -39,7 +39,9 @@ public class CassandraStoreManager extends AbstractStoreManager
     private int poolTimeBetweenEvictionRunsMillis; 
     private int poolMinEvictableIdleTimeMillis;
     
-    /**
+    private ColumnTimestamp columnTimestamp;
+   
+	/**
      * Constructor.
      * @param clr ClassLoader resolver
      * @param omfContext ObjectManagerFactory context
@@ -83,6 +85,17 @@ public class CassandraStoreManager extends AbstractStoreManager
             poolMinEvictableIdleTimeMillis = 30 * 1000; // default, 30 secs
         }
         
+        String timeClassName = conf.getStringProperty("datanucleus.store.cassandra.timestamp");
+        
+        //try and load the class they've specified
+        if(timeClassName != null){
+        	try {
+				this.columnTimestamp = (ColumnTimestamp) this.getClass().getClassLoader().loadClass(timeClassName).newInstance();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
       
         
         logConfiguration();
@@ -121,6 +134,12 @@ public class CassandraStoreManager extends AbstractStoreManager
         set.add("TransactionIsolationLevel.read-uncommitted");
         return set;
     }
+    
+    
+    public ColumnTimestamp getTimestamp() {
+		return columnTimestamp;
+	}
+
     
 //    public HBaseConfiguration getHbaseConfig()
 //    {

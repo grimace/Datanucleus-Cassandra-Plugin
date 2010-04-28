@@ -24,7 +24,6 @@ import java.util.List;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.Deletion;
-import org.apache.cassandra.thrift.Mutation;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 
@@ -38,18 +37,20 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	private List<Column> updates;
 	private List<Deletion> deletes;
 	private AbstractClassMetaData metaData;
+	private long updateTimestamp;
 
 	/**
 	 * @param columns
 	 * @param metaData
 	 */
-	public CassandraInsertFieldManager(List<Column> updates, List<Deletion> deletes, AbstractClassMetaData metaData) {
+	public CassandraInsertFieldManager(List<Column> updates, List<Deletion> deletes, long updateTimestamp, AbstractClassMetaData metaData) {
 		super();
 
 		this.metaData = metaData;
 
 		this.updates = updates;
 		this.deletes = deletes;
+		this.updateTimestamp = updateTimestamp;
 
 	}
 	
@@ -62,16 +63,18 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 			String columnName = getColumnName(metaData, fieldNumber);
 			
 			
-			ByteArrayOutputStream bis = new ByteArrayOutputStream();
-			ObjectOutputStream ois = new ObjectOutputStream(bis);
-
-//			
-//			(columnName, ois.writeBoolean(value));
-			ois.close();
-			bis.close();
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
+			oos.writeBoolean(value);
 			
-			Mutation mut = new Mutation();
-			mut.column_or_supercolumn();
+			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
+			
+			oos.close();
+			bos.close();
+			
+			updates.add(column);
+			
+		
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -80,60 +83,228 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 	@Override
 	public void storeByteField(int fieldNumber, byte value) {
-		// TODO Auto-generated method stub
-		super.storeByteField(fieldNumber, value);
+
+		try {
+
+			String columnName = getColumnName(metaData, fieldNumber);
+			
+			
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
+			oos.writeByte(value);
+			
+			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
+			
+			oos.close();
+			bos.close();
+			
+			updates.add(column);
+			
+		
+
+		} catch (Exception e) {
+			throw new NucleusException(e.getMessage(), e);
+		}
 	}
 
 	@Override
 	public void storeCharField(int fieldNumber, char value) {
-		// TODO Auto-generated method stub
-		super.storeCharField(fieldNumber, value);
+
+		try {
+
+			String columnName = getColumnName(metaData, fieldNumber);
+			
+			
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
+			oos.writeChar(value);
+			
+			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
+			
+			oos.close();
+			bos.close();
+			
+			updates.add(column);
+			
+		
+
+		} catch (Exception e) {
+			throw new NucleusException(e.getMessage(), e);
+		}
 	}
 
 	@Override
 	public void storeDoubleField(int fieldNumber, double value) {
-		// TODO Auto-generated method stub
-		super.storeDoubleField(fieldNumber, value);
+
+		try {
+
+			String columnName = getColumnName(metaData, fieldNumber);
+			
+			
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
+			oos.writeDouble(value);
+			
+			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
+			
+			oos.close();
+			bos.close();
+			
+			updates.add(column);
+			
+		
+
+		} catch (Exception e) {
+			throw new NucleusException(e.getMessage(), e);
+		}
 	}
 
 	@Override
 	public void storeFloatField(int fieldNumber, float value) {
-		// TODO Auto-generated method stub
-		super.storeFloatField(fieldNumber, value);
+
+		try {
+
+			String columnName = getColumnName(metaData, fieldNumber);
+			
+			
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
+			oos.writeFloat(value);
+			
+			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
+			
+			oos.close();
+			bos.close();
+			
+			updates.add(column);
+			
+		
+
+		} catch (Exception e) {
+			throw new NucleusException(e.getMessage(), e);
+		}
 	}
 
 	@Override
 	public void storeIntField(int fieldNumber, int value) {
-		// TODO Auto-generated method stub
-		super.storeIntField(fieldNumber, value);
+
+		try {
+
+			String columnName = getColumnName(metaData, fieldNumber);
+			
+			
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
+			oos.writeInt(value);
+			
+			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
+			
+			oos.close();
+			bos.close();
+			
+			updates.add(column);
+			
+		
+
+		} catch (Exception e) {
+			throw new NucleusException(e.getMessage(), e);
+		}
 	}
 
 	@Override
 	public void storeLongField(int fieldNumber, long value) {
-		// TODO Auto-generated method stub
-		super.storeLongField(fieldNumber, value);
+
+		try {
+
+			String columnName = getColumnName(metaData, fieldNumber);
+			
+			
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
+			oos.writeLong(value);
+			
+			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
+			
+			oos.close();
+			bos.close();
+			
+			updates.add(column);
+			
+		
+
+		} catch (Exception e) {
+			throw new NucleusException(e.getMessage(), e);
+		}
 	}
 	
 
 	@Override
 	public void storeShortField(int fieldNumber, short value) {
-		// TODO Auto-generated method stub
-		super.storeShortField(fieldNumber, value);
+		try {
+
+			String columnName = getColumnName(metaData, fieldNumber);
+			
+			
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
+			oos.writeShort(value);
+			
+			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
+			
+			oos.close();
+			bos.close();
+			
+			updates.add(column);
+			
+		
+
+		} catch (Exception e) {
+			throw new NucleusException(e.getMessage(), e);
+		}
 	}
 	
-	//these values can be deleted, so we'll want to 
+	//these values can be deleted, so we'll want to handle deletes if they're null
 
 	@Override
 	public void storeObjectField(int fieldNumber, Object value) {
-		// TODO Auto-generated method stub
-		super.storeObjectField(fieldNumber, value);
+		try {
+
+			String columnName = getColumnName(metaData, fieldNumber);
+			
+			
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
+			oos.writeObject(value);
+			
+			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
+			
+			oos.close();
+			bos.close();
+			
+			updates.add(column);
+			
+		
+
+		} catch (Exception e) {
+			throw new NucleusException(e.getMessage(), e);
+		}
 	}
 
 
 	@Override
 	public void storeStringField(int fieldNumber, String value) {
-		// TODO Auto-generated method stub
-		super.storeStringField(fieldNumber, value);
+		try {
+
+			String columnName = getColumnName(metaData, fieldNumber);
+			
+			Column column = new Column(getBytes(columnName), getBytes(value), this.updateTimestamp );
+			
+			updates.add(column);
+					
+
+		} catch (Exception e) {
+			throw new NucleusException(e.getMessage(), e);
+		}
 	}
 	
 	protected ColumnPath getColumnPath(AbstractClassMetaData metaData, int absoluteFieldNumber){

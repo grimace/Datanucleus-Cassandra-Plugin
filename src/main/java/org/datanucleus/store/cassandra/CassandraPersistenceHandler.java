@@ -18,12 +18,14 @@ Contributors :
 package org.datanucleus.store.cassandra;
 
 import java.util.List;
+import java.util.Stack;
 
 import me.prettyprint.cassandra.service.BatchMutation;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SlicePredicate;
@@ -117,15 +119,34 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 			AbstractClassMetaData metaData = op.getClassMetaData();
 			
 //			conn.getKeyspace().
+			List<Column> updates = new Stack<Column>();
+			List<Deletion> deletes = new Stack<Deletion>();
 			
-			conn.getKeyspace().b
 			
-			BatchMutation mutation = new BatchMutation();
-			mutation.addInsertion(key, columnFamilies, column)
-			mutation.a
 			
-			CassandraFetchFieldManager manager = new CassandraFetchFieldManager(columns, metaData);
+			CassandraInsertFieldManager manager = new CassandraInsertFieldManager(updates, deletes, this.manager.getTimestamp().getTime(), metaData);
 			op.replaceFields(metaData.getAllMemberPositions(), manager);
+			
+			
+			String key = getKey(op);
+			List<String> columnFamilies = new Stack<String>();
+			columnFamilies.add(metaData.getTable());
+			
+			//now perform the batch update
+			BatchMutation changes = new BatchMutation();
+			
+			
+			for (Column column : updates) {
+				changes.addInsertion(key, columnFamilies,column );
+			}
+			
+			
+			for (Deletion deletion : deletes) {
+				changes.addDeletion(key, columnFamilies,deletion );
+			}
+			
+			conn.getKeyspace().batchMutate(changes);
+			
 	            
 		} catch (Exception e) {
 			throw new NucleusDataStoreException (e.getMessage(), e);

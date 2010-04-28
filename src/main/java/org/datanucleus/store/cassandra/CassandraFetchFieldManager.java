@@ -297,6 +297,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			if (column == null) {
 				return null;
 			}
+			
 			ByteArrayInputStream bis = new ByteArrayInputStream(column.value);
 			ObjectInputStream ois = new ObjectInputStream(bis);
 			
