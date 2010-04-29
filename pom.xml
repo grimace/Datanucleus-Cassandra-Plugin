@@ -5,17 +5,17 @@
 	<artifactId>datanucleus-cassandra</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
-    <repositories>
-        <repository>
-            <id>local.repository</id>
-            <url>file:../../local.repository/trunk</url>
-            <layout>legacy</layout>
-        </repository>
-        <repository>
-            <id>DN_M2_Repo</id>
-            <url>http://www.datanucleus.org/downloads/maven2/</url>
-        </repository>
-    </repositories>
+	<repositories>
+		<repository>
+			<id>local.repository</id>
+			<url>file:../../local.repository/trunk</url>
+			<layout>legacy</layout>
+		</repository>
+		<repository>
+			<id>DN_M2_Repo</id>
+			<url>http://www.datanucleus.org/downloads/maven2/</url>
+		</repository>
+	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>org.datanucleus</groupId>
@@ -23,6 +23,7 @@
 			<version>2.0.4</version>
 			<scope>provided</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>me.prettyprint</groupId>
 			<artifactId>hector</artifactId>
@@ -43,45 +44,49 @@
 			<scope>system</scope>
 			<systemPath>${basedir}/lib/libthrift-r917130.jar</systemPath>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.cassandra</groupId>
+			<artifactId>cassandra-javautils</artifactId>
+			<systemPath>${basedir}/lib/cassandra-javautils.jar</systemPath>
+			<version>1.0.0</version>
+			<scope>system</scope>
+		</dependency>
+		
+		<!--  required for testing -->
+		 <dependency>
+            <groupId>javax.jdo</groupId>
+            <artifactId>jdo2-api</artifactId>
+            <version>[2.3-ec, 3.0)</version>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.6</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
-			<!--<sourceDirectory>src/main/java</sourceDirectory>
-		<resources>
-		 <resource>
-				<filtering>true</filtering>
-				<directory>src/java</directory>
-				<includes>
-					<include>**/plugin.xml</include>
-					<include>**/*.properties</include>
-					<include>**/*.dtd</include>
-					<include>**/*.xsd</include>
-					<include>**/*.jdo</include>
-					<include>**/META-INF/services/*</include>
-				</includes>
-			</resource>
+		<!--
+			<sourceDirectory>src/main/java</sourceDirectory> <resources>
+			<resource> <filtering>true</filtering>
+			<directory>src/java</directory> <includes>
+			<include>**/plugin.xml</include> <include>**/*.properties</include>
+			<include>**/*.dtd</include> <include>**/*.xsd</include>
+			<include>**/*.jdo</include> <include>**/META-INF/services/*</include>
+			</includes> </resource> <resource> <directory>${basedir}</directory>
+			<includes> <include>plugin.xml</include> </includes> </resource>
 			<resource>
-				<directory>${basedir}</directory>
-				<includes>
-					<include>plugin.xml</include>
-				</includes>
-			</resource>
-			<resource> -->
-				<!--
-					Need to have MANIFEST-MF in place before packaging, so unit-tests
-					will work
-				
-				<directory>${basedir}/META-INF</directory>
-				<targetPath>META-INF</targetPath>
-				<includes>
-					<include>MANIFEST.MF</include>
-					<include>LICENSE.txt</include>
-					<include>NOTICE.txt</include>
-					<include>README.txt</include>
-				</includes>
-			</resource>
-		</resources>
--->
+		-->
+		<!--
+			Need to have MANIFEST-MF in place before packaging, so unit-tests
+			will work <directory>${basedir}/META-INF</directory>
+			<targetPath>META-INF</targetPath> <includes>
+			<include>MANIFEST.MF</include> <include>LICENSE.txt</include>
+			<include>NOTICE.txt</include> <include>README.txt</include>
+			</includes> </resource> </resources>
+		-->
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -90,14 +95,11 @@
 					<target>1.5</target>
 				</configuration>
 			</plugin>
-			<!--<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifestFile>META-INF/MANIFEST.MF</manifestFile>
-					</archive>
-				</configuration>
-			</plugin>-->
+			<!--
+				<plugin> <artifactId>maven-jar-plugin</artifactId> <configuration>
+				<archive> <manifestFile>META-INF/MANIFEST.MF</manifestFile>
+				</archive> </configuration> </plugin>
+			-->
 
 		</plugins>
 	</build>
