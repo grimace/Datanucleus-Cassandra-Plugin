@@ -11,6 +11,7 @@
 			<url>file:../../local.repository/trunk</url>
 			<layout>legacy</layout>
 		</repository>
+		
 		<repository>
 			<id>DN_M2_Repo</id>
 			<url>http://www.datanucleus.org/downloads/maven2/</url>
@@ -29,13 +30,10 @@
 			<artifactId>hector</artifactId>
 			<version>0.6.0-11</version>
 			<type>jar</type>
+			<systemPath>${basedir}/lib/hector-0.6.0-11.jar</systemPath>
+            <scope>system</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache</groupId>
-			<artifactId>thrift</artifactId>
-			<version>0.2.0</version>
-		</dependency>
 
 		<dependency>
 			<groupId>libthrift</groupId>
