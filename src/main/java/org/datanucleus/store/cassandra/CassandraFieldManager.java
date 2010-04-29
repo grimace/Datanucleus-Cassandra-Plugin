@@ -19,7 +19,6 @@ package org.datanucleus.store.cassandra;
 
 import java.io.UnsupportedEncodingException;
 
-import org.apache.cassandra.thrift.ColumnPath;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.ColumnMetaData;

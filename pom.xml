@@ -5,11 +5,22 @@
 	<artifactId>datanucleus-cassandra</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
+    <repositories>
+        <repository>
+            <id>local.repository</id>
+            <url>file:../../local.repository/trunk</url>
+            <layout>legacy</layout>
+        </repository>
+        <repository>
+            <id>DN_M2_Repo</id>
+            <url>http://www.datanucleus.org/downloads/maven2/</url>
+        </repository>
+    </repositories>
 	<dependencies>
 		<dependency>
 			<groupId>org.datanucleus</groupId>
 			<artifactId>datanucleus-core</artifactId>
-			<version>[2.0.99, )</version>
+			<version>2.0.4</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -35,9 +46,9 @@
 	</dependencies>
 
 	<build>
-		<sourceDirectory>src/java</sourceDirectory>
+			<!--<sourceDirectory>src/main/java</sourceDirectory>
 		<resources>
-			<resource>
+		 <resource>
 				<filtering>true</filtering>
 				<directory>src/java</directory>
 				<includes>
@@ -55,11 +66,11 @@
 					<include>plugin.xml</include>
 				</includes>
 			</resource>
-			<resource>
+			<resource> -->
 				<!--
 					Need to have MANIFEST-MF in place before packaging, so unit-tests
 					will work
-				-->
+				
 				<directory>${basedir}/META-INF</directory>
 				<targetPath>META-INF</targetPath>
 				<includes>
@@ -70,7 +81,7 @@
 				</includes>
 			</resource>
 		</resources>
-
+-->
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -79,14 +90,14 @@
 					<target>1.5</target>
 				</configuration>
 			</plugin>
-			<plugin>
+			<!--<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
 					<archive>
 						<manifestFile>META-INF/MANIFEST.MF</manifestFile>
 					</archive>
 				</configuration>
-			</plugin>
+			</plugin>-->
 
 		</plugins>
 	</build>

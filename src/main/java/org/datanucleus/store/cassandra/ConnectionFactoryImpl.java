@@ -26,6 +26,7 @@ import me.prettyprint.cassandra.service.CassandraClientPoolFactory;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 
 import org.datanucleus.OMFContext;
+import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.store.connection.AbstractConnectionFactory;
 import org.datanucleus.store.connection.ManagedConnection;
 
@@ -100,7 +101,7 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 		try {
 			return new CassandraManagedConnection(this.pool, this.keyspace);
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new NucleusException("Couldn't connect to cassandra", e);
 		}
 
 

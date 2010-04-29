@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.Deletion;
+import org.apache.cassandra.thrift.SlicePredicate;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 
@@ -33,7 +34,6 @@ import org.datanucleus.metadata.AbstractClassMetaData;
  */
 public class CassandraInsertFieldManager extends CassandraFieldManager {
 
-	
 	private List<Column> updates;
 	private List<Deletion> deletes;
 	private AbstractClassMetaData metaData;
@@ -43,7 +43,9 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	 * @param columns
 	 * @param metaData
 	 */
-	public CassandraInsertFieldManager(List<Column> updates, List<Deletion> deletes, long updateTimestamp, AbstractClassMetaData metaData) {
+	public CassandraInsertFieldManager(List<Column> updates,
+			List<Deletion> deletes, long updateTimestamp,
+			AbstractClassMetaData metaData) {
 		super();
 
 		this.metaData = metaData;
@@ -53,28 +55,25 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 		this.updateTimestamp = updateTimestamp;
 
 	}
-	
-	
+
 	@Override
 	public void storeBooleanField(int fieldNumber, boolean value) {
 
 		try {
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			
-			
+
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(bos);
 			oos.writeBoolean(value);
-			
-			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
-			
+
+			Column column = new Column(getBytes(columnName), bos.toByteArray(),
+					this.updateTimestamp);
+
 			oos.close();
 			bos.close();
-			
+
 			updates.add(column);
-			
-		
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -87,20 +86,18 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 		try {
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			
-			
+
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(bos);
 			oos.writeByte(value);
-			
-			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
-			
+
+			Column column = new Column(getBytes(columnName), bos.toByteArray(),
+					this.updateTimestamp);
+
 			oos.close();
 			bos.close();
-			
+
 			updates.add(column);
-			
-		
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -113,20 +110,18 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 		try {
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			
-			
+
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(bos);
 			oos.writeChar(value);
-			
-			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
-			
+
+			Column column = new Column(getBytes(columnName), bos.toByteArray(),
+					this.updateTimestamp);
+
 			oos.close();
 			bos.close();
-			
+
 			updates.add(column);
-			
-		
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -139,20 +134,18 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 		try {
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			
-			
+
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(bos);
 			oos.writeDouble(value);
-			
-			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
-			
+
+			Column column = new Column(getBytes(columnName), bos.toByteArray(),
+					this.updateTimestamp);
+
 			oos.close();
 			bos.close();
-			
+
 			updates.add(column);
-			
-		
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -165,20 +158,18 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 		try {
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			
-			
+
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(bos);
 			oos.writeFloat(value);
-			
-			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
-			
+
+			Column column = new Column(getBytes(columnName), bos.toByteArray(),
+					this.updateTimestamp);
+
 			oos.close();
 			bos.close();
-			
+
 			updates.add(column);
-			
-		
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -191,20 +182,18 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 		try {
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			
-			
+
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(bos);
 			oos.writeInt(value);
-			
-			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
-			
+
+			Column column = new Column(getBytes(columnName), bos.toByteArray(),
+					this.updateTimestamp);
+
 			oos.close();
 			bos.close();
-			
+
 			updates.add(column);
-			
-		
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -217,100 +206,121 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 		try {
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			
-			
+
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(bos);
 			oos.writeLong(value);
-			
-			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
-			
+
+			Column column = new Column(getBytes(columnName), bos.toByteArray(),
+					this.updateTimestamp);
+
 			oos.close();
 			bos.close();
-			
+
 			updates.add(column);
-			
-		
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
 		}
 	}
-	
 
 	@Override
 	public void storeShortField(int fieldNumber, short value) {
 		try {
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			
-			
+
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(bos);
 			oos.writeShort(value);
-			
-			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
-			
+
+			Column column = new Column(getBytes(columnName), bos.toByteArray(),
+					this.updateTimestamp);
+
 			oos.close();
 			bos.close();
-			
+
 			updates.add(column);
-			
-		
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
 		}
 	}
-	
-	//these values can be deleted, so we'll want to handle deletes if they're null
+
+	// these values can be deleted, so we'll want to handle deletes if they're
+	// null
 
 	@Override
 	public void storeObjectField(int fieldNumber, Object value) {
 		try {
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			
-			
+
+			if (value == null) {
+
+				SlicePredicate slicePredicate = new SlicePredicate();
+				slicePredicate.addToColumn_names(getBytes(columnName));
+				Deletion delete = new Deletion(this.updateTimestamp);
+
+				delete.setPredicate(slicePredicate);
+
+				this.deletes.add(delete);
+				return;
+
+			}
+
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(bos);
 			oos.writeObject(value);
-			
-			Column column = new Column(getBytes(columnName), bos.toByteArray(), this.updateTimestamp );
-			
+
+			Column column = new Column(getBytes(columnName), bos.toByteArray(),
+					this.updateTimestamp);
+
 			oos.close();
 			bos.close();
-			
+
 			updates.add(column);
-			
-		
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
 		}
 	}
-
 
 	@Override
 	public void storeStringField(int fieldNumber, String value) {
 		try {
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			
-			Column column = new Column(getBytes(columnName), getBytes(value), this.updateTimestamp );
-			
+
+			if (value == null) {
+
+				SlicePredicate slicePredicate = new SlicePredicate();
+				slicePredicate.addToColumn_names(getBytes(columnName));
+				Deletion delete = new Deletion(this.updateTimestamp);
+
+				delete.setPredicate(slicePredicate);
+
+				this.deletes.add(delete);
+				return;
+
+			}
+
+			Column column = new Column(getBytes(columnName), getBytes(value),
+					this.updateTimestamp);
+
 			updates.add(column);
-					
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
 		}
 	}
-	
-	protected ColumnPath getColumnPath(AbstractClassMetaData metaData, int absoluteFieldNumber){
+
+	protected ColumnPath getColumnPath(AbstractClassMetaData metaData,
+			int absoluteFieldNumber) {
 		ColumnPath columnPath = new ColumnPath(metaData.getTable());
-		columnPath.setColumn(getBytes(getColumnName(metaData, absoluteFieldNumber)));
-		
+		columnPath.setColumn(getBytes(getColumnName(metaData,
+				absoluteFieldNumber)));
+
 		return columnPath;
 	}
 

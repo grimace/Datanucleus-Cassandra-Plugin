@@ -33,12 +33,12 @@ import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
+import org.datanucleus.ObjectManager;
+import org.datanucleus.StateManager;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusObjectNotFoundException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.store.AbstractPersistenceHandler;
-import org.datanucleus.store.ExecutionContext;
-import org.datanucleus.store.ObjectProvider;
 
 public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
@@ -54,15 +54,15 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 	}
 
 	@Override
-	public void deleteObject(ObjectProvider op) {
+	public void deleteObject(StateManager sm) {
 
 		CassandraManagedConnection conn = null;
 
 		try {
 			// delete the whole column family for this key
-			conn = getConnection(op);
-			conn.getKeyspace().remove(getKey(op),
-					getClassColumnFamily(op.getClassMetaData()));
+			conn = getConnection(sm);
+			conn.getKeyspace().remove(getKey(sm),
+					getClassColumnFamily(sm.getClassMetaData()));
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
 		} finally {
@@ -73,20 +73,20 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 	}
 
 	@Override
-	public void fetchObject(ObjectProvider op, int[] fieldNumbers) {
+	public void fetchObject(StateManager sm, int[] fieldNumbers) {
 
 		CassandraManagedConnection conn = null;
 
 		try {
 			// delete the whole column family for this key
-			conn = getConnection(op);
-			AbstractClassMetaData metaData = op.getClassMetaData();
-			List<Column> columns = conn.getKeyspace().getSlice(getKey(op),
+			conn = getConnection(sm);
+			AbstractClassMetaData metaData = sm.getClassMetaData();
+			List<Column> columns = conn.getKeyspace().getSlice(getKey(sm),
 					getColumnParent(metaData), getSliceprediCate(metaData));
 
 			CassandraFetchFieldManager manager = new CassandraFetchFieldManager(
 					columns, metaData);
-			op.replaceFields(metaData.getAllMemberPositions(), manager);
+			sm.replaceFields(metaData.getAllMemberPositions(), manager);
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -97,77 +97,37 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		}
 
 	}
+	
 
 	@Override
-	public Object findObject(ExecutionContext ectx, Object id) {
-		// don't want to generate objects. We want them fetched above
+	public Object findObject(ObjectManager om, Object id) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
+
 	@Override
-	public void insertObject(ObjectProvider op) {
+	public void insertObject(StateManager sm) {
 
 		//don't allow updates if this persistance manager isn't configured for it
-		this.manager.assertReadOnlyForUpdateOfObject(op);
+		this.manager.assertReadOnlyForUpdateOfObject(sm);
 
-		 
-		CassandraManagedConnection conn = null;
-
-		try {
-			// delete the whole column family for this key
-			conn = getConnection(op);
-			AbstractClassMetaData metaData = op.getClassMetaData();
-			
-//			conn.getKeyspace().
-			List<Column> updates = new Stack<Column>();
-			List<Deletion> deletes = new Stack<Deletion>();
-			
-			
-			
-			CassandraInsertFieldManager manager = new CassandraInsertFieldManager(updates, deletes, this.manager.getTimestamp().getTime(), metaData);
-			op.replaceFields(metaData.getAllMemberPositions(), manager);
-			
-			
-			String key = getKey(op);
-			List<String> columnFamilies = new Stack<String>();
-			columnFamilies.add(metaData.getTable());
-			
-			//now perform the batch update
-			BatchMutation changes = new BatchMutation();
-			
-			
-			for (Column column : updates) {
-				changes.addInsertion(key, columnFamilies,column );
-			}
-			
-			
-			for (Deletion deletion : deletes) {
-				changes.addDeletion(key, columnFamilies,deletion );
-			}
-			
-			conn.getKeyspace().batchMutate(changes);
-			
-	            
-		} catch (Exception e) {
-			throw new NucleusDataStoreException (e.getMessage(), e);
-		} finally {
-			if (conn != null) {
-				conn.close();
-			}
-		}
+		//just delegate to update.  They both perform the same logic
+		updateObject(sm, sm.getClassMetaData().getAllMemberPositions());
+		
 
 	}
 
 	@Override
-	public void locateObject(ObjectProvider op) {
+	public void locateObject(StateManager sm) {
 		CassandraManagedConnection conn = null;
 
 		try {
 			// delete the whole column family for this key
-			conn = getConnection(op);
-			AbstractClassMetaData metaData = op.getClassMetaData();
+			conn = getConnection(sm);
+			AbstractClassMetaData metaData = sm.getClassMetaData();
 
-			String key = getKey(op);
+			String key = getKey(sm);
 			List<Column> columns = conn.getKeyspace().getSlice(key,
 					getColumnParent(metaData), getSliceprediCate(metaData));
 
@@ -194,16 +154,63 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		}
 
 	}
+	
+
+
 
 	@Override
-	public void updateObject(ObjectProvider op, int[] fieldNumbers) {
-		this.manager.assertReadOnlyForUpdateOfObject(op);
+	public void updateObject(StateManager sm, int[] fieldNumbers) {
+		this.manager.assertReadOnlyForUpdateOfObject(sm);
 
+		 
+		CassandraManagedConnection conn = null;
+
+		try {
+			// delete the whole column family for this key
+			conn = getConnection(sm);
+			AbstractClassMetaData metaData = sm.getClassMetaData();
+			
+			
+			List<Column> updates = new Stack<Column>();
+			List<Deletion> deletes = new Stack<Deletion>();
+			
+			
+			
+			CassandraInsertFieldManager manager = new CassandraInsertFieldManager(updates, deletes, this.manager.getTimestamp().getTime(), metaData);
+			sm.replaceFields(metaData.getAllMemberPositions(), manager);
+			
+			
+			String key = getKey(sm);
+			List<String> columnFamilies = new Stack<String>();
+			columnFamilies.add(metaData.getTable());
+			
+			//now perform the batch update
+			BatchMutation changes = new BatchMutation();
+			
+			
+			for (Column column : updates) {
+				changes.addInsertion(key, columnFamilies,column );
+			}
+			
+			
+			for (Deletion deletion : deletes) {
+				changes.addDeletion(key, columnFamilies,deletion );
+			}
+			
+			conn.getKeyspace().batchMutate(changes);
+			
+	            
+		} catch (Exception e) {
+			throw new NucleusDataStoreException (e.getMessage(), e);
+		} finally {
+			if (conn != null) {
+				conn.close();
+			}
+		}
 	}
 
-	private CassandraManagedConnection getConnection(ObjectProvider op) {
-		return (CassandraManagedConnection) manager.getConnection(op
-				.getExecutionContext());
+	private CassandraManagedConnection getConnection(StateManager sm) {
+		return (CassandraManagedConnection) this.manager.getConnection(sm.getObjectManager());
 
 	}
 
@@ -214,12 +221,12 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 	 * @param op
 	 * @return
 	 */
-	private String getKey(ObjectProvider op) {
+	private String getKey(StateManager sm) {
 
 		StringBuffer buffer = new StringBuffer();
 
-		for (int index : op.getClassMetaData().getPKMemberPositions()) {
-			buffer.append(op.provideField(index));
+		for (int index : sm.getClassMetaData().getPKMemberPositions()) {
+			buffer.append(sm.provideField(index));
 		}
 
 		return buffer.toString();
@@ -264,4 +271,8 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 		return sp;
 	}
+
+
+	
+	
 }
