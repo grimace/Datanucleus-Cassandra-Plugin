@@ -22,6 +22,8 @@ import javax.transaction.xa.XAResource;
 import me.prettyprint.cassandra.service.CassandraClientPool;
 import me.prettyprint.cassandra.service.Keyspace;
 
+import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.store.connection.AbstractManagedConnection;
 
 /**
@@ -30,19 +32,20 @@ import org.datanucleus.store.connection.AbstractManagedConnection;
 public class CassandraManagedConnection extends AbstractManagedConnection {
 
 	private String keySpaceName;
-	
+
 	private Keyspace keySpace;
 
 	private CassandraClientPool client;
 
-	public CassandraManagedConnection(CassandraClientPool client, String keySpace) {
+	public CassandraManagedConnection(CassandraClientPool client,
+			String keySpace) {
 		this.client = client;
 		this.keySpaceName = keySpace;
 	}
 
 	@Override
 	public void close() {
-		//do nothing at the momennt
+		// do nothing at the momennt
 
 	}
 
@@ -61,37 +64,51 @@ public class CassandraManagedConnection extends AbstractManagedConnection {
 	}
 
 	/**
-	 * Get a connection to the application's keyspace
+	 * Get a connection to the application's keyspace with the default
+	 * consistency of QUORUM
+	 * 
 	 * @return
 	 */
-	public Keyspace getKeyspace(){
-		
+	public Keyspace getKeyspace() {
+
+		return getKeyspace(ConsistencyLevel.QUORUM);
+
+	}
+
+	/**
+	 * Get a connection to the application's keyspace with the default
+	 * consistency of QUORUM
+	 * 
+	 * @return
+	 */
+	public Keyspace getKeyspace(ConsistencyLevel consistency) {
+
 		try {
-			this.keySpace =  client.borrowClient().getKeyspace(keySpaceName);
+			this.keySpace = client.borrowClient().getKeyspace(keySpaceName,
+					consistency);
 			return this.keySpace;
 		} catch (Exception e) {
 
-			throw new RuntimeException(e);
-			
-		}	
-		
+			throw new NucleusDataStoreException(String.format("Unable to get a keyspace with consistencylevel %2", consistency), e);
+
+		}
+
 	}
-	
+
 	/**
 	 * Release the connection to the current keyspace
 	 */
-	public void release(){
-		if(this.keySpace == null){
-			throw new RuntimeException("You are calling release before a keyspace has been created");
+	public void release() {
+		if (this.keySpace == null) {
+			throw new RuntimeException(
+					"You are calling release before a keyspace has been created");
 		}
-		
+
 		try {
 			this.client.releaseClient(this.keySpace.getClient());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
-	
 
 }

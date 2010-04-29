@@ -24,6 +24,14 @@
 			<artifactId>thrift</artifactId>
 			<version>0.2.0</version>
 		</dependency>
+
+		<dependency>
+			<groupId>libthrift</groupId>
+			<artifactId>libthrift</artifactId>
+			<version>917130</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/libthrift-r917130.jar</systemPath>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -79,6 +87,7 @@
 					</archive>
 				</configuration>
 			</plugin>
+
 		</plugins>
 	</build>
 </project>

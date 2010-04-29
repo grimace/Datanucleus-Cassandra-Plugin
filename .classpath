@@ -8,6 +8,5 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/libthrift-r917130.jar"/>
 	<classpathentry kind="lib" path="lib/apache-cassandra-0.6.0.jar"/>
-	<classpathentry kind="lib" path="lib/cassandra-javautils.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

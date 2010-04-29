@@ -110,6 +110,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		//don't allow updates if this persistance manager isn't configured for it
 		this.manager.assertReadOnlyForUpdateOfObject(op);
 
+		op.getExecutionContext().
 		 
 		CassandraManagedConnection conn = null;
 
