@@ -24,7 +24,7 @@ Contributors:
         <store-manager class-name="org.datanucleus.store.cassandra.CassandraStoreManager" key="cassandra" url-key="cassandra"/>
     </extension>
 
-    <!-- QUERY LANGUAGES
+    <!-- QUERY LANGUAGES TODO
     <extension point="org.datanucleus.store_query_query">
         <query class-name="org.datanucleus.store.hbase.query.JDOQLQuery" datastore="hbase" name="JDOQL"/>
         <query class-name="org.datanucleus.store.hbase.query.JPQLQuery" datastore="hbase" name="JPQL"/>

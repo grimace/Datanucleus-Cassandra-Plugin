@@ -3,8 +3,6 @@
  */
 package org.datanucleus.store.cassandra.model;
 
-import java.util.UUID;
-
 import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.PersistenceCapable;
@@ -19,8 +17,8 @@ import javax.jdo.annotations.PrimaryKey;
 public class PrimitiveObject {
 
 	@PrimaryKey
-	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
-	private UUID id;
+	@Persistent(valueStrategy = IdGeneratorStrategy.UUIDSTRING)
+	private String id;
 
 	@Persistent
 	private boolean testBool;
@@ -119,6 +117,10 @@ public class PrimitiveObject {
 
 	public void setTestString(String testString) {
 		this.testString = testString;
+	}
+
+	public String getId() {
+		return id;
 	}
 
 }

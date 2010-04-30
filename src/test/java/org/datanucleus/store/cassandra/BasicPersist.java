@@ -3,15 +3,16 @@
  */
 package org.datanucleus.store.cassandra;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import java.io.IOException;
 
-import me.prettyprint.cassandra.dao.ExampleDao;
+import javax.jdo.JDOHelper;
+import javax.jdo.PersistenceManager;
+import javax.jdo.PersistenceManagerFactory;
+
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
 import org.apache.thrift.transport.TTransportException;
+import org.datanucleus.store.cassandra.model.PrimitiveObject;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -46,6 +47,14 @@ public class BasicPersist {
 	  @Test
 	  public void testBasicPerist() throws Exception {
 	   
+		  PersistenceManagerFactory pmf = JDOHelper.getPersistenceManagerFactory("Test");
+		  PersistenceManager pm = pmf.getPersistenceManager();
+		  
+		  
+		  PrimitiveObject objectOne = new PrimitiveObject();
+		  
+		  //now save our object
+		  pm.makePersistent(objectOne);
 	  }
 
 }

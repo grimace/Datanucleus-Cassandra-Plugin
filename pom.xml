@@ -11,7 +11,7 @@
 			<url>file:../../local.repository/trunk</url>
 			<layout>legacy</layout>
 		</repository>
-		
+
 		<repository>
 			<id>DN_M2_Repo</id>
 			<url>http://www.datanucleus.org/downloads/maven2/</url>
@@ -24,14 +24,14 @@
 			<version>2.0.4</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>me.prettyprint</groupId>
 			<artifactId>hector</artifactId>
 			<version>0.6.0-11</version>
 			<type>jar</type>
 			<systemPath>${basedir}/lib/hector-0.6.0-11.jar</systemPath>
-            <scope>system</scope>
+			<scope>system</scope>
 		</dependency>
 
 
@@ -42,6 +42,7 @@
 			<scope>system</scope>
 			<systemPath>${basedir}/lib/libthrift-r917130.jar</systemPath>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-javautils</artifactId>
@@ -49,55 +50,127 @@
 			<version>1.0.0</version>
 			<scope>system</scope>
 		</dependency>
-		
+
+
+		<dependency>
+			<groupId>org.apache.cassandra</groupId>
+			<artifactId>cassandra</artifactId>
+			<systemPath>${basedir}/lib/apache-cassandra-0.6.0.jar</systemPath>
+			<version>0.6.0</version>
+			<scope>system</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.cliffc.high_scale_lib</groupId>
+			<artifactId>high-scale-lib</artifactId>
+			<version>1.0.0</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/high-scale-lib.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>com.reardencommerce</groupId>
+			<artifactId>clhm-production</artifactId>
+			<version>1.0.0</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/clhm-production.jar</systemPath>
+		</dependency>
+
+
 		<!--  required for testing -->
-		 <dependency>
-            <groupId>javax.jdo</groupId>
-            <artifactId>jdo2-api</artifactId>
-            <version>[2.3-ec, 3.0)</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>javax.jdo</groupId>
+			<artifactId>jdo2-api</artifactId>
+			<version>[2.3-ec, 3.0)</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.6</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.15</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.collections</groupId>
+			<artifactId>google-collections</artifactId>
+			<version>1.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.5.8</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.5.8</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>1.5.8</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
-		<!--
-			<sourceDirectory>src/main/java</sourceDirectory> <resources>
-			<resource> <filtering>true</filtering>
-			<directory>src/java</directory> <includes>
-			<include>**/plugin.xml</include> <include>**/*.properties</include>
-			<include>**/*.dtd</include> <include>**/*.xsd</include>
-			<include>**/*.jdo</include> <include>**/META-INF/services/*</include>
-			</includes> </resource> <resource> <directory>${basedir}</directory>
-			<includes> <include>plugin.xml</include> </includes> </resource>
-			<resource>
-		-->
-		<!--
-			Need to have MANIFEST-MF in place before packaging, so unit-tests
-			will work <directory>${basedir}/META-INF</directory>
-			<targetPath>META-INF</targetPath> <includes>
-			<include>MANIFEST.MF</include> <include>LICENSE.txt</include>
-			<include>NOTICE.txt</include> <include>README.txt</include>
-			</includes> </resource> </resources>
-		-->
+
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
+					<source>1.6</source>
+					<target>1.6</target>
 				</configuration>
 			</plugin>
-			<!--
-				<plugin> <artifactId>maven-jar-plugin</artifactId> <configuration>
-				<archive> <manifestFile>META-INF/MANIFEST.MF</manifestFile>
-				</archive> </configuration> </plugin>
-			-->
+
+
+			<!--  only want to enhance classes that are within our test classes -->
+			<plugin>
+				<groupId>org.datanucleus</groupId>
+				<artifactId>maven-datanucleus-plugin</artifactId>
+				<version>2.0.1</version>
+				<configuration>
+					<metadataDirectory>${project.build.testOutputDirectory}
+					</metadataDirectory>
+					<mappingIncludes>**/model/*.class</mappingIncludes>
+					<log4jConfiguration>${basedir}/src/test/resources/log4j.properties
+					</log4jConfiguration>
+					<verbose>true</verbose>
+					<enhancerName>ASM</enhancerName>
+					<!-- <props>${basedir}/datanucleus.properties</props> -->
+				</configuration>
+				<executions>
+					<execution>
+						<phase>process-test-classes</phase>
+						<goals>
+							<goal>enhance</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+
 
 		</plugins>
 	</build>
