@@ -73,7 +73,11 @@
 			<scope>system</scope>
 			<systemPath>${basedir}/lib/clhm-production.jar</systemPath>
 		</dependency>
-
+		<dependency>
+			<groupId>commons-pool</groupId>
+			<artifactId>commons-pool</artifactId>
+			<version>1.5.3</version>
+		</dependency>
 
 		<!--  required for testing -->
 		<dependency>
@@ -131,6 +135,13 @@
 			<version>1.5.8</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.perf4j</groupId>
+			<artifactId>perf4j</artifactId>
+			<version>0.9.12</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>

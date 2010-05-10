@@ -32,7 +32,7 @@ Contributors:
 
     <!-- CONNECTION FACTORY -->
     <extension point="org.datanucleus.store_connectionfactory">
-        <connectionfactory name="cassandra" class-name="org.datanucleus.store.cassandra.ConnectionFactoryImpl" transactional="false"
+        <connectionfactory name="cassandra" class-name="org.datanucleus.store.cassandra.ConnectionFactoryImpl" transactional="true"
             datastore="cassandra"/>
     </extension> 
 

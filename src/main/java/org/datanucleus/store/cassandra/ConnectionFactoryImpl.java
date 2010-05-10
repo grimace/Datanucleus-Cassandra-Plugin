@@ -56,13 +56,13 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 	public ConnectionFactoryImpl(OMFContext omfContext, String resourceType) {
 		super(omfContext, resourceType);
 
-		String hosts = omfContext.getPersistenceConfiguration()
+		String connectionString = omfContext.getPersistenceConfiguration()
 				.getStringProperty("datanucleus.ConnectionURL");
 
 		// now strip off the cassandra: at the beginning and make sure our
 		// format is correct
 
-		Matcher hostMatcher = URL.matcher(hosts);
+		Matcher hostMatcher = URL.matcher(connectionString);
 
 		if (!hostMatcher.matches()) {
 			throw new UnsupportedOperationException(
@@ -70,11 +70,13 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 		}
 
 		// set our keyspace
-		keyspace = hostMatcher.group(0);
+		keyspace = hostMatcher.group(1);
+		
+		String hosts = hostMatcher.group(2);
 
 		// now we're configured our cassandra hosts, put them into a pool
 		CassandraHostConfigurator casHostConfigurator = new CassandraHostConfigurator(
-				hostMatcher.group(1));
+				hosts);
 
 		// create our pool
 		this.pool = CassandraClientPoolFactory.INSTANCE

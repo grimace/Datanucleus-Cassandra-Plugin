@@ -4,3 +4,4 @@ Bundle-Name: Cassandra plugin
 Bundle-SymbolicName: org.datanucleus.store.cassandra;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-Vendor: Spidertracks
+Require-Bundle: org.datanucleus
