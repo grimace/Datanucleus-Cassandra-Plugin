@@ -109,9 +109,6 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 	@Override
 	public void insertObject(StateManager sm) {
 
-		//don't allow updates if this persistance manager isn't configured for it
-		this.manager.assertReadOnlyForUpdateOfObject(sm);
-
 		//just delegate to update.  They both perform the same logic
 		updateObject(sm, sm.getClassMetaData().getAllMemberPositions());
 		
@@ -177,7 +174,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 			
 			
 			CassandraInsertFieldManager manager = new CassandraInsertFieldManager(updates, deletes, this.manager.getTimestamp().getTime(), metaData);
-			sm.replaceFields(metaData.getAllMemberPositions(), manager);
+			sm.provideFields(metaData.getAllMemberPositions(), manager);
 			
 			
 			String key = getKey(sm);

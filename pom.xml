@@ -16,8 +16,15 @@
 			<id>DN_M2_Repo</id>
 			<url>http://www.datanucleus.org/downloads/maven2/</url>
 		</repository>
+		
+		
 	</repositories>
 	<dependencies>
+		<!--
+			used as per cassandra's recommended UUID generation
+			http://johannburkard.de/software/uuid/
+		-->
+	
 		<dependency>
 			<groupId>org.datanucleus</groupId>
 			<artifactId>datanucleus-core</artifactId>

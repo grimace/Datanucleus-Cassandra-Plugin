@@ -44,20 +44,18 @@ public class CassandraFieldManager extends AbstractFieldManager {
 			return colmds[0].getName();
 		}
 
-		else {
-			throw new UnsupportedOperationException(String.format(
-					"You must specify a column name for property %s",
-					memberMetaData.getName()));
-		}
+		// TODO should we allow defaults?
+		return memberMetaData.getName();
+
+		// throw new UnsupportedOperationException(String.format(
+		// "You must specify a column name for property %s",
+		// memberMetaData.getName()));
 
 	}
-	
-
-	
-	
 
 	/**
 	 * Get the UTF8 bytes of a string
+	 * 
 	 * @param value
 	 * @return
 	 */
@@ -72,6 +70,7 @@ public class CassandraFieldManager extends AbstractFieldManager {
 
 	/**
 	 * Convert UTF8 bytes to a string
+	 * 
 	 * @param bytes
 	 * @return
 	 */

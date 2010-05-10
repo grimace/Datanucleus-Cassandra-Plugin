@@ -17,7 +17,8 @@ import javax.jdo.annotations.PrimaryKey;
 public class PrimitiveObject {
 
 	@PrimaryKey
-	@Persistent(valueStrategy = IdGeneratorStrategy.UUIDSTRING)
+	//@Persistent(customValueStrategy = "cassandra-uuid")
+	@Persistent(valueStrategy =  IdGeneratorStrategy.UUIDHEX)
 	private String id;
 
 	@Persistent

@@ -27,6 +27,7 @@ import org.datanucleus.PersistenceConfiguration;
 import org.datanucleus.store.AbstractStoreManager;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.NucleusConnection;
+import org.datanucleus.store.StorePersistenceHandler2;
 
 public class CassandraStoreManager extends AbstractStoreManager
 {
@@ -55,12 +56,13 @@ public class CassandraStoreManager extends AbstractStoreManager
        // omfContext.getMetaDataManager().registerListener(metadataListener);
 
         // Handler for persistence process
-//        persistenceHandler2 = new HBasePersistenceHandler(this);
+        persistenceHandler = new CassandraPersistenceHandler(this);
 
 //        hbaseConfig = new HBaseConfiguration();
 
         PersistenceConfiguration conf = omfContext.getPersistenceConfiguration();
         boolean autoCreateSchema = conf.getBooleanProperty("datanucleus.autoCreateSchema");
+        
         if (autoCreateSchema)
         {
             autoCreateTables = true;
@@ -73,6 +75,7 @@ public class CassandraStoreManager extends AbstractStoreManager
         }        
         // how often should the evictor run
         poolTimeBetweenEvictionRunsMillis = conf.getIntProperty("datanucleus.connectionPool.timeBetweenEvictionRunsMillis");
+        
         if (poolTimeBetweenEvictionRunsMillis == 0)
         {
             poolTimeBetweenEvictionRunsMillis = 15 * 1000; // default, 15 secs
@@ -80,6 +83,7 @@ public class CassandraStoreManager extends AbstractStoreManager
          
         // how long may a connection sit idle in the pool before it may be evicted
         poolMinEvictableIdleTimeMillis = conf.getIntProperty("datanucleus.connectionPool.minEvictableIdleTimeMillis");
+        
         if (poolMinEvictableIdleTimeMillis == 0)
         {
             poolMinEvictableIdleTimeMillis = 30 * 1000; // default, 30 secs
@@ -95,6 +99,8 @@ public class CassandraStoreManager extends AbstractStoreManager
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+        }else{
+        	this.columnTimestamp = new DefaultColumnTimestamp();
         }
       
         
