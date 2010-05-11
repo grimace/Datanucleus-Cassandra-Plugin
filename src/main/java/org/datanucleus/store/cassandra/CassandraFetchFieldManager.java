@@ -17,6 +17,9 @@ Contributors :
  ***********************************************************************/
 package org.datanucleus.store.cassandra;
 
+
+import static org.datanucleus.store.cassandra.utils.ByteConverter.getString;
+
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
 import java.util.HashMap;
@@ -301,13 +304,16 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 				return null;
 			}
 
-			ByteArrayInputStream bis = new ByteArrayInputStream(column.value);
-			ObjectInputStream ois = new ObjectInputStream(bis);
-
-			// always return UTF 8 values as UTF 8 shoudl always be stored
-			String value = ois.readUTF();
-			ois.close();
-			bis.close();
+//			ByteArrayInputStream bis = new ByteArrayInputStream(column.value);
+//			ObjectInputStream ois = new ObjectInputStream(bis);
+//
+//			// always return UTF 8 values as UTF 8 shoudl always be stored
+//			String value = ois.readUTF();
+//			ois.close();
+//			bis.close();
+			
+			String value = getString(column.value);
+			
 			return value;
 
 		} catch (Exception e) {

@@ -17,9 +17,6 @@ Contributors :
  ***********************************************************************/
 package org.datanucleus.store.cassandra;
 
-import java.io.UnsupportedEncodingException;
-import java.util.UUID;
-
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.ColumnMetaData;
@@ -31,8 +28,7 @@ import org.datanucleus.store.fieldmanager.AbstractFieldManager;
  */
 public class CassandraFieldManager extends AbstractFieldManager {
 
-	private static final String UTF8_ENCODING = "UTF-8";
-
+	
 	protected static String getColumnName(AbstractClassMetaData metaData,
 			int absoluteFieldNumber) {
 
@@ -54,36 +50,7 @@ public class CassandraFieldManager extends AbstractFieldManager {
 
 	}
 
-	/**
-	 * Get the UTF8 bytes of a string
-	 * 
-	 * @param value
-	 * @return
-	 */
-	protected static byte[] getBytes(String value) {
-		try {
-			return value.getBytes(UTF8_ENCODING);
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(
-					"I should never happen.  I'm encoding a string in UTF8");
-		}
-	}
-
-	/**
-	 * Convert UTF8 bytes to a string
-	 * 
-	 * @param bytes
-	 * @return
-	 */
-	protected static String getString(byte[] bytes) {
-		try {
-			return new String(bytes, UTF8_ENCODING);
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(
-					"I should never happen.  I'm encoding a string in UTF8");
-		}
-
-	}
+	
 
 //	/**
 //	 * As byte array.

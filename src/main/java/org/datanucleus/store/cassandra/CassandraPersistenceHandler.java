@@ -20,6 +20,8 @@ package org.datanucleus.store.cassandra;
 import java.util.List;
 import java.util.Stack;
 
+import static org.datanucleus.store.cassandra.utils.ByteConverter.getBytes;
+
 import me.prettyprint.cassandra.service.BatchMutation;
 
 import org.apache.cassandra.thrift.Column;
@@ -37,6 +39,7 @@ import org.datanucleus.ObjectManager;
 import org.datanucleus.StateManager;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusObjectNotFoundException;
+import org.datanucleus.exceptions.NucleusUserException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.store.AbstractPersistenceHandler;
 
@@ -81,8 +84,16 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 			// delete the whole column family for this key
 			conn = getConnection(sm);
 			AbstractClassMetaData metaData = sm.getClassMetaData();
-			List<Column> columns = conn.getKeyspace().getSlice(getKey(sm),
+			
+			String key = getKey(sm);
+			
+		
+			
+			List<Column> columns = conn.getKeyspace().getSlice(key,
 					getColumnParent(metaData), getSliceprediCate(metaData));
+
+		
+			populateKeys(columns, metaData, key);
 
 			CassandraFetchFieldManager manager = new CassandraFetchFieldManager(
 					columns, metaData);
@@ -101,7 +112,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 	@Override
 	public Object findObject(ObjectManager om, Object id) {
-		// TODO Auto-generated method stub
+		//do nothing, we use locate instead
 		return null;
 	}
 
@@ -133,6 +144,13 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 						"Couldn't find object %s with key %s", metaData
 								.getName(), key));
 			}
+			
+
+			populateKeys(columns, metaData, key);
+
+			CassandraFetchFieldManager manager = new CassandraFetchFieldManager(
+					columns, metaData);
+			sm.replaceFields(metaData.getAllMemberPositions(), manager);
 
 		} catch (InvalidRequestException e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -267,6 +285,20 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		sp.setSlice_range(sr);
 
 		return sp;
+	}
+	
+	private void populateKeys(List<Column> columns, AbstractClassMetaData metaData, String keyValues){
+		
+		String[] pks = metaData.getPrimaryKeyMemberNames();
+		
+		if(pks.length != 1){
+			throw new NucleusUserException("The cassandra store currently only support one pk per class");
+		}
+		
+		
+		Column column = new Column(getBytes(pks[0]), getBytes(keyValues), 0);
+		
+		columns.add(column);
 	}
 
 

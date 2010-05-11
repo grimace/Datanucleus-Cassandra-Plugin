@@ -29,9 +29,10 @@ import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 import org.apache.thrift.transport.TTransportException;
 import org.datanucleus.store.cassandra.model.PrimitiveObject;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Todd Nine
@@ -99,23 +100,23 @@ public class BasicPersist {
 		PrimitiveObject stored = (PrimitiveObject) pm.getObjectById(
 				PrimitiveObject.class, object.getId());
 
-		Assert.assertEquals(object.getId(), stored.getId());
+		assertEquals(object.getId(), stored.getId());
 
-		Assert.assertEquals(object.getTestByte(), stored.getTestByte());
+		assertEquals(object.getTestByte(), stored.getTestByte());
 
-		Assert.assertEquals(object.isTestBool(), stored.isTestBool());
+		assertEquals(object.isTestBool(), stored.isTestBool());
 
-		Assert.assertEquals(object.getTestChar(), stored.getTestChar());
+		assertEquals(object.getTestChar(), stored.getTestChar());
 
-		Assert.assertEquals(object.getTestDouble(), stored.getTestDouble());
+		assertEquals(object.getTestDouble(), stored.getTestDouble());
 
-		Assert.assertEquals(object.getTestFloat(), stored.getTestFloat());
+		assertEquals(object.getTestFloat(), stored.getTestFloat());
 
-		Assert.assertEquals(object.getTestInt(), stored.getTestInt());
+		assertEquals(object.getTestInt(), stored.getTestInt());
 
-		Assert.assertEquals(object.getTestLong(), stored.getTestLong());
+		assertEquals(object.getTestLong(), stored.getTestLong());
 
-		Assert.assertEquals(object.getTestString(), stored.getTestString());
+		assertEquals(object.getTestString(), stored.getTestString());
 
 	}
 

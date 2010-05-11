@@ -17,6 +17,8 @@ Contributors :
  ***********************************************************************/
 package org.datanucleus.store.cassandra;
 
+import static org.datanucleus.store.cassandra.utils.ByteConverter.getBytes;
+
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
@@ -27,7 +29,6 @@ import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
-import org.datanucleus.metadata.AbstractMemberMetaData;
 
 /**
  * @author Todd Nine
