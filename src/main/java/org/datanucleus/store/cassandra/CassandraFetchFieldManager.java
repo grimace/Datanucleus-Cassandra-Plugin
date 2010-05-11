@@ -26,9 +26,6 @@ import java.util.Map;
 import org.apache.cassandra.thrift.Column;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
-import org.datanucleus.metadata.AbstractMemberMetaData;
-
-import com.eaio.uuid.UUID;
 
 /**
  * @author Todd Nine
@@ -251,15 +248,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 				return null;
 			}
 
-			AbstractMemberMetaData memberMetaData = metaData
-					.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
-
-			Class fieldType = memberMetaData.getType();
-
-			// Return the uuid if it's a uuid
-			if (fieldType.equals(UUID.class)) {
-				return getUUID(column.value);
-			}
+			
 
 			ByteArrayInputStream bis = new ByteArrayInputStream(column.value);
 			ObjectInputStream ois = new ObjectInputStream(bis);
