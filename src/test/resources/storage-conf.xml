@@ -98,20 +98,23 @@
        ~ ColumnFamilies with high write:read ratios.  As with key caching,
        ~ valid values are from 0 to 1.  The default 0 disables it entirely.
       -->
-     <!--   <ColumnFamily CompareWith="BytesType" 
+      <ColumnFamily CompareWith="BytesType" 
                     Name="Standard1" 
                     RowsCached="10%"
                     KeysCachedFraction="0"/>
-      <ColumnFamily CompareWith="UTF8Type" Name="Standard2"/>-->
-      <ColumnFamily CompareWith="UTF8Type" Name="PrimitiveObject"/>
-    <!--  <ColumnFamily ColumnType="Super"
+      <ColumnFamily CompareWith="UTF8Type" Name="Standard2"/>
+      <ColumnFamily CompareWith="TimeUUIDType" Name="StandardByUUID1"/>
+      <ColumnFamily ColumnType="Super"
                     CompareWith="UTF8Type"
                     CompareSubcolumnsWith="UTF8Type"
                     Name="Super1"
                     RowsCached="1000"
                     KeysCachedFraction="0"
-                    Comment="A column family with supercolumns, whose column and subcolumn names are UTF8 strings"/>-->
+                    Comment="A column family with supercolumns, whose column and subcolumn names are UTF8 strings"/>
 
+  	 
+  	 <ColumnFamily CompareWith="UTF8Type" Name="PrimitiveObject"/>
+  
       <!--
        ~ Strategy: Setting this to the class that implements
        ~ IReplicaPlacementStrategy will change the way the node picker works.
@@ -205,11 +208,9 @@
 
   <!-- Miscellaneous -->
 
-  <!-- Time to wait for a reply from other nodes before failing the command
--->
+  <!-- Time to wait for a reply from other nodes before failing the command -->
   <RpcTimeoutInMillis>5000</RpcTimeoutInMillis>
-  <!-- Size to allow commitlog to grow to before creating a new segment
--->
+  <!-- Size to allow commitlog to grow to before creating a new segment -->
   <CommitLogRotationThresholdInMB>128</CommitLogRotationThresholdInMB>
 
 
@@ -277,8 +278,7 @@
    ~ buffer size relative to the data buffer if you have few (many) 
    ~ columns per key.  Bigger is only better _if_ your memtables get large
    ~ enough to use the space. (Check in your data directory after your
-   ~ app has been running long enough.)
--->
+   ~ app has been running long enough.) -->
   <FlushDataBufferSizeInMB>32</FlushDataBufferSizeInMB>
   <FlushIndexBufferSizeInMB>8</FlushIndexBufferSizeInMB>
 
@@ -328,8 +328,7 @@
    ~ you can afford more of those in parallel.  A good rule of thumb is 2
    ~ concurrent reads per processor core.  Increase ConcurrentWrites to
    ~ the number of clients writing at once if you enable CommitLogSync +
-   ~ CommitLogSyncDelay.
--->
+   ~ CommitLogSyncDelay. -->
   <ConcurrentReads>8</ConcurrentReads>
   <ConcurrentWrites>32</ConcurrentWrites>
 
