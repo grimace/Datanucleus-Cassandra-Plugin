@@ -35,5 +35,10 @@ Contributors:
         <connectionfactory name="cassandra" class-name="org.datanucleus.store.cassandra.ConnectionFactoryImpl" transactional="true"
             datastore="cassandra"/>
     </extension> 
+    
+     <!-- CASSANDRA'S RECOMMENDED UUID  -->
+    <extension point="org.datanucleus.store_valuegenerator">
+    	<valuegenerator name="uuid-cassandra" class-name="org.datanucleus.store.cassandra.utils.CassandraUUIDGenerator" unique="true"/>
+    </extension> 
 
 </plugin>

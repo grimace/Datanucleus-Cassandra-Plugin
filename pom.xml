@@ -16,15 +16,15 @@
 			<id>DN_M2_Repo</id>
 			<url>http://www.datanucleus.org/downloads/maven2/</url>
 		</repository>
-		
-		
+
+
 	</repositories>
 	<dependencies>
 		<!--
 			used as per cassandra's recommended UUID generation
 			http://johannburkard.de/software/uuid/
 		-->
-	
+
 		<dependency>
 			<groupId>org.datanucleus</groupId>
 			<artifactId>datanucleus-core</artifactId>
@@ -62,8 +62,8 @@
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra</artifactId>
-			<systemPath>${basedir}/lib/apache-cassandra-0.6.0.jar</systemPath>
-			<version>0.6.0</version>
+			<systemPath>${basedir}/lib/apache-cassandra-0.6.1.jar</systemPath>
+			<version>0.6.1</version>
 			<scope>system</scope>
 		</dependency>
 		<dependency>
@@ -73,6 +73,7 @@
 			<scope>system</scope>
 			<systemPath>${basedir}/lib/high-scale-lib.jar</systemPath>
 		</dependency>
+
 		<dependency>
 			<groupId>com.reardencommerce</groupId>
 			<artifactId>clhm-production</artifactId>
@@ -80,6 +81,15 @@
 			<scope>system</scope>
 			<systemPath>${basedir}/lib/clhm-production.jar</systemPath>
 		</dependency>
+
+		<dependency>
+			<groupId>com.eaio.uuid</groupId>
+			<artifactId>uuid</artifactId>
+			<systemPath>${basedir}/lib/uuid-3.2.jar</systemPath>
+			<version>3.2</version>
+			<scope>system</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>commons-pool</groupId>
 			<artifactId>commons-pool</artifactId>
@@ -149,6 +159,13 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.datanucleus</groupId>
+			<artifactId>datanucleus-enhancer</artifactId>
+			<version>2.0.2</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

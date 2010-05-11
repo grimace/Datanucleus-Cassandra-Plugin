@@ -103,6 +103,7 @@ public class CassandraStoreManager extends AbstractStoreManager
         	this.columnTimestamp = new DefaultColumnTimestamp();
         }
       
+       
         
         logConfiguration();
     }

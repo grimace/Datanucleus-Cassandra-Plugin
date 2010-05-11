@@ -27,6 +27,7 @@ import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
+import org.datanucleus.metadata.AbstractMemberMetaData;
 
 /**
  * @author Todd Nine
@@ -61,6 +62,10 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
+			if(isKey(fieldNumber)){
+				return;
+			}
+			
 			String columnName = getColumnName(metaData, fieldNumber);
 
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -85,6 +90,10 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
+			if(isKey(fieldNumber)){
+				return;
+			}
+			
 			String columnName = getColumnName(metaData, fieldNumber);
 
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -108,6 +117,10 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	public void storeCharField(int fieldNumber, char value) {
 
 		try {
+
+			if(isKey(fieldNumber)){
+				return;
+			}
 
 			String columnName = getColumnName(metaData, fieldNumber);
 
@@ -133,6 +146,10 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
+			if(isKey(fieldNumber)){
+				return;
+			}
+
 			String columnName = getColumnName(metaData, fieldNumber);
 
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -157,6 +174,11 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
+
+			if(isKey(fieldNumber)){
+				return;
+			}
+			
 			String columnName = getColumnName(metaData, fieldNumber);
 
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -180,7 +202,11 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	public void storeIntField(int fieldNumber, int value) {
 
 		try {
-
+			
+			if(isKey(fieldNumber)){
+				return;
+			}
+			
 			String columnName = getColumnName(metaData, fieldNumber);
 
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -205,6 +231,10 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
+			if(isKey(fieldNumber)){
+				return;
+			}
+			
 			String columnName = getColumnName(metaData, fieldNumber);
 
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -228,6 +258,10 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	public void storeShortField(int fieldNumber, short value) {
 		try {
 
+			if(isKey(fieldNumber)){
+				return;
+			}
+			
 			String columnName = getColumnName(metaData, fieldNumber);
 
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -253,6 +287,11 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	@Override
 	public void storeObjectField(int fieldNumber, Object value) {
 		try {
+			
+
+			if(isKey(fieldNumber)){
+				return;
+			}
 
 			String columnName = getColumnName(metaData, fieldNumber);
 
@@ -290,6 +329,11 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	public void storeStringField(int fieldNumber, String value) {
 		try {
 
+
+			if(isKey(fieldNumber)){
+				return;
+			}
+			
 			String columnName = getColumnName(metaData, fieldNumber);
 
 			if (value == null) {
@@ -322,6 +366,18 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 				absoluteFieldNumber)));
 
 		return columnPath;
+	}
+	
+	/**
+	 * Returns true if the field is a key
+	 * @param fieldNumber
+	 * @return
+	 */
+	protected boolean isKey(int fieldNumber){
+
+		return metaData.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber).isPrimaryKey();
+		
+		
 	}
 
 }
