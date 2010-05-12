@@ -27,6 +27,8 @@ import javax.jdo.PersistenceManagerFactory;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
 import org.apache.thrift.transport.TTransportException;
+import org.datanucleus.store.cassandra.model.Card;
+import org.datanucleus.store.cassandra.model.Pack;
 import org.datanucleus.store.cassandra.model.PrimitiveObject;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -39,7 +41,7 @@ import static org.junit.Assert.*;
  * 
  */
 
-public class BasicPersist {
+public class PersistTests {
 
 	private static EmbeddedServerHelper embedded;
 
@@ -126,6 +128,38 @@ public class BasicPersist {
 
 		assertEquals(object.getTestString(), stored.getTestString());
 
+	}
+	
+
+	@Test
+	public void testBasicPeristAndLoadOneToMany() throws Exception {
+
+		PersistenceManagerFactory pmf = JDOHelper
+				.getPersistenceManagerFactory("Test");
+			
+		
+		Pack pack = new Pack();
+		
+		Card aceSpades = new Card();
+		aceSpades.setName("Ace of Spades");
+		pack.getCards().add(aceSpades);
+		
+		
+		Card jackHearts = new Card();
+		jackHearts.setName("Jack of Hearts");
+		pack.getCards().add(jackHearts);
+		
+		pmf.getPersistenceManager().makePersistent(pack);
+		
+		
+		Pack saved = pmf.getPersistenceManager().getObjectById(Pack.class, pack.getId());
+		
+		assertEquals(pack, saved);
+		
+		assertTrue(saved.getCards().contains(aceSpades));
+		
+		assertTrue(saved.getCards().contains(jackHearts));
+		
 	}
 
 }

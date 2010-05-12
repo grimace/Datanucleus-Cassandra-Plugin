@@ -232,6 +232,11 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 			if (isKey(fieldNumber)) {
 				return;
 			}
+			
+//		TODO make cascading saves happen	
+//			return;
+			
+		
 
 			String columnName = getColumnName(metaData, fieldNumber);
 

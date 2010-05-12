@@ -21,17 +21,50 @@ import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.Inheritance;
 import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
+import javax.jdo.annotations.Persistent;
 
 /**
  * This object represents the "many" side of a one to many collection
  * @author Todd Nine
  *
  */
-@PersistenceCapable(table = "ManyToOne", identityType = IdentityType.APPLICATION)
+@PersistenceCapable(table = "Card", identityType = IdentityType.APPLICATION)
 @Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
-public class ManyToOne extends BaseEntity {
+public class Card extends BaseEntity {
 
 	
+	@Persistent
+	private Pack pack;
+	
+	private String name;
+	
 
+	/**
+	 * @return the pack
+	 */
+	public Pack getPack() {
+		return pack;
+	}
+
+	/**
+	 * @param pack the pack to set
+	 */
+	public void setPack(Pack pack) {
+		this.pack = pack;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
 	
 }

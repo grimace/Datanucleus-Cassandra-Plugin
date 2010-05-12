@@ -113,7 +113,9 @@
                     Comment="A column family with supercolumns, whose column and subcolumn names are UTF8 strings"/>
 
   	 
-  	 <ColumnFamily CompareWith="UTF8Type" Name="PrimitiveObject"/>
+		<ColumnFamily CompareWith="UTF8Type" Name="PrimitiveObject"/>
+	 	<ColumnFamily CompareWith="UTF8Type" Name="Pack"/>
+	  	<ColumnFamily CompareWith="UTF8Type" Name="Card"/>
   
       <!--
        ~ Strategy: Setting this to the class that implements
@@ -208,9 +210,11 @@
 
   <!-- Miscellaneous -->
 
-  <!-- Time to wait for a reply from other nodes before failing the command -->
+  <!-- Time to wait for a reply from other nodes before failing the command
+-->
   <RpcTimeoutInMillis>5000</RpcTimeoutInMillis>
-  <!-- Size to allow commitlog to grow to before creating a new segment -->
+  <!-- Size to allow commitlog to grow to before creating a new segment
+-->
   <CommitLogRotationThresholdInMB>128</CommitLogRotationThresholdInMB>
 
 
@@ -278,7 +282,8 @@
    ~ buffer size relative to the data buffer if you have few (many) 
    ~ columns per key.  Bigger is only better _if_ your memtables get large
    ~ enough to use the space. (Check in your data directory after your
-   ~ app has been running long enough.) -->
+   ~ app has been running long enough.)
+-->
   <FlushDataBufferSizeInMB>32</FlushDataBufferSizeInMB>
   <FlushIndexBufferSizeInMB>8</FlushIndexBufferSizeInMB>
 
@@ -328,7 +333,8 @@
    ~ you can afford more of those in parallel.  A good rule of thumb is 2
    ~ concurrent reads per processor core.  Increase ConcurrentWrites to
    ~ the number of clients writing at once if you enable CommitLogSync +
-   ~ CommitLogSyncDelay. -->
+   ~ CommitLogSyncDelay.
+-->
   <ConcurrentReads>8</ConcurrentReads>
   <ConcurrentWrites>32</ConcurrentWrites>
 

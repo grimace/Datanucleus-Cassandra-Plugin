@@ -84,15 +84,12 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 			// delete the whole column family for this key
 			conn = getConnection(sm);
 			AbstractClassMetaData metaData = sm.getClassMetaData();
-			
+
 			String key = getKey(sm);
-			
-		
-			
+
 			List<Column> columns = conn.getKeyspace().getSlice(key,
 					getColumnParent(metaData), getSliceprediCate(metaData));
 
-		
 			populateKeys(columns, metaData, key);
 
 			CassandraFetchFieldManager manager = new CassandraFetchFieldManager(
@@ -108,21 +105,18 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		}
 
 	}
-	
 
 	@Override
 	public Object findObject(ObjectManager om, Object id) {
-		//do nothing, we use locate instead
+		// do nothing, we use locate instead
 		return null;
 	}
-
 
 	@Override
 	public void insertObject(StateManager sm) {
 
-		//just delegate to update.  They both perform the same logic
+		// just delegate to update. They both perform the same logic
 		updateObject(sm, sm.getClassMetaData().getAllMemberPositions());
-		
 
 	}
 
@@ -144,7 +138,6 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 						"Couldn't find object %s with key %s", metaData
 								.getName(), key));
 			}
-			
 
 			populateKeys(columns, metaData, key);
 
@@ -169,54 +162,45 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		}
 
 	}
-	
-
-
 
 	@Override
 	public void updateObject(StateManager sm, int[] fieldNumbers) {
 		this.manager.assertReadOnlyForUpdateOfObject(sm);
 
-		 
 		CassandraManagedConnection conn = null;
 
 		try {
 			// delete the whole column family for this key
 			conn = getConnection(sm);
 			AbstractClassMetaData metaData = sm.getClassMetaData();
-			
-			
+
 			List<Column> updates = new Stack<Column>();
 			List<Deletion> deletes = new Stack<Deletion>();
-			
-			
-			
-			CassandraInsertFieldManager manager = new CassandraInsertFieldManager(updates, deletes, this.manager.getTimestamp().getTime(), metaData);
+
+			CassandraInsertFieldManager manager = new CassandraInsertFieldManager(
+					updates, deletes, this.manager.getTimestamp().getTime(),
+					metaData);
 			sm.provideFields(metaData.getAllMemberPositions(), manager);
-			
-			
+
 			String key = getKey(sm);
-			List<String> columnFamilies = new Stack<String>();
+			Stack<String> columnFamilies = new Stack<String>();
 			columnFamilies.add(metaData.getTable());
-			
-			//now perform the batch update
+
+			// now perform the batch update
 			BatchMutation changes = new BatchMutation();
-			
-			
+
 			for (Column column : updates) {
-				changes.addInsertion(key, columnFamilies,column );
+				changes.addInsertion(key, columnFamilies, column);
 			}
-			
-			
+
 			for (Deletion deletion : deletes) {
-				changes.addDeletion(key, columnFamilies,deletion );
+				changes.addDeletion(key, columnFamilies, deletion);
 			}
-			
+
 			conn.getKeyspace().batchMutate(changes);
-			
-	            
+
 		} catch (Exception e) {
-			throw new NucleusDataStoreException (e.getMessage(), e);
+			throw new NucleusDataStoreException(e.getMessage(), e);
 		} finally {
 			if (conn != null) {
 				conn.close();
@@ -225,7 +209,8 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 	}
 
 	private CassandraManagedConnection getConnection(StateManager sm) {
-		return (CassandraManagedConnection) this.manager.getConnection(sm.getObjectManager());
+		return (CassandraManagedConnection) this.manager.getConnection(sm
+				.getObjectManager());
 
 	}
 
@@ -286,22 +271,20 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 		return sp;
 	}
-	
-	private void populateKeys(List<Column> columns, AbstractClassMetaData metaData, String keyValues){
-		
+
+	private void populateKeys(List<Column> columns,
+			AbstractClassMetaData metaData, String keyValues) {
+
 		String[] pks = metaData.getPrimaryKeyMemberNames();
-		
-		if(pks.length != 1){
-			throw new NucleusUserException("The cassandra store currently only support one pk per class");
+
+		if (pks.length != 1) {
+			throw new NucleusUserException(
+					"The cassandra store currently only support one pk per class");
 		}
-		
-		
+
 		Column column = new Column(getBytes(pks[0]), getBytes(keyValues), 0);
-		
+
 		columns.add(column);
 	}
 
-
-	
-	
 }

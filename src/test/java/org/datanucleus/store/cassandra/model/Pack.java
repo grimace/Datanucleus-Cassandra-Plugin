@@ -17,20 +17,37 @@ Contributors :
  ***********************************************************************/
 package org.datanucleus.store.cassandra.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.Inheritance;
 import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
+import javax.jdo.annotations.Persistent;
 
 /**
  * An object with a collection to many objects
  * @author Todd Nine 
  */
-@PersistenceCapable(table = "OneToMany", identityType = IdentityType.APPLICATION)
+@PersistenceCapable(table = "Pack", identityType = IdentityType.APPLICATION)
 @Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
-public class OneToMany extends BaseEntity {
+public class Pack extends BaseEntity {
 	
 	
+	@Persistent(mappedBy="pack")
+	private List<Card> cards;
+	
+	public Pack(){
+		cards = new ArrayList<Card>();
+	}
+
+	/**
+	 * @return the manyToOne
+	 */
+	public List<Card> getCards() {
+		return cards;
+	}
 
 	
 }
