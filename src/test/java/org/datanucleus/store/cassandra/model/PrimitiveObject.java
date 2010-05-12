@@ -4,9 +4,10 @@
 package org.datanucleus.store.cassandra.model;
 
 import javax.jdo.annotations.IdentityType;
+import javax.jdo.annotations.Inheritance;
+import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
-import javax.jdo.annotations.PrimaryKey;
 
 
 
@@ -16,11 +17,10 @@ import javax.jdo.annotations.PrimaryKey;
  * 
  */
 @PersistenceCapable(table = "PrimitiveObject", identityType = IdentityType.APPLICATION)
-public class PrimitiveObject {
+@Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
+public class PrimitiveObject extends BaseEntity{
 
-	@PrimaryKey
-	@Persistent(customValueStrategy = "uuid-cassandra")
-	private String id;
+
 
 	@Persistent
 	private boolean testBool;
@@ -121,8 +121,5 @@ public class PrimitiveObject {
 		this.testString = testString;
 	}
 
-	public String getId() {
-		return id;
-	}
 
 }

@@ -32,7 +32,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Todd Nine
@@ -96,9 +96,17 @@ public class BasicPersist {
 		// now save our object
 		pm.makePersistent(object);
 
+		
+		//don't want it to come from the cache, get a new pm
+		PersistenceManager pm2 = pmf.getPersistenceManager();
+
 		// now retrieve a copy
-		PrimitiveObject stored = (PrimitiveObject) pm.getObjectById(
+		PrimitiveObject stored = (PrimitiveObject) pm2.getObjectById(
 				PrimitiveObject.class, object.getId());
+		
+		
+		//make sure they're not the same instance, we want a new  one from the data source
+		assertFalse(object == stored);
 
 		assertEquals(object.getId(), stored.getId());
 

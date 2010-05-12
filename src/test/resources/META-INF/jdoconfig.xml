@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <jdoconfig xmlns="http://java.sun.com/xml/ns/jdo/jdoconfig"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="http://java.sun.com/xml/ns/jdo/jdoconfig">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://java.sun.com/xml/ns/jdo/jdoconfig">
 
-    <!-- Datastore Txn PMF -->
-    <persistence-manager-factory name="Test">
-        <property name="javax.jdo.PersistenceManagerFactoryClass"
-            value="org.datanucleus.jdo.JDOPersistenceManagerFactory"/>
-        <property name="javax.jdo.option.ConnectionURL"
-            value="cassandra:Keyspace1:localhost:9170"/>
-        <property name="javax.jdo.option.Optimistic"
-            value="false"/>
-      
-    </persistence-manager-factory>
+	<!-- Datastore Txn PMF -->
+	<persistence-manager-factory name="Test">
+		<property name="javax.jdo.PersistenceManagerFactoryClass"
+			value="org.datanucleus.jdo.JDOPersistenceManagerFactory" />
+		<property name="javax.jdo.option.ConnectionURL" value="cassandra:Keyspace1:localhost:9170" />
+		<property name="javax.jdo.option.Optimistic" value="false" />
+
+		<!--
+			we don't want a level 2 cache as another node may mod an object while
+			it's cached
+		
+		<property name="datanucleus.cache.level1" value="false" />-->
+
+
+	</persistence-manager-factory>
 
 </jdoconfig>

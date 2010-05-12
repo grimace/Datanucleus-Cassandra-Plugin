@@ -302,7 +302,7 @@ public class ByteConverter {
 	 * @throws IOException
 	 * @throws ClassNotFoundException 
 	 */
-	public static <T extends Object> T getObject(byte[] bytes) throws IOException, ClassNotFoundException {
+	public static <T> T getObject(byte[] bytes) throws IOException, ClassNotFoundException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
 		ObjectInputStream ois = new ObjectInputStream(bis);
 		T serialized = (T) ois.readObject();
