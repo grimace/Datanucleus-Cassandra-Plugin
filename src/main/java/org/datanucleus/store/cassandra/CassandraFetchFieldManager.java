@@ -17,7 +17,15 @@ Contributors :
  ***********************************************************************/
 package org.datanucleus.store.cassandra;
 
-
+import static org.datanucleus.store.cassandra.utils.ByteConverter.getBoolean;
+import static org.datanucleus.store.cassandra.utils.ByteConverter.getChar;
+import static org.datanucleus.store.cassandra.utils.ByteConverter.getDouble;
+import static org.datanucleus.store.cassandra.utils.ByteConverter.getFloat;
+import static org.datanucleus.store.cassandra.utils.ByteConverter.getInt;
+import static org.datanucleus.store.cassandra.utils.ByteConverter.getLong;
+import static org.datanucleus.store.cassandra.utils.ByteConverter.getObject;
+import static org.datanucleus.store.cassandra.utils.ByteConverter.getShort;
+import static org.datanucleus.store.cassandra.utils.ByteConverter.getString;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +34,6 @@ import java.util.Map;
 import org.apache.cassandra.thrift.Column;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
-import org.datanucleus.store.cassandra.utils.ByteConverter;
 
 /**
  * @author Todd Nine
@@ -53,7 +60,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 		this.columns = new HashMap<String, Column>();
 
 		for (Column column : columns) {
-			this.columns.put(ByteConverter.getString(column.name), column);
+			this.columns.put(getString(column.name), column);
 		}
 	}
 
@@ -71,10 +78,8 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			if (column == null) {
 				return false;
 			}
-			
-			
 
-			return ByteConverter.getBoolean(column.value);
+			return getBoolean(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -94,7 +99,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			if (column == null) {
 				return 0;
 			}
-			
+
 			return column.value[0];
 
 		} catch (Exception e) {
@@ -115,8 +120,8 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			if (column == null) {
 				return Character.MIN_VALUE;
 			}
-			
-			return ByteConverter.getChar(column.value);
+
+			return getChar(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -136,7 +141,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			if (column == null) {
 				return 0;
 			}
-			return ByteConverter.getDouble(column.value);
+			return getDouble(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -156,7 +161,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			if (column == null) {
 				return 0;
 			}
-			return ByteConverter.getFloat(column.value);
+			return getFloat(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -176,8 +181,8 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			if (column == null) {
 				return 0;
 			}
-			
-			return ByteConverter.getInt(column.value);
+
+			return getInt(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -197,8 +202,8 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			if (column == null) {
 				return 0;
 			}
-			
-			return ByteConverter.getLong(column.value);
+
+			return getLong(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -219,7 +224,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 				return null;
 			}
 
-			return ByteConverter.getObject(column.value);
+			return getObject(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -239,8 +244,8 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			if (column == null) {
 				return 0;
 			}
-			
-			return ByteConverter.getShort(column.value);
+
+			return getShort(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -261,16 +266,17 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 				return null;
 			}
 
-//			ByteArrayInputStream bis = new ByteArrayInputStream(column.value);
-//			
-//
-//			// always return UTF 8 values as UTF 8 shoudl always be stored
-//			String value = ois.readUTF();
-//			
-//			
-			
-			String value = ByteConverter.getString(column.value);
-			
+			// ByteArrayInputStream bis = new
+			// ByteArrayInputStream(column.value);
+			//			
+			//
+			// // always return UTF 8 values as UTF 8 shoudl always be stored
+			// String value = ois.readUTF();
+			//			
+			//			
+
+			String value = getString(column.value);
+
 			return value;
 
 		} catch (Exception e) {

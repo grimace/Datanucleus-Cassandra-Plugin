@@ -142,12 +142,12 @@ public class PersistTests {
 		
 		Card aceSpades = new Card();
 		aceSpades.setName("Ace of Spades");
-		pack.getCards().add(aceSpades);
+		pack.AddCard(aceSpades);
 		
 		
 		Card jackHearts = new Card();
 		jackHearts.setName("Jack of Hearts");
-		pack.getCards().add(jackHearts);
+		pack.AddCard(jackHearts);
 		
 		pmf.getPersistenceManager().makePersistent(pack);
 		

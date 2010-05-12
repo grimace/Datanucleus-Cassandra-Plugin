@@ -46,7 +46,7 @@ public class CassandraManagedConnection extends AbstractManagedConnection {
 	@Override
 	public void close() {
 		// do nothing at the momennt
-
+		release();
 	}
 
 	@Override
@@ -89,7 +89,9 @@ public class CassandraManagedConnection extends AbstractManagedConnection {
 			return this.keySpace;
 		} catch (Exception e) {
 
-			throw new NucleusDataStoreException(String.format("Unable to get a keyspace with consistencylevel %2", consistency), e);
+			throw new NucleusDataStoreException(String.format(
+					"Unable to get a keyspace with consistencylevel %2",
+					consistency), e);
 
 		}
 

@@ -48,6 +48,11 @@ public class Pack extends BaseEntity {
 	public List<Card> getCards() {
 		return cards;
 	}
+	
+	public void AddCard(Card card){
+		this.cards.add(card);
+		card.setPack(this);
+	}
 
 	
 }

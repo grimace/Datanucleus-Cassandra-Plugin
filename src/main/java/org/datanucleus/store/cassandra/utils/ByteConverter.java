@@ -302,6 +302,7 @@ public class ByteConverter {
 	 * @throws IOException
 	 * @throws ClassNotFoundException 
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T> T getObject(byte[] bytes) throws IOException, ClassNotFoundException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
 		ObjectInputStream ois = new ObjectInputStream(bis);

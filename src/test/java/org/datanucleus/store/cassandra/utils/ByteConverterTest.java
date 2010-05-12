@@ -20,7 +20,6 @@ package org.datanucleus.store.cassandra.utils;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 import org.junit.Test;
 

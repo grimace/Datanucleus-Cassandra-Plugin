@@ -17,17 +17,17 @@ Contributors :
  ***********************************************************************/
 package org.datanucleus.store.cassandra;
 
-import java.util.List;
-import java.util.Stack;
 
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getBytes;
+import static org.datanucleus.store.cassandra.utils.MetaDataUtils.getKey;
+
+import java.util.List;
 
 import me.prettyprint.cassandra.service.BatchMutation;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
-import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SlicePredicate;
@@ -42,13 +42,17 @@ import org.datanucleus.exceptions.NucleusObjectNotFoundException;
 import org.datanucleus.exceptions.NucleusUserException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.store.AbstractPersistenceHandler;
+import org.datanucleus.store.ExecutionContext;
+import org.datanucleus.store.cassandra.mutate.BatchMutationManager;
 
 public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 	private CassandraStoreManager manager;
+	private BatchMutationManager batchManager;
 
 	public CassandraPersistenceHandler(CassandraStoreManager manager) {
 		this.manager = manager;
+		this.batchManager = new BatchMutationManager();
 	}
 
 	@Override
@@ -174,30 +178,46 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 			conn = getConnection(sm);
 			AbstractClassMetaData metaData = sm.getClassMetaData();
 
-			List<Column> updates = new Stack<Column>();
-			List<Deletion> deletes = new Stack<Deletion>();
+//			List<Column> updates = new Stack<Column>();
+//			List<SuperColumn> superColumns = new Stack<SuperColumn>();
+//			List<Deletion> deletes = new Stack<Deletion>();
+			
+			ExecutionContext ec = sm.getObjectManager().getExecutionContext();
 
-			CassandraInsertFieldManager manager = new CassandraInsertFieldManager(
-					updates, deletes, this.manager.getTimestamp().getTime(),
-					metaData);
+			//signal a write is about to start
+			this.batchManager.beginWrite(ec, sm);
+			
+			CassandraInsertFieldManager manager = new CassandraInsertFieldManager(this.batchManager, sm, metaData.getTable(), getKey(sm), this.manager.getTimestamp().getTime());
+			
 			sm.provideFields(metaData.getAllMemberPositions(), manager);
-
-			String key = getKey(sm);
-			Stack<String> columnFamilies = new Stack<String>();
-			columnFamilies.add(metaData.getTable());
-
-			// now perform the batch update
-			BatchMutation changes = new BatchMutation();
-
-			for (Column column : updates) {
-				changes.addInsertion(key, columnFamilies, column);
+			
+			BatchMutation mutate = this.batchManager.endWrite(ec, sm);
+			
+			//this is the root object, perform a write operation to cassandra
+			if(mutate != null){
+				conn.getKeyspace().batchMutate(mutate);
 			}
 
-			for (Deletion deletion : deletes) {
-				changes.addDeletion(key, columnFamilies, deletion);
-			}
+//			String key = getKey(sm);
+//			Stack<String> columnFamilies = new Stack<String>();
+//			columnFamilies.add(metaData.getTable());
+//
+//			// now perform the batch update
+//			BatchMutation changes = new BatchMutation();
+//
+//			for (Column column : updates) {
+//				changes.addInsertion(key, columnFamilies, column);
+//			}
+//			
+//			for( SuperColumn superColumn: superColumns){
+//				changes.addSuperInsertion(key, columnFamilies, superColumn);
+//			}
+//
+//			for (Deletion deletion : deletes) {
+//				changes.addDeletion(key, columnFamilies, deletion);
+//			}
 
-			conn.getKeyspace().batchMutate(changes);
+			
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -214,23 +234,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 	}
 
-	/**
-	 * Get the primary key field of this class. Allows the user to define more
-	 * than one field for a PK
-	 * 
-	 * @param op
-	 * @return
-	 */
-	private String getKey(StateManager sm) {
 
-		StringBuffer buffer = new StringBuffer();
-
-		for (int index : sm.getClassMetaData().getPKMemberPositions()) {
-			buffer.append(sm.provideField(index));
-		}
-
-		return buffer.toString();
-	}
 
 	/**
 	 * Get the column path to the entire class
