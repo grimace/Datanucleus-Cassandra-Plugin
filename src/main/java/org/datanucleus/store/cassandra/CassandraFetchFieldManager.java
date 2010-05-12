@@ -18,10 +18,7 @@ Contributors :
 package org.datanucleus.store.cassandra;
 
 
-import static org.datanucleus.store.cassandra.utils.ByteConverter.getString;
 
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +26,7 @@ import java.util.Map;
 import org.apache.cassandra.thrift.Column;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
+import org.datanucleus.store.cassandra.utils.ByteConverter;
 
 /**
  * @author Todd Nine
@@ -55,7 +53,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 		this.columns = new HashMap<String, Column>();
 
 		for (Column column : columns) {
-			this.columns.put(getString(column.name), column);
+			this.columns.put(ByteConverter.getString(column.name), column);
 		}
 	}
 
@@ -73,13 +71,10 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			if (column == null) {
 				return false;
 			}
-			ByteArrayInputStream bis = new ByteArrayInputStream(column.value);
-			ObjectInputStream ois = new ObjectInputStream(bis);
+			
+			
 
-			boolean value = ois.readBoolean();
-			ois.close();
-			bis.close();
-			return value;
+			return ByteConverter.getBoolean(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -99,13 +94,8 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			if (column == null) {
 				return 0;
 			}
-			ByteArrayInputStream bis = new ByteArrayInputStream(column.value);
-			ObjectInputStream ois = new ObjectInputStream(bis);
-
-			byte value = ois.readByte();
-			ois.close();
-			bis.close();
-			return value;
+			
+			return column.value[0];
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -123,14 +113,10 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			// record, and this is a new field just return the java default
 			// value
 			if (column == null) {
-				return '\u0000';
+				return Character.MIN_VALUE;
 			}
-			ByteArrayInputStream bis = new ByteArrayInputStream(column.value);
-			ObjectInputStream ois = new ObjectInputStream(bis);
-			char value = ois.readChar();
-			ois.close();
-			bis.close();
-			return value;
+			
+			return ByteConverter.getChar(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -150,12 +136,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			if (column == null) {
 				return 0;
 			}
-			ByteArrayInputStream bis = new ByteArrayInputStream(column.value);
-			ObjectInputStream ois = new ObjectInputStream(bis);
-			double value = ois.readDouble();
-			ois.close();
-			bis.close();
-			return value;
+			return ByteConverter.getDouble(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -175,12 +156,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			if (column == null) {
 				return 0;
 			}
-			ByteArrayInputStream bis = new ByteArrayInputStream(column.value);
-			ObjectInputStream ois = new ObjectInputStream(bis);
-			float value = ois.readFloat();
-			ois.close();
-			bis.close();
-			return value;
+			return ByteConverter.getFloat(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -200,12 +176,8 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			if (column == null) {
 				return 0;
 			}
-			ByteArrayInputStream bis = new ByteArrayInputStream(column.value);
-			ObjectInputStream ois = new ObjectInputStream(bis);
-			int value = ois.readInt();
-			ois.close();
-			bis.close();
-			return value;
+			
+			return ByteConverter.getInt(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -225,12 +197,8 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			if (column == null) {
 				return 0;
 			}
-			ByteArrayInputStream bis = new ByteArrayInputStream(column.value);
-			ObjectInputStream ois = new ObjectInputStream(bis);
-			long value = ois.readLong();
-			ois.close();
-			bis.close();
-			return value;
+			
+			return ByteConverter.getLong(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -251,14 +219,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 				return null;
 			}
 
-			
-
-			ByteArrayInputStream bis = new ByteArrayInputStream(column.value);
-			ObjectInputStream ois = new ObjectInputStream(bis);
-			Object value = ois.readObject();
-			ois.close();
-			bis.close();
-			return value;
+			return ByteConverter.getObject(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -278,12 +239,8 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			if (column == null) {
 				return 0;
 			}
-			ByteArrayInputStream bis = new ByteArrayInputStream(column.value);
-			ObjectInputStream ois = new ObjectInputStream(bis);
-			short value = ois.readShort();
-			ois.close();
-			bis.close();
-			return value;
+			
+			return ByteConverter.getShort(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -305,14 +262,14 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			}
 
 //			ByteArrayInputStream bis = new ByteArrayInputStream(column.value);
-//			ObjectInputStream ois = new ObjectInputStream(bis);
+//			
 //
 //			// always return UTF 8 values as UTF 8 shoudl always be stored
 //			String value = ois.readUTF();
-//			ois.close();
-//			bis.close();
+//			
+//			
 			
-			String value = getString(column.value);
+			String value = ByteConverter.getString(column.value);
 			
 			return value;
 

@@ -27,7 +27,6 @@ import org.datanucleus.PersistenceConfiguration;
 import org.datanucleus.store.AbstractStoreManager;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.NucleusConnection;
-import org.datanucleus.store.StorePersistenceHandler2;
 
 public class CassandraStoreManager extends AbstractStoreManager
 {

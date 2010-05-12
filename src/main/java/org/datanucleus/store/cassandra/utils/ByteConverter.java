@@ -17,17 +17,303 @@ Contributors :
  ***********************************************************************/
 package org.datanucleus.store.cassandra.utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 
 /**
  * @author Todd Nine
- *
+ * 
  */
 public class ByteConverter {
 
 	private static final String UTF8_ENCODING = "UTF-8";
 
+	/**
+	 * Write to byte array
+	 * @param value
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] getBytes(boolean value) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(bos);
+		oos.writeBoolean(value);
+		oos.flush();
+
+		byte[] bytes = bos.toByteArray();
+
+		oos.close();
+		bos.close();
+
+		return bytes;
+	}
+
+	/**
+	 * Read byte array to boolean
+	 * @param bytes
+	 * @return
+	 * @throws IOException
+	 */
+	public static boolean getBoolean(byte[] bytes) throws IOException {
+		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+		ObjectInputStream ois = new ObjectInputStream(bis);
+		boolean serialized = ois.readBoolean();
+		ois.close();
+		bis.close();
+
+		return serialized;
+	}
 	
+	/**
+	 * Write to byte array
+	 * @param value
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] getBytes(short value) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(bos);
+		oos.writeShort(value);
+		oos.flush();
+
+		byte[] bytes = bos.toByteArray();
+
+		oos.close();
+		bos.close();
+
+		return bytes;
+	}
+
+	/**
+	 * Read byte array to boolean
+	 * @param bytes
+	 * @return
+	 * @throws IOException
+	 */
+	public static short getShort(byte[] bytes) throws IOException {
+		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+		ObjectInputStream ois = new ObjectInputStream(bis);
+		short serialized = ois.readShort();
+		ois.close();
+		bis.close();
+
+		return serialized;
+	}
+	
+
+	/**
+	 * Write to byte array
+	 * @param value
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] getBytes(int value) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(bos);
+		oos.writeInt(value);
+		oos.flush();
+
+		byte[] bytes = bos.toByteArray();
+
+		oos.close();
+		bos.close();
+
+		return bytes;
+	}
+
+	/**
+	 * Read byte array to boolean
+	 * @param bytes
+	 * @return
+	 * @throws IOException
+	 */
+	public static int getInt(byte[] bytes) throws IOException {
+		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+		ObjectInputStream ois = new ObjectInputStream(bis);
+		int serialized = ois.readInt();
+		ois.close();
+		bis.close();
+
+		return serialized;
+	}
+	
+
+	/**
+	 * Write to byte array
+	 * @param value
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] getBytes(long value) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(bos);
+		oos.writeLong(value);
+		oos.flush();
+
+		byte[] bytes = bos.toByteArray();
+
+		oos.close();
+		bos.close();
+
+		return bytes;
+	}
+
+	/**
+	 * Read byte array to boolean
+	 * @param bytes
+	 * @return
+	 * @throws IOException
+	 */
+	public static long getLong(byte[] bytes) throws IOException {
+		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+		ObjectInputStream ois = new ObjectInputStream(bis);
+		long serialized = ois.readLong();
+		ois.close();
+		bis.close();
+
+		return serialized;
+	}
+	
+
+	/**
+	 * Write to byte array
+	 * @param value
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] getBytes(char value) throws IOException {
+				
+		return getBytes(new String(new char[]{value}));
+	}
+
+	/**
+	 * Read byte array to boolean
+	 * @param bytes
+	 * @return
+	 * @throws IOException
+	 */
+	public static char getChar(byte[] bytes) throws IOException {
+		return getString(bytes).charAt(0);
+	}
+
+	
+	/**
+	 * Write to byte array
+	 * @param value
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] getBytes(float value) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(bos);
+		oos.writeFloat(value);
+		oos.flush();
+
+		byte[] bytes = bos.toByteArray();
+
+		oos.close();
+		bos.close();
+
+		return bytes;
+	}
+
+	/**
+	 * Read byte array to boolean
+	 * @param bytes
+	 * @return
+	 * @throws IOException
+	 */
+	public static float getFloat(byte[] bytes) throws IOException {
+		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+		ObjectInputStream ois = new ObjectInputStream(bis);
+		float serialized = ois.readFloat();
+		ois.close();
+		bis.close();
+
+		return serialized;
+	}
+	
+	
+	/**
+	 * Write to byte array
+	 * @param value
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] getBytes(double value) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(bos);
+		oos.writeDouble(value);
+		oos.flush();
+
+		byte[] bytes = bos.toByteArray();
+
+		oos.close();
+		bos.close();
+
+		return bytes;
+	}
+
+	/**
+	 * Read byte array to boolean
+	 * @param bytes
+	 * @return
+	 * @throws IOException
+	 */
+	public static double getDouble(byte[] bytes) throws IOException {
+		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+		ObjectInputStream ois = new ObjectInputStream(bis);
+		double serialized = ois.readDouble();
+		ois.close();
+		bis.close();
+
+		return serialized;
+	}
+	
+
+	/**
+	 * Write to byte array
+	 * @param value
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] getBytes(Object value) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(bos);
+		oos.writeObject(value);
+		oos.flush();
+
+		byte[] bytes = bos.toByteArray();
+
+		oos.close();
+		bos.close();
+
+		return bytes;
+	}
+
+	/**
+	 * Read byte array to boolean
+	 * @param bytes
+	 * @return
+	 * @throws IOException
+	 * @throws ClassNotFoundException 
+	 */
+	public static <T extends Object> T getObject(byte[] bytes) throws IOException, ClassNotFoundException {
+		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+		ObjectInputStream ois = new ObjectInputStream(bis);
+		T serialized = (T) ois.readObject();
+		ois.close();
+		bis.close();
+
+		return serialized;
+	}
+
+
+
 	/**
 	 * Get the UTF8 bytes of a string
 	 * 

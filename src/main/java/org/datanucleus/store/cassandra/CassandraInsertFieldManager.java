@@ -17,10 +17,6 @@ Contributors :
  ***********************************************************************/
 package org.datanucleus.store.cassandra;
 
-import static org.datanucleus.store.cassandra.utils.ByteConverter.getBytes;
-
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
 import java.util.List;
 
 import org.apache.cassandra.thrift.Column;
@@ -29,6 +25,7 @@ import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
+import org.datanucleus.store.cassandra.utils.ByteConverter;
 
 /**
  * @author Todd Nine
@@ -63,21 +60,14 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
-			if(isKey(fieldNumber)){
+			if (isKey(fieldNumber)) {
 				return;
 			}
-			
+
 			String columnName = getColumnName(metaData, fieldNumber);
 
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeBoolean(value);
-
-			Column column = new Column(getBytes(columnName), bos.toByteArray(),
-					this.updateTimestamp);
-
-			oos.close();
-			bos.close();
+			Column column = new Column(ByteConverter.getBytes(columnName),
+					ByteConverter.getBytes(value), this.updateTimestamp);
 
 			updates.add(column);
 
@@ -91,21 +81,14 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
-			if(isKey(fieldNumber)){
+			if (isKey(fieldNumber)) {
 				return;
 			}
-			
+
 			String columnName = getColumnName(metaData, fieldNumber);
 
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeByte(value);
-
-			Column column = new Column(getBytes(columnName), bos.toByteArray(),
-					this.updateTimestamp);
-
-			oos.close();
-			bos.close();
+			Column column = new Column(ByteConverter.getBytes(columnName),
+					new byte[] { value }, this.updateTimestamp);
 
 			updates.add(column);
 
@@ -119,21 +102,14 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
-			if(isKey(fieldNumber)){
+			if (isKey(fieldNumber)) {
 				return;
 			}
 
 			String columnName = getColumnName(metaData, fieldNumber);
 
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeChar(value);
-
-			Column column = new Column(getBytes(columnName), bos.toByteArray(),
-					this.updateTimestamp);
-
-			oos.close();
-			bos.close();
+			Column column = new Column(ByteConverter.getBytes(columnName),
+					ByteConverter.getBytes(value), this.updateTimestamp);
 
 			updates.add(column);
 
@@ -147,21 +123,14 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
-			if(isKey(fieldNumber)){
+			if (isKey(fieldNumber)) {
 				return;
 			}
 
 			String columnName = getColumnName(metaData, fieldNumber);
 
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeDouble(value);
-
-			Column column = new Column(getBytes(columnName), bos.toByteArray(),
-					this.updateTimestamp);
-
-			oos.close();
-			bos.close();
+			Column column = new Column(ByteConverter.getBytes(columnName),
+					ByteConverter.getBytes(value), this.updateTimestamp);
 
 			updates.add(column);
 
@@ -175,22 +144,14 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
-
-			if(isKey(fieldNumber)){
+			if (isKey(fieldNumber)) {
 				return;
 			}
-			
+
 			String columnName = getColumnName(metaData, fieldNumber);
 
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeFloat(value);
-
-			Column column = new Column(getBytes(columnName), bos.toByteArray(),
-					this.updateTimestamp);
-
-			oos.close();
-			bos.close();
+			Column column = new Column(ByteConverter.getBytes(columnName),
+					ByteConverter.getBytes(value), this.updateTimestamp);
 
 			updates.add(column);
 
@@ -203,22 +164,15 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	public void storeIntField(int fieldNumber, int value) {
 
 		try {
-			
-			if(isKey(fieldNumber)){
+
+			if (isKey(fieldNumber)) {
 				return;
 			}
-			
+
 			String columnName = getColumnName(metaData, fieldNumber);
 
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeInt(value);
-
-			Column column = new Column(getBytes(columnName), bos.toByteArray(),
-					this.updateTimestamp);
-
-			oos.close();
-			bos.close();
+			Column column = new Column(ByteConverter.getBytes(columnName),
+					ByteConverter.getBytes(value), this.updateTimestamp);
 
 			updates.add(column);
 
@@ -232,21 +186,14 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
-			if(isKey(fieldNumber)){
+			if (isKey(fieldNumber)) {
 				return;
 			}
-			
+
 			String columnName = getColumnName(metaData, fieldNumber);
 
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeLong(value);
-
-			Column column = new Column(getBytes(columnName), bos.toByteArray(),
-					this.updateTimestamp);
-
-			oos.close();
-			bos.close();
+			Column column = new Column(ByteConverter.getBytes(columnName),
+					ByteConverter.getBytes(value), this.updateTimestamp);
 
 			updates.add(column);
 
@@ -259,21 +206,14 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	public void storeShortField(int fieldNumber, short value) {
 		try {
 
-			if(isKey(fieldNumber)){
+			if (isKey(fieldNumber)) {
 				return;
 			}
-			
+
 			String columnName = getColumnName(metaData, fieldNumber);
 
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeShort(value);
-
-			Column column = new Column(getBytes(columnName), bos.toByteArray(),
-					this.updateTimestamp);
-
-			oos.close();
-			bos.close();
+			Column column = new Column(ByteConverter.getBytes(columnName),
+					ByteConverter.getBytes(value), this.updateTimestamp);
 
 			updates.add(column);
 
@@ -288,9 +228,8 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	@Override
 	public void storeObjectField(int fieldNumber, Object value) {
 		try {
-			
 
-			if(isKey(fieldNumber)){
+			if (isKey(fieldNumber)) {
 				return;
 			}
 
@@ -299,7 +238,8 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 			if (value == null) {
 
 				SlicePredicate slicePredicate = new SlicePredicate();
-				slicePredicate.addToColumn_names(getBytes(columnName));
+				slicePredicate.addToColumn_names(ByteConverter
+						.getBytes(columnName));
 				Deletion delete = new Deletion(this.updateTimestamp);
 
 				delete.setPredicate(slicePredicate);
@@ -309,15 +249,8 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 			}
 
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeObject(value);
-
-			Column column = new Column(getBytes(columnName), bos.toByteArray(),
-					this.updateTimestamp);
-
-			oos.close();
-			bos.close();
+			Column column = new Column(ByteConverter.getBytes(columnName),
+					ByteConverter.getBytes(value), this.updateTimestamp);
 
 			updates.add(column);
 
@@ -330,17 +263,17 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	public void storeStringField(int fieldNumber, String value) {
 		try {
 
-
-			if(isKey(fieldNumber)){
+			if (isKey(fieldNumber)) {
 				return;
 			}
-			
+
 			String columnName = getColumnName(metaData, fieldNumber);
 
 			if (value == null) {
 
 				SlicePredicate slicePredicate = new SlicePredicate();
-				slicePredicate.addToColumn_names(getBytes(columnName));
+				slicePredicate.addToColumn_names(ByteConverter
+						.getBytes(columnName));
 				Deletion delete = new Deletion(this.updateTimestamp);
 
 				delete.setPredicate(slicePredicate);
@@ -350,8 +283,8 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 			}
 
-			Column column = new Column(getBytes(columnName), getBytes(value),
-					this.updateTimestamp);
+			Column column = new Column(ByteConverter.getBytes(columnName),
+					ByteConverter.getBytes(value), this.updateTimestamp);
 
 			updates.add(column);
 
@@ -363,22 +296,23 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	protected ColumnPath getColumnPath(AbstractClassMetaData metaData,
 			int absoluteFieldNumber) {
 		ColumnPath columnPath = new ColumnPath(metaData.getTable());
-		columnPath.setColumn(getBytes(getColumnName(metaData,
+		columnPath.setColumn(ByteConverter.getBytes(getColumnName(metaData,
 				absoluteFieldNumber)));
 
 		return columnPath;
 	}
-	
+
 	/**
 	 * Returns true if the field is a key
+	 * 
 	 * @param fieldNumber
 	 * @return
 	 */
-	protected boolean isKey(int fieldNumber){
+	protected boolean isKey(int fieldNumber) {
 
-		return metaData.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber).isPrimaryKey();
-		
-		
+		return metaData.getMetaDataForManagedMemberAtAbsolutePosition(
+				fieldNumber).isPrimaryKey();
+
 	}
 
 }

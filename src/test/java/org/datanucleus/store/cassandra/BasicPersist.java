@@ -108,9 +108,9 @@ public class BasicPersist {
 
 		assertEquals(object.getTestChar(), stored.getTestChar());
 
-		assertEquals(object.getTestDouble(), stored.getTestDouble());
+		assertEquals(object.getTestDouble(), stored.getTestDouble(), 0);
 
-		assertEquals(object.getTestFloat(), stored.getTestFloat());
+		assertEquals(object.getTestFloat(), stored.getTestFloat(), 0);
 
 		assertEquals(object.getTestInt(), stored.getTestInt());
 
