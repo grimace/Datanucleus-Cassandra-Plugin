@@ -101,9 +101,9 @@ public class CassandraManagedConnection extends AbstractManagedConnection {
 	 * Release the connection to the current keyspace
 	 */
 	public void release() {
+		//do nothing, the keyspace hasn't been allocated
 		if (this.keySpace == null) {
-			throw new RuntimeException(
-					"You are calling release before a keyspace has been created");
+			return;
 		}
 
 		try {

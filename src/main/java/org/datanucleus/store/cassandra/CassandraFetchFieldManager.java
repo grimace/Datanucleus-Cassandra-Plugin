@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.SuperColumn;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 
@@ -42,14 +43,14 @@ import org.datanucleus.metadata.AbstractClassMetaData;
 public class CassandraFetchFieldManager extends CassandraFieldManager {
 
 	private Map<String, Column> columns;
+	private Map<String, SuperColumn> superColumns;
 	private AbstractClassMetaData metaData;
 
 	/**
 	 * @param columns
 	 * @param metaData
 	 */
-	public CassandraFetchFieldManager(List<Column> columns,
-			AbstractClassMetaData metaData) {
+	public CassandraFetchFieldManager(List<Column> columns, List<SuperColumn> superColumns,	AbstractClassMetaData metaData) {
 		super();
 
 		this.metaData = metaData;
@@ -58,9 +59,20 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 		// take our O(n) hit up front then perform an O(1) lookup. Sorting and
 		// searching is O(n log (n)) sort plus log n search
 		this.columns = new HashMap<String, Column>();
+		this.superColumns = new HashMap<String, SuperColumn>();
 
 		for (Column column : columns) {
+			//TODO super columns are returned as nulls.  This may be a bug
+			if(column == null){
+				continue;
+			}
+			
 			this.columns.put(getString(column.name), column);
+		}
+		
+
+		for (SuperColumn column : superColumns) {
+			this.superColumns.put(getString(column.name), column);
 		}
 	}
 

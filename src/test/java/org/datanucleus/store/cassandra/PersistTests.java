@@ -156,10 +156,20 @@ public class PersistTests {
 		
 		assertEquals(pack, saved);
 		
+		assertNotNull(saved.getCards());
+		
 		assertTrue(saved.getCards().contains(aceSpades));
 		
 		assertTrue(saved.getCards().contains(jackHearts));
 		
+	}
+	
+	/**
+	 * Tests an object is serialized as bytes properly
+	 */
+	@Test
+	public void testSerializableObject(){
+		fail("unimplemented");
 	}
 
 }
