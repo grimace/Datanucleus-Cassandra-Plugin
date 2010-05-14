@@ -90,21 +90,28 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 			AbstractClassMetaData metaData = sm.getClassMetaData();
 
 			String key = getKey(sm);
-
 			List<Column> columns = conn.getKeyspace().getSlice(key,
 					getColumnParent(metaData), getSliceprediCate(metaData));
-			
-			
-			List<SuperColumn> superColumns = conn.getKeyspace().getSuperSlice(key,
-					getColumnParent(metaData), getSliceprediCate(metaData));
 
-		
+			List<SuperColumn> superColumns = null;
+
+			// we have collections get our superslices to retreive them
+			if (metaData.getMultivaluedMemberPositions().length > 0) {
+				superColumns = conn.getKeyspace().getSuperSlice(key,
+						getColumnParent(metaData), getSliceprediCate(metaData));
+			}
+
+			if (columns == null || columns.size() == 0) {
+				throw new NucleusObjectNotFoundException(String.format(
+						"Couldn't find object %s with key %s", metaData
+								.getName(), key));
+			}
 
 			populateKeys(columns, metaData, key);
 
 			CassandraFetchFieldManager manager = new CassandraFetchFieldManager(
-					columns, superColumns, metaData);
-			sm.replaceFields(metaData.getAllMemberPositions(), manager);
+					columns, superColumns, sm);
+			sm.replaceFields(fieldNumbers, manager);
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -132,47 +139,8 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 	@Override
 	public void locateObject(StateManager sm) {
-		CassandraManagedConnection conn = null;
 
-		try {
-			// delete the whole column family for this key
-			conn = getConnection(sm);
-			AbstractClassMetaData metaData = sm.getClassMetaData();
-
-			String key = getKey(sm);
-			List<Column> columns = conn.getKeyspace().getSlice(key,
-					getColumnParent(metaData), getSliceprediCate(metaData));
-			
-			List<SuperColumn> superColumns = conn.getKeyspace().getSuperSlice(key,
-					getColumnParent(metaData), getSliceprediCate(metaData));
-
-			if (columns == null || columns.size() == 0) {
-				throw new NucleusObjectNotFoundException(String.format(
-						"Couldn't find object %s with key %s", metaData
-								.getName(), key));
-			}
-
-			populateKeys(columns, metaData, key);
-
-			CassandraFetchFieldManager manager = new CassandraFetchFieldManager(
-					columns, superColumns, metaData);
-			sm.replaceFields(metaData.getAllMemberPositions(), manager);
-
-		} catch (InvalidRequestException e) {
-			throw new NucleusDataStoreException(e.getMessage(), e);
-		} catch (NotFoundException e) {
-			throw new NucleusDataStoreException(e.getMessage(), e);
-		} catch (UnavailableException e) {
-			throw new NucleusDataStoreException(e.getMessage(), e);
-		} catch (TException e) {
-			throw new NucleusDataStoreException(e.getMessage(), e);
-		} catch (TimedOutException e) {
-			throw new NucleusDataStoreException(e.getMessage(), e);
-		} finally {
-			if (conn != null) {
-				conn.close();
-			}
-		}
+		fetchObject(sm, sm.getClassMetaData().getAllMemberPositions());
 
 	}
 
