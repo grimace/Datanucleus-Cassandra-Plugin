@@ -281,12 +281,16 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 				
 				if (fieldMetaData.hasCollection()) {		
 					
+					int index = 0;
+					
 					for(Object element : (Collection)value){
 						//persist the object
 						Object persisted = context.persistObjectInternal(element, op,	-1, StateManager.PC);
 											
 						
-						this.manager.AddSuperColumn(context, columnFamily, rowKey, columnName, "c",  getBytes(getKey(persisted)), timestamp);
+						this.manager.AddSuperColumn(context, columnFamily, rowKey, columnName, String.valueOf(index),  getBytes(getKey(persisted)), timestamp);
+						
+						index++;
 					}
 					
 				} else if (fieldMetaData.hasMap()) {
