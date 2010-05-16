@@ -19,6 +19,7 @@ package org.datanucleus.store.cassandra;
 
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getBytes;
 
+import java.lang.reflect.Array;
 import java.util.Collection;
 
 import javax.jdo.identity.StringIdentity;
@@ -298,7 +299,16 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 					// value is non-PC
 					throw new NucleusException("maps are currently unimplemented.");
 				} else if (fieldMetaData.hasArray()) {
-					throw new NucleusException("arrays are currently unimplemented.");
+					
+					
+					for(int i = 0; i < Array.getLength(value); i ++){
+						//persist the object
+						Object persisted = context.persistObjectInternal(Array.get(value, i), op,	-1, StateManager.PC);			
+						
+						this.manager.AddSuperColumn(context, columnFamily, rowKey, columnName, String.valueOf(i),  getBytes(getKey(persisted)), timestamp);
+						
+					}
+					
 				}
 				
 				return;

@@ -18,6 +18,7 @@ Contributors :
 package org.datanucleus.store.cassandra;
 
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getBoolean;
+import static org.datanucleus.store.cassandra.utils.ByteConverter.getBytes;
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getChar;
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getDouble;
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getFloat;
@@ -244,7 +245,6 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 		try {
 
 			String columnName = getColumnName(metaData, fieldNumber);
-		
 
 			ExecutionContext ec = stateManager.getObjectProvider()
 					.getExecutionContext();
@@ -253,8 +253,6 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 					.getClassMetaData()
 					.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
 			int relationType = fieldMetaData.getRelationType(clr);
-
-			
 
 			if (relationType == Relation.ONE_TO_ONE_BI
 					|| relationType == Relation.ONE_TO_ONE_UNI
@@ -294,6 +292,10 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 					|| relationType == Relation.ONE_TO_MANY_BI
 					|| relationType == Relation.ONE_TO_MANY_UNI) {
 
+
+				SuperColumn collection = this.superColumns.get(columnName);
+
+				
 				if (Collection.class.isAssignableFrom(fieldMetaData.getType())) {
 					Collection<Object> coll;
 					try {
@@ -307,18 +309,16 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 
 					// loop through the super columns
 
-					SuperColumn collection = this.superColumns.get(columnName);
-
 					for (Column col : collection.columns) {
-//
+						//
 						AbstractClassMetaData elementCmd = fieldMetaData
 								.getCollection().getElementClassMetaData(
 										ec.getClassLoaderResolver(),
 										ec.getMetaDataManager());
-						
 
-//						AbstractClassMetaData elementCmd = fieldMetaData.getCollection().
-								
+						// AbstractClassMetaData elementCmd =
+						// fieldMetaData.getCollection().
+
 						Object element = getObjectFromIdString(
 								getString(col.value), elementCmd);
 						coll.add(element);
@@ -330,16 +330,39 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 					throw new NucleusException(
 							"maps are currently unimplemented.");
 				} else if (fieldMetaData.getType().isArray()) {
-					throw new NucleusException(
-							"arrays are currently unimplemented.");
+
+					 Object array = Array.newInstance(fieldMetaData.getType().getComponentType(), collection.columns.size());
+	                        
+
+					
+					for (Column col : collection.columns) {
+						//
+						AbstractClassMetaData elementCmd = fieldMetaData
+								.getArray().getElementClassMetaData(
+										ec.getClassLoaderResolver(),
+										ec.getMetaDataManager());
+
+						// AbstractClassMetaData elementCmd =
+						// fieldMetaData.getCollection().
+
+						Object element = getObjectFromIdString(
+								getString(col.value), elementCmd);
+						
+						
+						Array.set(array, Integer.valueOf(getString(col.name)), element);
+					}
+					
+
+					return stateManager.wrapSCOField(fieldNumber, array, false,
+							false, true);
 				}
 
 			}
-			
+
 			Column column = this.columns.get(columnName);
-			
-			//No object defined
-			if(column == null){
+
+			// No object defined
+			if (column == null) {
 				return null;
 			}
 

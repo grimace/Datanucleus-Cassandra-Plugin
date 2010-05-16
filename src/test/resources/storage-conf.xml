@@ -119,6 +119,9 @@
 	 	<ColumnFamily CompareWith="UTF8Type" Name="Pack" ColumnType="Super" CompareSubcolumnsWith="UTF8Type"/>
 	  	<ColumnFamily CompareWith="UTF8Type" Name="Card"/>
   
+        <ColumnFamily CompareWith="UTF8Type" Name="PackArray" ColumnType="Super" CompareSubcolumnsWith="UTF8Type"/>
+        <ColumnFamily CompareWith="UTF8Type" Name="CardArray"/>
+  
       <!--
        ~ Strategy: Setting this to the class that implements
        ~ IReplicaPlacementStrategy will change the way the node picker works.

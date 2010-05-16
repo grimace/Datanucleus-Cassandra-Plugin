@@ -18,6 +18,12 @@ Contributors :
 
 package org.datanucleus.store.cassandra;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 
 import javax.jdo.JDOHelper;
@@ -28,13 +34,15 @@ import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
 import org.apache.thrift.transport.TTransportException;
 import org.datanucleus.store.cassandra.model.Card;
+import org.datanucleus.store.cassandra.model.CardArray;
+import org.datanucleus.store.cassandra.model.CardMap;
 import org.datanucleus.store.cassandra.model.Pack;
+import org.datanucleus.store.cassandra.model.PackArray;
+import org.datanucleus.store.cassandra.model.PackMap;
 import org.datanucleus.store.cassandra.model.PrimitiveObject;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * @author Todd Nine
@@ -132,7 +140,7 @@ public class PersistTests {
 	
 
 	@Test
-	public void testBasicPeristAndLoadOneToMany() throws Exception {
+	public void testBasicPeristAndLoadOneToManyCollection() throws Exception {
 
 		PersistenceManagerFactory pmf = JDOHelper
 				.getPersistenceManagerFactory("Test");
@@ -163,6 +171,75 @@ public class PersistTests {
 		assertTrue(saved.getCards().contains(jackHearts));
 		
 	}
+	
+	@Test
+	public void testBasicPeristAndLoadOneToManyArray() throws Exception {
+
+		PersistenceManagerFactory pmf = JDOHelper
+				.getPersistenceManagerFactory("Test");
+			
+		
+		PackArray pack = new PackArray();
+		
+		CardArray aceSpades = new CardArray();
+		aceSpades.setName("Ace of Spades");
+		pack.getCards()[0] = (aceSpades);
+		
+		
+		CardArray jackHearts = new CardArray();
+		jackHearts.setName("Jack of Hearts");
+		pack.getCards()[1] = jackHearts;
+		
+		pmf.getPersistenceManager().makePersistent(pack);
+		
+		
+		PackArray saved = pmf.getPersistenceManager().getObjectById(PackArray.class, pack.getId());
+		
+		assertEquals(pack, saved);
+		
+		assertNotNull(saved.getCards());
+		
+		assertTrue(saved.getCards()[0].equals(aceSpades));
+		
+		assertTrue(saved.getCards()[1].equals(jackHearts));
+		
+	}
+	
+
+	@Test
+	public void testBasicPeristAndLoadOneToManyMap() throws Exception {
+
+		PersistenceManagerFactory pmf = JDOHelper
+				.getPersistenceManagerFactory("Test");
+			
+		
+		PackMap pack = new PackMap();
+		
+		CardMap aceSpades = new CardMap();
+		aceSpades.setName("Ace of Spades");
+		pack.AddCard(aceSpades);
+		
+		
+		CardMap jackHearts = new CardMap();
+		jackHearts.setName("Jack of Hearts");
+		pack.AddCard(jackHearts);
+		
+		pmf.getPersistenceManager().makePersistent(pack);
+		
+		
+		PackMap saved = pmf.getPersistenceManager().getObjectById(PackMap.class, pack.getId());
+		
+		assertEquals(pack, saved);
+		
+		assertNotNull(saved.getCards());
+		
+		assertEquals(saved.getCards().get(aceSpades.getName()), aceSpades);
+		
+		assertEquals(saved.getCards().get(jackHearts.getName()), aceSpades);
+		
+		
+	}
+	
 	
 	/**
 	 * Tests an object is serialized as bytes properly
