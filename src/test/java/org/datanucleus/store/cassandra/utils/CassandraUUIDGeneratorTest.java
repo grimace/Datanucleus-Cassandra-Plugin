@@ -21,7 +21,8 @@ import static org.junit.Assert.fail;
 
 import java.util.HashMap;
 import java.util.UUID;
-import org.datanucleus.store.cassandra.utils.CassandraUUIDGenerator;
+
+import org.datanucleus.store.cassandra.identity.CassandraUUIDGenerator;
 
 import org.junit.Test;
 
@@ -32,7 +33,7 @@ import org.junit.Test;
 public class CassandraUUIDGeneratorTest {
 
 	/**
-	 * Test method for {@link org.datanucleus.store.cassandra.utils.CassandraUUIDGenerator#CassandraUUIDGenerator(java.lang.String, java.util.Properties)}.
+	 * Test method for {@link org.datanucleus.store.cassandra.identity.CassandraUUIDGenerator#CassandraUUIDGenerator(java.lang.String, java.util.Properties)}.
 	 */
 	@Test
 	public void testCassandraUUIDGenerator() {
@@ -44,7 +45,7 @@ public class CassandraUUIDGeneratorTest {
 	}
 
 	/**
-	 * Test method for {@link org.datanucleus.store.cassandra.utils.CassandraUUIDGenerator#reserveBlock(long)}.
+	 * Test method for {@link org.datanucleus.store.cassandra.identity.CassandraUUIDGenerator#reserveBlock(long)}.
 	 */
 	@Test
 	public void testReserveBlockLong() {

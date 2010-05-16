@@ -36,6 +36,7 @@ import org.apache.thrift.transport.TTransportException;
 import org.datanucleus.store.cassandra.model.Card;
 import org.datanucleus.store.cassandra.model.CardArray;
 import org.datanucleus.store.cassandra.model.CardMap;
+import org.datanucleus.store.cassandra.model.DateEntity;
 import org.datanucleus.store.cassandra.model.Pack;
 import org.datanucleus.store.cassandra.model.PackArray;
 import org.datanucleus.store.cassandra.model.PackMap;
@@ -106,16 +107,15 @@ public class PersistTests {
 		// now save our object
 		pm.makePersistent(object);
 
-		
-		//don't want it to come from the cache, get a new pm
+		// don't want it to come from the cache, get a new pm
 		PersistenceManager pm2 = pmf.getPersistenceManager();
 
 		// now retrieve a copy
 		PrimitiveObject stored = (PrimitiveObject) pm2.getObjectById(
 				PrimitiveObject.class, object.getId());
-		
-		
-		//make sure they're not the same instance, we want a new  one from the data source
+
+		// make sure they're not the same instance, we want a new one from the
+		// data source
 		assertFalse(object == stored);
 
 		assertEquals(object.getId(), stored.getId());
@@ -137,115 +137,122 @@ public class PersistTests {
 		assertEquals(object.getTestString(), stored.getTestString());
 
 	}
-	
 
 	@Test
 	public void testBasicPeristAndLoadOneToManyCollection() throws Exception {
 
 		PersistenceManagerFactory pmf = JDOHelper
 				.getPersistenceManagerFactory("Test");
-			
-		
+
 		Pack pack = new Pack();
-		
+
 		Card aceSpades = new Card();
 		aceSpades.setName("Ace of Spades");
 		pack.AddCard(aceSpades);
-		
-		
+
 		Card jackHearts = new Card();
 		jackHearts.setName("Jack of Hearts");
 		pack.AddCard(jackHearts);
-		
+
 		pmf.getPersistenceManager().makePersistent(pack);
-		
-		
-		Pack saved = pmf.getPersistenceManager().getObjectById(Pack.class, pack.getId());
-		
+
+		Pack saved = pmf.getPersistenceManager().getObjectById(Pack.class,
+				pack.getId());
+
 		assertEquals(pack, saved);
-		
+
 		assertNotNull(saved.getCards());
-		
+
 		assertTrue(saved.getCards().contains(aceSpades));
-		
+
 		assertTrue(saved.getCards().contains(jackHearts));
-		
+
 	}
-	
+
 	@Test
 	public void testBasicPeristAndLoadOneToManyArray() throws Exception {
 
 		PersistenceManagerFactory pmf = JDOHelper
 				.getPersistenceManagerFactory("Test");
-			
-		
+
 		PackArray pack = new PackArray();
-		
+
 		CardArray aceSpades = new CardArray();
 		aceSpades.setName("Ace of Spades");
 		pack.getCards()[0] = (aceSpades);
-		
-		
+
 		CardArray jackHearts = new CardArray();
 		jackHearts.setName("Jack of Hearts");
 		pack.getCards()[1] = jackHearts;
-		
+
 		pmf.getPersistenceManager().makePersistent(pack);
-		
-		
-		PackArray saved = pmf.getPersistenceManager().getObjectById(PackArray.class, pack.getId());
-		
+
+		PackArray saved = pmf.getPersistenceManager().getObjectById(
+				PackArray.class, pack.getId());
+
 		assertEquals(pack, saved);
-		
+
 		assertNotNull(saved.getCards());
-		
+
 		assertTrue(saved.getCards()[0].equals(aceSpades));
-		
+
 		assertTrue(saved.getCards()[1].equals(jackHearts));
-		
+
 	}
-	
 
 	@Test
 	public void testBasicPeristAndLoadOneToManyMap() throws Exception {
 
 		PersistenceManagerFactory pmf = JDOHelper
 				.getPersistenceManagerFactory("Test");
-			
-		
+
 		PackMap pack = new PackMap();
-		
+
 		CardMap aceSpades = new CardMap();
 		aceSpades.setName("Ace of Spades");
 		pack.AddCard(aceSpades);
-		
-		
+
 		CardMap jackHearts = new CardMap();
 		jackHearts.setName("Jack of Hearts");
 		pack.AddCard(jackHearts);
-		
+
 		pmf.getPersistenceManager().makePersistent(pack);
-		
-		
-		PackMap saved = pmf.getPersistenceManager().getObjectById(PackMap.class, pack.getId());
-		
+
+		PackMap saved = pmf.getPersistenceManager().getObjectById(
+				PackMap.class, pack.getId());
+
 		assertEquals(pack, saved);
-		
+
 		assertNotNull(saved.getCards());
-		
+
 		assertEquals(saved.getCards().get(aceSpades.getName()), aceSpades);
-		
+
 		assertEquals(saved.getCards().get(jackHearts.getName()), aceSpades);
-		
-		
+
 	}
-	
-	
+
+	@Test
+	public void testDateEntity() throws Exception {
+		DateEntity entity = new DateEntity();
+		entity.setName("Test Entity");
+		
+
+		PersistenceManagerFactory pmf = JDOHelper
+				.getPersistenceManagerFactory("Test");
+
+		pmf.getPersistenceManager().makePersistent(entity);
+		
+		
+		DateEntity saved = pmf.getPersistenceManager().getObjectById(DateEntity.class,entity.getId());
+
+		assertEquals(entity, saved);
+	}
+
 	/**
 	 * Tests an object is serialized as bytes properly
 	 */
 	@Test
-	public void testSerializableObject(){
+	public void testSerializableObject() {
 		fail("unimplemented");
 	}
 

@@ -15,7 +15,7 @@ limitations under the License.
 Contributors :
     ...
  ***********************************************************************/
-package org.datanucleus.store.cassandra.utils;
+package org.datanucleus.store.cassandra.identity;
 
 import java.util.Properties;
 

@@ -121,6 +121,10 @@
   
         <ColumnFamily CompareWith="UTF8Type" Name="PackArray" ColumnType="Super" CompareSubcolumnsWith="UTF8Type"/>
         <ColumnFamily CompareWith="UTF8Type" Name="CardArray"/>
+        
+        
+          <ColumnFamily CompareWith="UTF8Type" Name="DateEntity"/>
+  
   
       <!--
        ~ Strategy: Setting this to the class that implements
