@@ -18,7 +18,6 @@ Contributors :
 package org.datanucleus.store.cassandra;
 
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getBoolean;
-import static org.datanucleus.store.cassandra.utils.ByteConverter.getBytes;
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getChar;
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getDouble;
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getFloat;
@@ -27,6 +26,7 @@ import static org.datanucleus.store.cassandra.utils.ByteConverter.getLong;
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getObject;
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getShort;
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getString;
+import static org.datanucleus.store.cassandra.utils.MetaDataUtils.getKeyValue;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -42,12 +42,9 @@ import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
-import org.datanucleus.metadata.MetaDataUtils;
 import org.datanucleus.metadata.Relation;
 import org.datanucleus.sco.SCOUtils;
 import org.datanucleus.store.ExecutionContext;
-import org.datanucleus.store.ObjectProvider;
-import org.datanucleus.store.fieldmanager.FieldManager;
 
 /**
  * @author Todd Nine
@@ -244,10 +241,22 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 	public Object fetchObjectField(int fieldNumber) {
 		try {
 
-			String columnName = getColumnName(metaData, fieldNumber);
-
 			ExecutionContext ec = stateManager.getObjectProvider()
 					.getExecutionContext();
+
+			String columnName = getColumnName(metaData, fieldNumber);
+
+			// check if it's an identity. If so we'll need to de-serialize it
+			// from a string to an object using the converter utils
+			if (isKey(this.metaData, fieldNumber)) {
+
+				Column column = this.columns.get(columnName);
+
+				return getKeyValue(this.stateManager, this.metaData,
+						getString(column.value));
+
+			}
+
 			ClassLoaderResolver clr = ec.getClassLoaderResolver();
 			AbstractMemberMetaData fieldMetaData = stateManager
 					.getClassMetaData()
@@ -292,10 +301,8 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 					|| relationType == Relation.ONE_TO_MANY_BI
 					|| relationType == Relation.ONE_TO_MANY_UNI) {
 
-
 				SuperColumn collection = this.superColumns.get(columnName);
 
-				
 				if (Collection.class.isAssignableFrom(fieldMetaData.getType())) {
 					Collection<Object> coll;
 					try {
@@ -331,10 +338,9 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 							"maps are currently unimplemented.");
 				} else if (fieldMetaData.getType().isArray()) {
 
-					 Object array = Array.newInstance(fieldMetaData.getType().getComponentType(), collection.columns.size());
-	                        
+					Object array = Array.newInstance(fieldMetaData.getType()
+							.getComponentType(), collection.columns.size());
 
-					
 					for (Column col : collection.columns) {
 						//
 						AbstractClassMetaData elementCmd = fieldMetaData
@@ -347,11 +353,10 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 
 						Object element = getObjectFromIdString(
 								getString(col.value), elementCmd);
-						
-						
-						Array.set(array, Integer.valueOf(getString(col.name)), element);
+
+						Array.set(array, Integer.valueOf(getString(col.name)),
+								element);
 					}
-					
 
 					return stateManager.wrapSCOField(fieldNumber, array, false,
 							false, true);
@@ -450,6 +455,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			id = stateManager.getObjectManager().newObjectId(cls, idStr);
 		}
 		return stateManager.getObjectManager().findObject(id, true, true, null);
+
 	}
 
 }

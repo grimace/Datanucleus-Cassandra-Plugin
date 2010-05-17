@@ -17,30 +17,134 @@ Contributors :
  ***********************************************************************/
 package org.datanucleus.store.cassandra.utils;
 
+import javax.jdo.identity.ObjectIdentity;
+import javax.jdo.identity.SingleFieldIdentity;
+import javax.jdo.spi.PersistenceCapable;
+
+import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.StateManager;
+import org.datanucleus.metadata.AbstractClassMetaData;
+import org.datanucleus.metadata.IdentityMetaData;
+import org.datanucleus.metadata.IdentityType;
+import org.datanucleus.store.ExecutionContext;
+import org.datanucleus.store.mapped.exceptions.DatastoreFieldDefinitionException;
+import org.datanucleus.store.types.ObjectStringConverter;
 
 /**
  * Get the string key for the object associated with this state manager
+ * 
  * @author Todd Nine
- *
+ * 
  */
 public class MetaDataUtils {
 
+	//		
 	/**
-	 * Get the primary key field of this class. Allows the user to define more
-	 * than one field for a PK
+	 * Convenience method to find an object given a string form of its identity,
+	 * and the metadata for the class (or a superclass).
 	 * 
-	 * @param op
+	 * @param idStr
+	 *            The id string
+	 * @param cmd
+	 *            Metadata for the class
+	 * @return The object
+	 */
+	public static String getKey(StateManager stateManager) {
+
+		return getKey(stateManager.getObjectProvider().getExecutionContext(),
+				stateManager.getObject());
+
+	}
+
+	/**
+	 * Get the stringified key for the given execution context and object
+	 * 
+	 * @param ec
+	 * @param object
 	 * @return
 	 */
-	public static String getKey(StateManager sm) {
+	public static String getKey(ExecutionContext ec, Object object) {
+		Object id = ec.getApiAdapter().getIdForObject(object);
 
-		StringBuffer buffer = new StringBuffer();
+		if (id instanceof ObjectIdentity) {
+			ObjectIdentity identity = (ObjectIdentity) id;
 
-		for (int index : sm.getClassMetaData().getPKMemberPositions()) {
-			buffer.append(sm.provideField(index));
+			ObjectStringConverter converter = ec.getTypeManager().getStringConverter(
+					identity.getKey().getClass());
+			
+			if(converter == null){
+				throw new DatastoreFieldDefinitionException(String.format("You must define an ObjectStringConverter for type %s", identity.getKey().getClass()));
+			}
+			
+			return converter.toString(identity.getKey());
+		} else if (id instanceof SingleFieldIdentity){
+			
+			SingleFieldIdentity identity = (SingleFieldIdentity) id;
+
+			ObjectStringConverter converter = ec.getTypeManager().getStringConverter(
+					identity.getKeyAsObject().getClass());
+			
+			if(converter != null){
+				return converter.toString(identity.getKeyAsObject());
+			}
+			
+			
+			
+			
 		}
 
-		return buffer.toString();
+		// else just call the default tostring
+		return id.toString();
 	}
+
+	/**
+	 * Object for the identity in the AbstractClassMetaData's class.  Try and build it from the string
+	 * 
+	 * @param ec
+	 * @param object
+	 * @return
+	 */
+	public static Object getKeyValue(StateManager sm, AbstractClassMetaData cmd, String value) {
+		
+		ExecutionContext ec = sm.getObjectProvider().getExecutionContext();
+	
+	
+		ClassLoaderResolver clr = ec.getClassLoaderResolver();
+		
+		
+		//if we get here, we can assume it's persistenceCapable
+		Object id  = ec.getApiAdapter().getObjectId(sm);
+		
+		ObjectStringConverter converter = null;
+		
+		if (id instanceof ObjectIdentity) {
+			ObjectIdentity identity = (ObjectIdentity) id;
+
+			converter = ec.getTypeManager().getStringConverter(
+					identity.getKey().getClass());
+			
+			if(converter == null){
+				throw new DatastoreFieldDefinitionException(String.format("You must define an ObjectStringConverter for type %s", identity.getKey().getClass()));
+			}
+			
+			return converter.toObject(value);
+		} else if (id instanceof SingleFieldIdentity){
+			
+			SingleFieldIdentity identity = (SingleFieldIdentity) id;
+
+			converter = ec.getTypeManager().getStringConverter(
+					identity.getTargetClass());
+			
+			if(converter != null){
+				return converter.toObject(value);
+			}
+			
+		}
+		
+		
+		return value;
+			
+
+	}
+	
 }

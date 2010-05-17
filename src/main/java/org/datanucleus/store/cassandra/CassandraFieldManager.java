@@ -50,6 +50,18 @@ public class CassandraFieldManager extends AbstractFieldManager {
 
 	}
 
+	/**
+	 * Returns true if the field is a key
+	 * 
+	 * @param fieldNumber
+	 * @return
+	 */
+	protected boolean isKey(AbstractClassMetaData metaData, int fieldNumber) {
+
+		return metaData.getMetaDataForManagedMemberAtAbsolutePosition(
+				fieldNumber).isPrimaryKey();
+
+	}
 	
 
 //	/**

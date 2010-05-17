@@ -41,6 +41,14 @@ Contributors:
     	<valuegenerator name="uuid-cassandra" class-name="org.datanucleus.store.cassandra.identity.CassandraUUIDGenerator" unique="true"/>
     </extension> 
     
+    <!-- Extension point for custom serialization of values -->
+    <extension point="org.datanucleus.java_type">
+           <java-type name="java.util.Date" persistent="true" dfg="true" embedded="true" wrapper-type="org.datanucleus.sco.simple.Date"
+            string-converter="org.datanucleus.store.cassandra.identity.DateConverter"
+            long-converter="org.datanucleus.store.types.DateLongConverter"/>
+        <java-type name="com.eaio.uuid.UUID" string-converter="org.datanucleus.store.cassandra.identity.UUIDConverter" />
+    </extension>
+    
     <!-- Extension for
      <extension point="org.datanucleus.store_datastoreidentity">
         <datastoreidentity name="date-cassandra" class-name="org.datanucleus.store.cassandra.identity.DateImpl" unique="true"/>
