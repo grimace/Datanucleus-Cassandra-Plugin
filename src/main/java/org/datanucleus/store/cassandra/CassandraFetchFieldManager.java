@@ -34,6 +34,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.jdo.identity.ObjectIdentity;
+import javax.jdo.identity.SingleFieldIdentity;
+import javax.jdo.spi.PersistenceCapable;
+
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.datanucleus.ClassLoaderResolver;
@@ -42,9 +46,12 @@ import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
+import org.datanucleus.metadata.MetaDataUtils;
 import org.datanucleus.metadata.Relation;
 import org.datanucleus.sco.SCOUtils;
 import org.datanucleus.store.ExecutionContext;
+import org.datanucleus.store.mapped.exceptions.DatastoreFieldDefinitionException;
+import org.datanucleus.store.types.ObjectStringConverter;
 
 /**
  * @author Todd Nine
@@ -445,17 +452,24 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			AbstractClassMetaData cmd) {
 		ExecutionContext ec = stateManager.getObjectProvider()
 				.getExecutionContext();
-		ClassLoaderResolver clr = ec.getClassLoaderResolver();
-		Object id = null;
-		if (cmd.usesSingleFieldIdentityClass()) {
-			id = ec.getApiAdapter().getNewApplicationIdentityObjectId(clr, cmd,
-					idStr);
-		} else {
-			Class cls = clr.classForName(cmd.getFullClassName());
-			id = stateManager.getObjectManager().newObjectId(cls, idStr);
-		}
+		ClassLoaderResolver clr = ec.getClassLoaderResolver();	
+		
+		int[] pkPositions = cmd.getPKMemberPositions();
+		
+		AbstractMemberMetaData metaData = cmd.getMetaDataForManagedMemberAtAbsolutePosition(pkPositions[0]);
+		
+		
+		//now get the converter based on the type
+		ObjectStringConverter	converter = ec.getTypeManager().getStringConverter(metaData.getType());
+			
+		//convert it to an instance of the type
+		Object value = converter.toObject(idStr);		
+		
+		Class cls = clr.classForName(cmd.getFullClassName());
+		
+		Object id = stateManager.getObjectManager().newObjectId(cls, value);
+		
 		return stateManager.getObjectManager().findObject(id, true, true, null);
 
 	}
-
 }

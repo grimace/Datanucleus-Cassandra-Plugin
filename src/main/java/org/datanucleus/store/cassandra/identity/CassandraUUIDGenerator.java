@@ -22,6 +22,8 @@ import java.util.Properties;
 import org.datanucleus.store.valuegenerator.AbstractGenerator;
 import org.datanucleus.store.valuegenerator.ValueGenerationBlock;
 
+import com.eaio.uuid.UUID;
+
 
 /**
  * @author Todd Nine
@@ -49,7 +51,7 @@ public class CassandraUUIDGenerator extends AbstractGenerator {
 	public ValueGenerationBlock reserveBlock(long size) {
 		
 		
-		String[] ids = new String[(int) size];
+		UUID[] ids = new UUID[(int) size];
 		for (int i = 0; i < size; i++) {
 			ids[i] = getIdentifier();
 		}
@@ -62,9 +64,9 @@ public class CassandraUUIDGenerator extends AbstractGenerator {
 	 * 
 	 * @return The identifier
 	 */
-	protected String getIdentifier()
+	protected UUID getIdentifier()
     {
-		 return new com.eaio.uuid.UUID().toString();
+		 return new com.eaio.uuid.UUID();
 
     }
 	

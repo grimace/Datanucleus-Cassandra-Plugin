@@ -23,6 +23,8 @@ import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
+import com.eaio.uuid.UUID;
+
 /**
  * @author Todd Nine
  *
@@ -33,9 +35,9 @@ public abstract class BaseEntity {
 
 	@PrimaryKey
 	@Persistent(customValueStrategy = "uuid-cassandra")
-	private String id;
+	private UUID id;
 	
-	public String getId() {
+	public UUID getId() {
 		return id;
 	}
 

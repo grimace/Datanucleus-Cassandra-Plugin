@@ -28,9 +28,7 @@ import com.eaio.uuid.UUID;
  */
 public class UUIDConverter implements ObjectStringConverter {
 
-	public UUIDConverter(StateManager sm, String string) {
-		System.out.print("bleh");
-	}
+
 
 	/*
 	 * (non-Javadoc)

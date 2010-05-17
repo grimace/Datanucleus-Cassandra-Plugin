@@ -46,7 +46,7 @@ Contributors:
            <java-type name="java.util.Date" persistent="true" dfg="true" embedded="true" wrapper-type="org.datanucleus.sco.simple.Date"
             string-converter="org.datanucleus.store.cassandra.identity.DateConverter"
             long-converter="org.datanucleus.store.types.DateLongConverter"/>
-        <java-type name="com.eaio.uuid.UUID" string-converter="org.datanucleus.store.cassandra.identity.UUIDConverter" />
+        <java-type name="com.eaio.uuid.UUID" string-converter="org.datanucleus.store.cassandra.identity.UUIDConverter"  persistent="true" dfg="true" embedded="true"  />
     </extension>
     
     <!-- Extension for
