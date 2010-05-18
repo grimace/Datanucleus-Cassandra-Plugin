@@ -69,28 +69,27 @@ public class MetaDataUtils {
 		if (id instanceof ObjectIdentity) {
 			ObjectIdentity identity = (ObjectIdentity) id;
 
-			ObjectStringConverter converter = ec.getTypeManager().getStringConverter(
-					identity.getKey().getClass());
-			
-			if(converter == null){
-				throw new DatastoreFieldDefinitionException(String.format("You must define an ObjectStringConverter for type %s", identity.getKey().getClass()));
+			ObjectStringConverter converter = ec.getTypeManager()
+					.getStringConverter(identity.getKey().getClass());
+
+			if (converter == null) {
+				throw new DatastoreFieldDefinitionException(String.format(
+						"You must define an ObjectStringConverter for type %s",
+						identity.getKey().getClass()));
 			}
-			
+
 			return converter.toString(identity.getKey());
-		} else if (id instanceof SingleFieldIdentity){
-			
+		} else if (id instanceof SingleFieldIdentity) {
+
 			SingleFieldIdentity identity = (SingleFieldIdentity) id;
 
-			ObjectStringConverter converter = ec.getTypeManager().getStringConverter(
-					identity.getKeyAsObject().getClass());
-			
-			if(converter != null){
+			ObjectStringConverter converter = ec.getTypeManager()
+					.getStringConverter(identity.getKeyAsObject().getClass());
+
+			if (converter != null) {
 				return converter.toString(identity.getKeyAsObject());
 			}
-			
-			
-			
-			
+
 		}
 
 		// else just call the default tostring
@@ -98,53 +97,111 @@ public class MetaDataUtils {
 	}
 
 	/**
-	 * Object for the identity in the AbstractClassMetaData's class.  Try and build it from the string
+	 * Convert from the given object to a string.
+	 * 
+	 * @param ec
+	 * @param o
+	 * @return
+	 */
+	public static String convertToKey(ExecutionContext ec, Object o) {
+
+		if (o instanceof String) {
+			return (String) o;
+		}
+
+		ObjectStringConverter converter = ec.getTypeManager()
+				.getStringConverter(o.getClass());
+
+		if (converter == null) {
+			throw new DatastoreFieldDefinitionException(String.format(
+					"You must define an ObjectStringConverter for type %s", o
+							.getClass()));
+		}
+
+		return converter.toString(o);
+	}
+
+	/**
+	 * Use the datanucleus converers to convert from the string to a new
+	 * instance of the target class
+	 * 
+	 * @param ec
+	 * @param targetClass
+	 * @param value
+	 * @return
+	 */
+	public static Object convertFromString(ExecutionContext ec,
+			String targetClassName, String value) {
+
+		ClassLoaderResolver clr = ec.getClassLoaderResolver();
+
+		Class targetClass = clr.classForName(targetClassName);
+
+		if (targetClass.equals(String.class)) {
+			return value;
+		}
+
+		ObjectStringConverter converter = ec.getTypeManager()
+				.getStringConverter(targetClass);
+
+		if (converter == null) {
+			throw new DatastoreFieldDefinitionException(String.format(
+					"You must define an ObjectStringConverter for type %s",
+					targetClass));
+		}
+
+		return converter.toObject(value);
+
+	}
+
+	/**
+	 * Object for the identity in the AbstractClassMetaData's class. Try and
+	 * build it from the string
 	 * 
 	 * @param ec
 	 * @param object
 	 * @return
 	 */
-	public static Object getKeyValue(StateManager sm, AbstractClassMetaData cmd, String value) {
-		
+	public static Object getKeyValue(StateManager sm,
+			AbstractClassMetaData cmd, String value) {
+
 		ExecutionContext ec = sm.getObjectProvider().getExecutionContext();
-	
-	
+
 		ClassLoaderResolver clr = ec.getClassLoaderResolver();
-		
-		
-		//if we get here, we can assume it's persistenceCapable
-		Object id  = ec.getApiAdapter().getObjectId(sm);
-		
+
+		// if we get here, we can assume it's persistenceCapable
+		Object id = ec.getApiAdapter().getObjectId(sm);
+
 		ObjectStringConverter converter = null;
-		
+
 		if (id instanceof ObjectIdentity) {
 			ObjectIdentity identity = (ObjectIdentity) id;
 
 			converter = ec.getTypeManager().getStringConverter(
 					identity.getKey().getClass());
-			
-			if(converter == null){
-				throw new DatastoreFieldDefinitionException(String.format("You must define an ObjectStringConverter for type %s", identity.getKey().getClass()));
+
+			if (converter == null) {
+				throw new DatastoreFieldDefinitionException(String.format(
+						"You must define an ObjectStringConverter for type %s",
+						identity.getKey().getClass()));
 			}
-			
+
 			return converter.toObject(value);
-		} else if (id instanceof SingleFieldIdentity){
-			
+		} else if (id instanceof SingleFieldIdentity) {
+
 			SingleFieldIdentity identity = (SingleFieldIdentity) id;
 
 			converter = ec.getTypeManager().getStringConverter(
 					identity.getTargetClass());
-			
-			if(converter != null){
+
+			if (converter != null) {
 				return converter.toObject(value);
 			}
-			
+
 		}
-		
-		
+
 		return value;
-			
 
 	}
-	
+
 }

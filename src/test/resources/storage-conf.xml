@@ -115,15 +115,19 @@
   	 
 		<ColumnFamily CompareWith="UTF8Type" Name="PrimitiveObject"/>
 		
-		<!--  Our pack has a many relationship (collection).  As such we're going to need to make it a super column -->
+		<!--  Our pack has a many relationship (collection).  As such we're going to need to make it a super column
+-->
 	 	<ColumnFamily CompareWith="UTF8Type" Name="Pack" ColumnType="Super" CompareSubcolumnsWith="UTF8Type"/>
 	  	<ColumnFamily CompareWith="UTF8Type" Name="Card"/>
   
         <ColumnFamily CompareWith="UTF8Type" Name="PackArray" ColumnType="Super" CompareSubcolumnsWith="UTF8Type"/>
         <ColumnFamily CompareWith="UTF8Type" Name="CardArray"/>
         
+         <ColumnFamily CompareWith="UTF8Type" Name="PackMap" ColumnType="Super" CompareSubcolumnsWith="UTF8Type"/>
+         <ColumnFamily CompareWith="UTF8Type" Name="CardMap"/>
         
-          <ColumnFamily CompareWith="UTF8Type" Name="DateEntity"/>
+        
+        <ColumnFamily CompareWith="UTF8Type" Name="DateEntity"/>
   
   
       <!--

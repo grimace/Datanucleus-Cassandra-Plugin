@@ -26,6 +26,7 @@ import static org.datanucleus.store.cassandra.utils.ByteConverter.getLong;
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getObject;
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getShort;
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getString;
+import static org.datanucleus.store.cassandra.utils.MetaDataUtils.convertFromString;
 import static org.datanucleus.store.cassandra.utils.MetaDataUtils.getKeyValue;
 
 import java.lang.reflect.Array;
@@ -33,10 +34,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.jdo.identity.ObjectIdentity;
-import javax.jdo.identity.SingleFieldIdentity;
-import javax.jdo.spi.PersistenceCapable;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.SuperColumn;
@@ -46,11 +43,10 @@ import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
-import org.datanucleus.metadata.MetaDataUtils;
+import org.datanucleus.metadata.MapMetaData;
 import org.datanucleus.metadata.Relation;
 import org.datanucleus.sco.SCOUtils;
 import org.datanucleus.store.ExecutionContext;
-import org.datanucleus.store.mapped.exceptions.DatastoreFieldDefinitionException;
 import org.datanucleus.store.types.ObjectStringConverter;
 
 /**
@@ -341,8 +337,47 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 					return stateManager.wrapSCOField(fieldNumber, coll, false,
 							false, true);
 				} else if (Map.class.isAssignableFrom(fieldMetaData.getType())) {
-					throw new NucleusException(
-							"maps are currently unimplemented.");
+
+					Map<Object, Object> map;
+
+					try {
+						Class instanceType = SCOUtils.getContainerInstanceType(
+								fieldMetaData.getType(), fieldMetaData
+										.getOrderMetaData() != null);
+						map = (Map<Object, Object>) instanceType.newInstance();
+					} catch (Exception e) {
+						throw new NucleusDataStoreException(e.getMessage(), e);
+					}
+
+					// loop through the super columns
+
+					for (Column col : collection.columns) {
+						//
+						
+						MapMetaData mapMetaData = fieldMetaData.getMap();
+						
+					
+						AbstractClassMetaData valueMetaData = mapMetaData.getValueClassMetaData(
+										ec.getClassLoaderResolver(),
+										ec.getMetaDataManager());
+
+						// AbstractClassMetaData elementCmd =
+						// fieldMetaData.getCollection().
+						
+						
+
+						Object element = getObjectFromIdString(
+								getString(col.value), valueMetaData);
+
+						Object key = convertFromString(ec, mapMetaData.getKeyType(), getString(col.name));
+
+						map.put(key, element);
+					}
+
+					return stateManager.wrapSCOField(fieldNumber, map, false, false, true);
+
+					// throw new NucleusException(
+					// "maps are currently unimplemented.");
 				} else if (fieldMetaData.getType().isArray()) {
 
 					Object array = Array.newInstance(fieldMetaData.getType()
@@ -354,9 +389,6 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 								.getArray().getElementClassMetaData(
 										ec.getClassLoaderResolver(),
 										ec.getMetaDataManager());
-
-						// AbstractClassMetaData elementCmd =
-						// fieldMetaData.getCollection().
 
 						Object element = getObjectFromIdString(
 								getString(col.value), elementCmd);
@@ -450,25 +482,27 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 	 */
 	protected Object getObjectFromIdString(String idStr,
 			AbstractClassMetaData cmd) {
+
 		ExecutionContext ec = stateManager.getObjectProvider()
 				.getExecutionContext();
-		ClassLoaderResolver clr = ec.getClassLoaderResolver();	
-		
+		ClassLoaderResolver clr = ec.getClassLoaderResolver();
+
 		int[] pkPositions = cmd.getPKMemberPositions();
-		
-		AbstractMemberMetaData metaData = cmd.getMetaDataForManagedMemberAtAbsolutePosition(pkPositions[0]);
-		
-		
-		//now get the converter based on the type
-		ObjectStringConverter	converter = ec.getTypeManager().getStringConverter(metaData.getType());
-			
-		//convert it to an instance of the type
-		Object value = converter.toObject(idStr);		
-		
+
+		AbstractMemberMetaData metaData = cmd
+				.getMetaDataForManagedMemberAtAbsolutePosition(pkPositions[0]);
+
+		// now get the converter based on the type
+		ObjectStringConverter converter = ec.getTypeManager()
+				.getStringConverter(metaData.getType());
+
+		// convert it to an instance of the type
+		Object value = converter.toObject(idStr);
+
 		Class cls = clr.classForName(cmd.getFullClassName());
-		
+
 		Object id = stateManager.getObjectManager().newObjectId(cls, value);
-		
+
 		return stateManager.getObjectManager().findObject(id, true, true, null);
 
 	}

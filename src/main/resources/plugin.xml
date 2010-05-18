@@ -43,9 +43,11 @@ Contributors:
     
     <!-- Extension point for custom serialization of values -->
     <extension point="org.datanucleus.java_type">
+    
+    	<!-- keep all the default properties, but override the string converter for cassandra -->
            <java-type name="java.util.Date" persistent="true" dfg="true" embedded="true" wrapper-type="org.datanucleus.sco.simple.Date"
             string-converter="org.datanucleus.store.cassandra.identity.DateConverter"
-            long-converter="org.datanucleus.store.types.DateLongConverter"/>
+            long-converter="org.datanucleus.store.types.DateLongConverter" override="true"/>
         <java-type name="com.eaio.uuid.UUID" string-converter="org.datanucleus.store.cassandra.identity.UUIDConverter"  persistent="true" dfg="true" embedded="true"  />
     </extension>
     

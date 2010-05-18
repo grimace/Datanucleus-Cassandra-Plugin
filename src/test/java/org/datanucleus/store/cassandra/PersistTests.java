@@ -227,7 +227,7 @@ public class PersistTests {
 
 		assertEquals(saved.getCards().get(aceSpades.getName()), aceSpades);
 
-		assertEquals(saved.getCards().get(jackHearts.getName()), aceSpades);
+		assertEquals(saved.getCards().get(jackHearts.getName()), jackHearts);
 
 	}
 

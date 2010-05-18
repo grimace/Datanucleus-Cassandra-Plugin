@@ -18,12 +18,11 @@ Contributors :
 package org.datanucleus.store.cassandra;
 
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getBytes;
-import static org.datanucleus.store.cassandra.utils.MetaDataUtils.getKey;
+import static org.datanucleus.store.cassandra.utils.MetaDataUtils.*;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
-
-import javax.jdo.identity.StringIdentity;
+import java.util.Map;
 
 import org.apache.cassandra.thrift.ColumnPath;
 import org.datanucleus.ClassLoaderResolver;
@@ -36,7 +35,6 @@ import org.datanucleus.metadata.Relation;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.cassandra.mutate.BatchMutationManager;
-import org.datanucleus.store.mapped.exceptions.DatastoreFieldDefinitionException;
 
 /**
  * @author Todd Nine
@@ -276,7 +274,8 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 				// TODO add this data to the supercolumn info
 
 				this.manager.AddColumn(context, columnFamily, rowKey,
-						columnName, getBytes(getKey(this.context, persisted)), timestamp);
+						columnName, getBytes(getKey(this.context, persisted)),
+						timestamp);
 
 				return;
 				// add it to a super column on this object
@@ -301,16 +300,30 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 						this.manager.AddSuperColumn(context, columnFamily,
 								rowKey, columnName, String.valueOf(index),
-								getBytes(getKey(this.context, persisted)), timestamp);
+								getBytes(getKey(this.context, persisted)),
+								timestamp);
 
 						index++;
 					}
 
 				} else if (fieldMetaData.hasMap()) {
-					// TODO Implement map persistence - what to do if key or
-					// value is non-PC
-					throw new NucleusException(
-							"maps are currently unimplemented.");
+
+					Map map = ((Map) value);
+					// get each element and persist it.
+					for (Object key : map.keySet()) {
+
+						// now we're persisted, create the supercolumn map
+						Object persisted = context.persistObjectInternal(map
+								.get(key), op, -1, StateManager.PC);
+						
+						this.manager
+								.AddSuperColumn(context, columnFamily, rowKey,
+										columnName, convertToKey(context, key),
+										getBytes(getKey(context, persisted)),
+										timestamp);
+
+					}
+
 				} else if (fieldMetaData.hasArray()) {
 
 					for (int i = 0; i < Array.getLength(value); i++) {
@@ -320,7 +333,8 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 						this.manager.AddSuperColumn(context, columnFamily,
 								rowKey, columnName, String.valueOf(i),
-								getBytes(getKey(this.context, persisted)), timestamp);
+								getBytes(getKey(this.context, persisted)),
+								timestamp);
 
 					}
 
