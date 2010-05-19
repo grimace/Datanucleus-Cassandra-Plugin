@@ -132,6 +132,8 @@
         
         
         <ColumnFamily CompareWith="UTF8Type" Name="DateEntity"/>
+        
+        <ColumnFamily CompareWith="UTF8Type" Name="UnitData"/>
   
   
       <!--

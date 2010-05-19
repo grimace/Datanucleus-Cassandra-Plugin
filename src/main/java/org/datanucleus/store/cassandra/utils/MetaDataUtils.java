@@ -92,7 +92,7 @@ public class MetaDataUtils {
 
 		}
 
-		// else just call the default tostring
+		// else just call the default tostring since it's a user defined key
 		return id.toString();
 	}
 

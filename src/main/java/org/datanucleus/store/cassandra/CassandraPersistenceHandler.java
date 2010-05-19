@@ -96,10 +96,9 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 						getColumnParent(metaData), getSliceprediCate(metaData));
 			}
 
-			if (columns == null || columns.size() == 0) {
-				throw new NucleusObjectNotFoundException(String.format(
-						"Couldn't find object %s with key %s", metaData
-								.getName(), key));
+			//do nothing, there's no data
+			if (columns == null || columns.size() == 0 ) {
+				return;
 			}
 
 			populateKeys(columns, metaData, key);
