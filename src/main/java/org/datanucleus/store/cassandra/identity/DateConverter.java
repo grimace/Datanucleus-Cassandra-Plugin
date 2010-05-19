@@ -19,7 +19,6 @@ package org.datanucleus.store.cassandra.identity;
 
 import java.util.Date;
 
-import org.datanucleus.StateManager;
 import org.datanucleus.store.types.ObjectStringConverter;
 
 /**

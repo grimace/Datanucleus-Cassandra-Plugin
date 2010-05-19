@@ -15,52 +15,53 @@ limitations under the License.
 Contributors :
     ...
  ***********************************************************************/
-package org.datanucleus.store.cassandra.identity;
+package me.prettyprint.cassandra.testutils;
 
-import org.datanucleus.store.types.ObjectStringConverter;
+import java.io.IOException;
 
-import com.eaio.uuid.UUID;
+import org.apache.thrift.transport.TTransportException;
+
 
 /**
  * @author Todd Nine
  * 
  */
-public class UUIDConverter implements ObjectStringConverter {
+public enum CassandraServer {
 
+	INSTANCE;
 
+	private EmbeddedServerHelper defaultPool;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.datanucleus.store.types.ObjectStringConverter#toObject(java.lang.
-	 * String)
-	 */
-	@Override
-	public Object toObject(String str) {
-
-		if (str == null || str.length() == 0) {
-			return null;
-		}
-
-		return new UUID(str);
+	private CassandraServer() {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.datanucleus.store.types.ObjectStringConverter#toString(java.lang.
-	 * Object)
-	 */
-	@Override
-	public String toString(Object obj) {
-
-		if (!(obj instanceof UUID)) {
-			return null;
-		}
-
-		return obj.toString();
+	public static CassandraServer getInstance() {
+		return INSTANCE;
 	}
+
+	/**
+	 * Get a reference to a reusable pool.
+	 * 
+	 * @return
+	 * @throws InterruptedException 
+	 * @throws IOException 
+	 * @throws TTransportException 
+	 */
+	public void Run() throws TTransportException, IOException, InterruptedException {
+		if (defaultPool == null) {
+			synchronized (INSTANCE) {
+				if (defaultPool == null) {
+					defaultPool = new EmbeddedServerHelper();
+					defaultPool.setup();
+				}
+			}
+		}
+		
+	}
+	
+	
+	
+
+	
 
 }

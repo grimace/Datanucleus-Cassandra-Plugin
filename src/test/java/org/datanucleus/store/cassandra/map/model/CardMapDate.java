@@ -15,7 +15,12 @@ limitations under the License.
 Contributors :
     ...
  ***********************************************************************/
-package org.datanucleus.store.cassandra.model;
+package org.datanucleus.store.cassandra.map.model;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.Inheritance;
@@ -23,33 +28,53 @@ import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 
+import org.datanucleus.store.cassandra.model.BaseEntity;
+
 /**
  * This object represents the "many" side of a one to many collection
+ * 
  * @author Todd Nine
- *
+ * 
  */
-@PersistenceCapable(table = "CardArray", identityType = IdentityType.APPLICATION)
+@PersistenceCapable(table = "CardMapDate", identityType = IdentityType.APPLICATION)
 @Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
-public class CardArray extends BaseEntity {
+public class CardMapDate extends BaseEntity {
 
-	
+	private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+
 	@Persistent
-	private PackArray pack;
-	
+	private PackMapDate pack;
+
 	private String name;
-	
+
+	private Date time;
+
+	public CardMapDate(int year, int month, int date) {
+		
+		Calendar cal = new GregorianCalendar(UTC);
+		cal.clear();
+		cal.set(year, month, date);
+		
+		this.time = cal.getTime();
+		
+	}
+
+	public Date getTime() {
+		return time;
+	}
 
 	/**
 	 * @return the pack
 	 */
-	public PackArray getPack() {
+	public PackMapDate getPack() {
 		return pack;
 	}
 
 	/**
-	 * @param pack the pack to set
+	 * @param pack
+	 *            the pack to set
 	 */
-	public void setPack(PackArray pack) {
+	public void setPack(PackMapDate pack) {
 		this.pack = pack;
 	}
 
@@ -61,10 +86,11 @@ public class CardArray extends BaseEntity {
 	}
 
 	/**
-	 * @param name the name to set
+	 * @param name
+	 *            the name to set
 	 */
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 }

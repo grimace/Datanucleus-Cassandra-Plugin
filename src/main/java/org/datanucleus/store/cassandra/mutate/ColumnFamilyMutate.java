@@ -81,7 +81,7 @@ public class ColumnFamilyMutate {
 	 * @param columnName
 	 * @param timestamp
 	 */
-	public void AddDelete(String columnName, long timestamp ){
+	public void addDelete(String columnName, long timestamp ){
 		
 		if(deletes.containsKey(columnName)){
 			throw new NucleusDataStoreException(String.format("You are attempting to perform multiple deletes on column %s in the same instnace", columnName));
@@ -103,7 +103,7 @@ public class ColumnFamilyMutate {
 	 * @param value
 	 * @param timestamp
 	 */
-	public void AddColumn(String columnName, byte[] value, long timestamp){
+	public void addColumn(String columnName, byte[] value, long timestamp){
 
 		if(columns.containsKey(columnName)){
 			throw new NucleusDataStoreException(String.format("You are attempting to perform multiple sets on column %s in the same instnace", columnName));
@@ -120,7 +120,7 @@ public class ColumnFamilyMutate {
 	 * @param value
 	 * @param timestamp
 	 */
-	public void AddSuperColumn(String superColumnName, String columnName, byte[] value, long timestamp){
+	public void addSuperColumn(String superColumnName, String columnName, byte[] value, long timestamp){
 		
 		SuperColumn superColumn = superColumns.get(superColumnName);
 		

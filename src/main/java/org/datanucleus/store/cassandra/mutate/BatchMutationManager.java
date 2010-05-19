@@ -74,9 +74,9 @@ public class BatchMutationManager {
 	 * @param columnName
 	 * @param timestamp
 	 */
-	public void AddDelete(ExecutionContext context, String columnFamily,
+	public void addDelete(ExecutionContext context, String columnFamily,
 			String rowKey, String columnName, long timestamp) {
-		getMutations(context).AddDelete(columnFamily, rowKey, columnName,
+		getMutations(context).addDelete(columnFamily, rowKey, columnName,
 				timestamp);
 	}
 
@@ -89,9 +89,9 @@ public class BatchMutationManager {
 	 * @param value
 	 * @param timestamp
 	 */
-	public void AddColumn(ExecutionContext context, String columnFamily,
+	public void addColumn(ExecutionContext context, String columnFamily,
 			String rowKey, String columnName, byte[] value, long timestamp) {
-		getMutations(context).AddColumn(columnFamily, rowKey, columnName,
+		getMutations(context).addColumn(columnFamily, rowKey, columnName,
 				value, timestamp);
 	}
 
@@ -105,10 +105,10 @@ public class BatchMutationManager {
 	 * @param value
 	 * @param timestamp
 	 */
-	public void AddSuperColumn(ExecutionContext context, String columnFamily,
+	public void addSuperColumn(ExecutionContext context, String columnFamily,
 			String rowKey, String superColumnName, String columnName,
 			byte[] value, long timestamp) {
-		getMutations(context).AddSuperColumn(columnFamily, rowKey,
+		getMutations(context).addSuperColumn(columnFamily, rowKey,
 				superColumnName, columnName, value, timestamp);
 	}
 

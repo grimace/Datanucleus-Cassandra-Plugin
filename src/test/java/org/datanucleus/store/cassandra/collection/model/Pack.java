@@ -15,7 +15,10 @@ limitations under the License.
 Contributors :
     ...
  ***********************************************************************/
-package org.datanucleus.store.cassandra.model;
+package org.datanucleus.store.cassandra.collection.model;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.Inheritance;
@@ -23,48 +26,35 @@ import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 
+import org.datanucleus.store.cassandra.model.BaseEntity;
+
 /**
- * This object represents the "many" side of a one to many collection
- * @author Todd Nine
- *
+ * An object with a collection to many objects
+ * @author Todd Nine 
  */
-@PersistenceCapable(table = "CardMap", identityType = IdentityType.APPLICATION)
+@PersistenceCapable(table = "Pack", identityType = IdentityType.APPLICATION)
 @Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
-public class CardMap extends BaseEntity {
-
+public class Pack extends BaseEntity {
 	
-	@Persistent
-	private PackMap pack;
 	
-	private String name;
+	@Persistent(mappedBy="pack")
+	private List<Card> cards;
 	
-
-	/**
-	 * @return the pack
-	 */
-	public PackMap getPack() {
-		return pack;
+	public Pack(){
+		cards = new ArrayList<Card>();
 	}
 
 	/**
-	 * @param pack the pack to set
+	 * @return the manyToOne
 	 */
-	public void setPack(PackMap pack) {
-		this.pack = pack;
+	public List<Card> getCards() {
+		return cards;
+	}
+	
+	public void AddCard(Card card){
+		this.cards.add(card);
+		card.setPack(this);
 	}
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
 	
 }

@@ -15,7 +15,11 @@ limitations under the License.
 Contributors :
     ...
  ***********************************************************************/
-package org.datanucleus.store.cassandra.model;
+package org.datanucleus.store.cassandra.map.model;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.Inheritance;
@@ -23,48 +27,35 @@ import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 
+import org.datanucleus.store.cassandra.model.BaseEntity;
+
 /**
- * This object represents the "many" side of a one to many collection
+ * An object with a map to many objects.  Indexed by Date
+ * 
  * @author Todd Nine
- *
  */
-@PersistenceCapable(table = "Card", identityType = IdentityType.APPLICATION)
+@PersistenceCapable(table = "PackMapDate", identityType = IdentityType.APPLICATION)
 @Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
-public class Card extends BaseEntity {
+public class PackMapDate extends BaseEntity {
+	
+	@Persistent(mappedBy = "pack")
+	private Map<Date, CardMapDate> cards;
 
-	
-	@Persistent
-	private Pack pack;
-	
-	private String name;
-	
-
-	/**
-	 * @return the pack
-	 */
-	public Pack getPack() {
-		return pack;
+	public PackMapDate() {
+		cards = new  HashMap<Date, CardMapDate>();
 	}
 
 	/**
-	 * @param pack the pack to set
+	 * @return the manyToOne
 	 */
-	public void setPack(Pack pack) {
-		this.pack = pack;
-	}
-
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
+	public Map<Date, CardMapDate> getCards() {
+		return cards;
 	}
 	
+
+	public void AddCard(CardMapDate card){
+		this.cards.put(card.getTime(), card);
+		card.setPack(this);
+	}
+
 }

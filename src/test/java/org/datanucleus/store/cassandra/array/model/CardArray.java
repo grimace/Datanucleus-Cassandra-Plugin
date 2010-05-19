@@ -15,58 +15,46 @@ limitations under the License.
 Contributors :
     ...
  ***********************************************************************/
-package org.datanucleus.store.cassandra.model;
-
-import java.util.Date;
+package org.datanucleus.store.cassandra.array.model;
 
 import javax.jdo.annotations.IdentityType;
+import javax.jdo.annotations.Inheritance;
+import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
-import javax.jdo.annotations.PrimaryKey;
+
+import org.datanucleus.store.cassandra.model.BaseEntity;
 
 /**
- * Class to test persisting dates as Identities.
+ * This object represents the "many" side of a one to many collection
  * @author Todd Nine
  *
  */
-@PersistenceCapable(table = "DateEntity", identityType = IdentityType.APPLICATION)
-public class DateEntity {
+@PersistenceCapable(table = "CardArray", identityType = IdentityType.APPLICATION)
+@Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
+public class CardArray extends BaseEntity {
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		DateEntity other = (DateEntity) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
-	}
-
-	@PrimaryKey
+	
 	@Persistent
-	private Date id;
+	private PackArray pack;
 	
 	private String name;
 	
-	public DateEntity(){
-		id = new Date();
+
+	/**
+	 * @return the pack
+	 */
+	public PackArray getPack() {
+		return pack;
 	}
-	
+
+	/**
+	 * @param pack the pack to set
+	 */
+	public void setPack(PackArray pack) {
+		this.pack = pack;
+	}
+
 	/**
 	 * @return the name
 	 */
@@ -80,13 +68,5 @@ public class DateEntity {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	/**
-	 * @return the id
-	 */
-	public Date getId() {
-		return id;
-	}
-	
 	
 }

@@ -87,7 +87,7 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 			String columnName = getColumnName(metaData, fieldNumber);
 
-			manager.AddColumn(context, columnFamily, rowKey, columnName,
+			manager.addColumn(context, columnFamily, rowKey, columnName,
 					getBytes(value), timestamp);
 
 		} catch (Exception e) {
@@ -105,7 +105,7 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 			}
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			manager.AddColumn(context, columnFamily, rowKey, columnName,
+			manager.addColumn(context, columnFamily, rowKey, columnName,
 					new byte[] { value }, timestamp);
 
 		} catch (Exception e) {
@@ -123,7 +123,7 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 			}
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			manager.AddColumn(context, columnFamily, rowKey, columnName,
+			manager.addColumn(context, columnFamily, rowKey, columnName,
 					getBytes(value), timestamp);
 
 		} catch (Exception e) {
@@ -141,7 +141,7 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 			}
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			manager.AddColumn(context, columnFamily, rowKey, columnName,
+			manager.addColumn(context, columnFamily, rowKey, columnName,
 					getBytes(value), timestamp);
 
 		} catch (Exception e) {
@@ -159,7 +159,7 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 			}
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			manager.AddColumn(context, columnFamily, rowKey, columnName,
+			manager.addColumn(context, columnFamily, rowKey, columnName,
 					getBytes(value), timestamp);
 
 		} catch (Exception e) {
@@ -177,7 +177,7 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 			}
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			manager.AddColumn(context, columnFamily, rowKey, columnName,
+			manager.addColumn(context, columnFamily, rowKey, columnName,
 					getBytes(value), timestamp);
 
 		} catch (Exception e) {
@@ -195,7 +195,7 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 			}
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			manager.AddColumn(context, columnFamily, rowKey, columnName,
+			manager.addColumn(context, columnFamily, rowKey, columnName,
 					getBytes(value), timestamp);
 
 		} catch (Exception e) {
@@ -212,7 +212,7 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 			}
 
 			String columnName = getColumnName(metaData, fieldNumber);
-			manager.AddColumn(context, columnFamily, rowKey, columnName,
+			manager.addColumn(context, columnFamily, rowKey, columnName,
 					getBytes(value), timestamp);
 
 		} catch (Exception e) {
@@ -240,7 +240,7 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 			// delete operation
 			if (value == null) {
 
-				this.manager.AddDelete(context, columnFamily, rowKey,
+				this.manager.addDelete(context, columnFamily, rowKey,
 						columnName, timestamp);
 
 				return;
@@ -273,7 +273,7 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 				// TODO add this data to the supercolumn info
 
-				this.manager.AddColumn(context, columnFamily, rowKey,
+				this.manager.addColumn(context, columnFamily, rowKey,
 						columnName, getBytes(getKey(this.context, persisted)),
 						timestamp);
 
@@ -298,7 +298,7 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 						Object persisted = context.persistObjectInternal(
 								element, op, -1, StateManager.PC);
 
-						this.manager.AddSuperColumn(context, columnFamily,
+						this.manager.addSuperColumn(context, columnFamily,
 								rowKey, columnName, String.valueOf(index),
 								getBytes(getKey(this.context, persisted)),
 								timestamp);
@@ -317,7 +317,7 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 								.get(key), op, -1, StateManager.PC);
 						
 						this.manager
-								.AddSuperColumn(context, columnFamily, rowKey,
+								.addSuperColumn(context, columnFamily, rowKey,
 										columnName, convertToKey(context, key),
 										getBytes(getKey(context, persisted)),
 										timestamp);
@@ -331,7 +331,7 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 						Object persisted = context.persistObjectInternal(Array
 								.get(value, i), op, -1, StateManager.PC);
 
-						this.manager.AddSuperColumn(context, columnFamily,
+						this.manager.addSuperColumn(context, columnFamily,
 								rowKey, columnName, String.valueOf(i),
 								getBytes(getKey(this.context, persisted)),
 								timestamp);
@@ -344,7 +344,7 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 			}
 
 			// default case where we persist raw objects
-			manager.AddColumn(context, columnName, rowKey, columnName,
+			manager.addColumn(context, columnFamily, rowKey, columnName,
 					getBytes(value), timestamp);
 
 		} catch (Exception e) {
@@ -363,12 +363,12 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 			String columnName = getColumnName(metaData, fieldNumber);
 
 			if (value == null) {
-				manager.AddDelete(context, columnFamily, rowKey, columnName,
+				manager.addDelete(context, columnFamily, rowKey, columnName,
 						fieldNumber);
 				return;
 			}
 
-			manager.AddColumn(context, columnFamily, rowKey, columnName,
+			manager.addColumn(context, columnFamily, rowKey, columnName,
 					getBytes(value), timestamp);
 
 		} catch (Exception e) {

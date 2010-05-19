@@ -1,13 +1,15 @@
 /**
  * 
  */
-package org.datanucleus.store.cassandra.model;
+package org.datanucleus.store.cassandra.basic.model;
 
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.Inheritance;
 import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
+
+import org.datanucleus.store.cassandra.model.BaseEntity;
 
 
 
@@ -18,7 +20,7 @@ import javax.jdo.annotations.Persistent;
  */
 @PersistenceCapable(table = "PrimitiveObject", identityType = IdentityType.APPLICATION)
 @Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
-public class PrimitiveObject extends BaseEntity{
+public class EmbeddedObject extends BaseEntity{
 
 
 

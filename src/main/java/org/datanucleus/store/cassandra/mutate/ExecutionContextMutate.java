@@ -64,9 +64,9 @@ public class ExecutionContextMutate {
 	 * @param columnName
 	 * @param timestamp
 	 */
-	public void AddDelete(String columnFamily, String rowKey,
+	public void addDelete(String columnFamily, String rowKey,
 			String columnName, long timestamp) {
-		getMutation(columnFamily, rowKey).AddDelete(columnName, timestamp);
+		getMutation(columnFamily, rowKey).addDelete(columnName, timestamp);
 	}
 
 	/**
@@ -78,9 +78,9 @@ public class ExecutionContextMutate {
 	 * @param value
 	 * @param timestamp
 	 */
-	public void AddColumn(String columnFamily, String rowKey,
+	public void addColumn(String columnFamily, String rowKey,
 			String columnName, byte[] value, long timestamp) {
-		getMutation(columnFamily, rowKey).AddColumn(columnName, value,
+		getMutation(columnFamily, rowKey).addColumn(columnName, value,
 				timestamp);
 	}
 
@@ -95,10 +95,10 @@ public class ExecutionContextMutate {
 	 * @param value
 	 * @param timestamp
 	 */
-	public void AddSuperColumn(String columnFamily, String rowKey,
+	public void addSuperColumn(String columnFamily, String rowKey,
 			String superColumnName, String columnName, byte[] value,
 			long timestamp) {
-		getMutation(columnFamily, rowKey).AddSuperColumn(superColumnName,
+		getMutation(columnFamily, rowKey).addSuperColumn(superColumnName,
 				columnName, value, timestamp);
 	}
 

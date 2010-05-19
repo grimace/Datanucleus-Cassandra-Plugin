@@ -15,7 +15,10 @@ limitations under the License.
 Contributors :
     ...
  ***********************************************************************/
-package org.datanucleus.store.cassandra.model;
+package org.datanucleus.store.cassandra.map.model;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.Inheritance;
@@ -23,30 +26,35 @@ import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 
+import org.datanucleus.store.cassandra.model.BaseEntity;
+
 /**
  * An object with a collection to many objects
- * @author Todd Nine 
+ * 
+ * @author Todd Nine
  */
-@PersistenceCapable(table = "PackArray", identityType = IdentityType.APPLICATION)
+@PersistenceCapable(table = "PackMap", identityType = IdentityType.APPLICATION)
 @Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
-public class PackArray extends BaseEntity {
-	
-	
-	@Persistent(mappedBy="pack")
-	private CardArray[] cards;
-	
-	public PackArray(){
-		cards = new CardArray[2];
+public class PackMap extends BaseEntity {
+
+	@Persistent(mappedBy = "pack")
+	private Map<String, CardMap> cards;
+
+	public PackMap() {
+		cards = new  HashMap<String, CardMap>();
 	}
 
 	/**
 	 * @return the manyToOne
 	 */
-	public CardArray[] getCards() {
+	public Map<String, CardMap> getCards() {
 		return cards;
 	}
 	
-	
 
-	
+	public void AddCard(CardMap card){
+		this.cards.put(card.getName(), card);
+		card.setPack(this);
+	}
+
 }
