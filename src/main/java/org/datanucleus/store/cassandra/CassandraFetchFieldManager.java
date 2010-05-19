@@ -410,7 +410,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 				return null;
 			}
 
-			return getObject(column.value);
+			return convertFromString(ec, fieldMetaData.getTypeName(), getString(column.value));
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);

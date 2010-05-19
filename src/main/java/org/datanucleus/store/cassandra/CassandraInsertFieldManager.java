@@ -18,7 +18,8 @@ Contributors :
 package org.datanucleus.store.cassandra;
 
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getBytes;
-import static org.datanucleus.store.cassandra.utils.MetaDataUtils.*;
+import static org.datanucleus.store.cassandra.utils.MetaDataUtils.convertToKey;
+import static org.datanucleus.store.cassandra.utils.MetaDataUtils.getKey;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -35,6 +36,7 @@ import org.datanucleus.metadata.Relation;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.cassandra.mutate.BatchMutationManager;
+import org.datanucleus.store.mapped.exceptions.DatastoreFieldDefinitionException;
 
 /**
  * @author Todd Nine
@@ -315,7 +317,7 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 						// now we're persisted, create the supercolumn map
 						Object persisted = context.persistObjectInternal(map
 								.get(key), op, -1, StateManager.PC);
-						
+
 						this.manager
 								.addSuperColumn(context, columnFamily, rowKey,
 										columnName, convertToKey(context, key),
@@ -343,9 +345,20 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 				return;
 			}
 
-			// default case where we persist raw objects
-			manager.addColumn(context, columnFamily, rowKey, columnName,
-					getBytes(value), timestamp);
+			try {
+				String stringValue = convertToKey(context, value);
+
+				manager.addColumn(context, columnFamily, rowKey, columnName,
+						getBytes(stringValue), timestamp);
+			} catch (DatastoreFieldDefinitionException e) {
+
+				// TODO Handle embedded objects
+				throw new NucleusDataStoreException(
+						String
+								.format(
+										"Unable to save object %s.  The object must either be embedded, or have a defined ObjectStringConverter",
+										value), e);
+			}
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
