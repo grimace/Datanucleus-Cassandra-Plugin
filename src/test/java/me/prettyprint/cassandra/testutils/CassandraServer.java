@@ -47,7 +47,7 @@ public enum CassandraServer {
 	 * @throws IOException 
 	 * @throws TTransportException 
 	 */
-	public void Run() throws TTransportException, IOException, InterruptedException {
+	public void start() throws TTransportException, IOException, InterruptedException {
 		if (defaultPool == null) {
 			synchronized (INSTANCE) {
 				if (defaultPool == null) {
@@ -57,6 +57,10 @@ public enum CassandraServer {
 			}
 		}
 		
+	}
+	
+	public void stop(){
+		defaultPool.teardown();
 	}
 	
 	

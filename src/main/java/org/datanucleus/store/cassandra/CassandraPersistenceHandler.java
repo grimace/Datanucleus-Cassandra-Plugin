@@ -17,7 +17,6 @@ Contributors :
  ***********************************************************************/
 package org.datanucleus.store.cassandra;
 
-import static org.datanucleus.store.cassandra.utils.ByteConverter.getBytes;
 import static org.datanucleus.store.cassandra.utils.MetaDataUtils.getKey;
 
 import java.util.List;
@@ -29,12 +28,9 @@ import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
-import org.apache.cassandra.thrift.SuperColumn;
 import org.datanucleus.ObjectManager;
 import org.datanucleus.StateManager;
 import org.datanucleus.exceptions.NucleusDataStoreException;
-import org.datanucleus.exceptions.NucleusObjectNotFoundException;
-import org.datanucleus.exceptions.NucleusUserException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.store.AbstractPersistenceHandler;
 import org.datanucleus.store.ExecutionContext;
@@ -88,23 +84,9 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 			List<Column> columns = conn.getKeyspace().getSlice(key,
 					getColumnParent(metaData), getSliceprediCate(metaData));
 
-			List<SuperColumn> superColumns = null;
-
-			// we have collections get our superslices to retreive them
-			if (metaData.getMultivaluedMemberPositions().length > 0) {
-				superColumns = conn.getKeyspace().getSuperSlice(key,
-						getColumnParent(metaData), getSliceprediCate(metaData));
-			}
-
-			//do nothing, there's no data
-			if (columns == null || columns.size() == 0 ) {
-				return;
-			}
-
-			populateKeys(columns, metaData, key);
-
 			CassandraFetchFieldManager manager = new CassandraFetchFieldManager(
-					columns, superColumns, sm);
+					columns, sm);
+
 			sm.replaceFields(fieldNumbers, manager);
 
 		} catch (Exception e) {
@@ -178,25 +160,6 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 		}
 
-		// String key = getKey(sm);
-		// Stack<String> columnFamilies = new Stack<String>();
-		// columnFamilies.add(metaData.getTable());
-		//
-		// // now perform the batch update
-		// BatchMutation changes = new BatchMutation();
-		//
-		// for (Column column : updates) {
-		// changes.addInsertion(key, columnFamilies, column);
-		// }
-		//			
-		// for( SuperColumn superColumn: superColumns){
-		// changes.addSuperInsertion(key, columnFamilies, superColumn);
-		// }
-		//
-		// for (Deletion deletion : deletes) {
-		// changes.addDeletion(key, columnFamilies, deletion);
-		// }
-
 	}
 
 	private CassandraManagedConnection getConnection(StateManager sm) {
@@ -244,22 +207,5 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 		return sp;
 	}
-
-	private void populateKeys(List<Column> columns,
-			AbstractClassMetaData metaData, String keyValues) {
-
-		String[] pks = metaData.getPrimaryKeyMemberNames();
-
-		if (pks.length != 1) {
-			throw new NucleusUserException(
-					"The cassandra store currently only support one pk per class");
-		}
-
-		Column column = new Column(getBytes(pks[0]), getBytes(keyValues), 0);
-
-		columns.add(column);
-	}
-	
-
 
 }

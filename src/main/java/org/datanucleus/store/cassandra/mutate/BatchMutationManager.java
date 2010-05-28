@@ -96,7 +96,7 @@ public class BatchMutationManager {
 	}
 
 	/**
-	 * Add the super column with data to the current execution context operations
+	 * Add the super column with data to the current execution context operations Not currently used
 	 * @param context
 	 * @param columnFamily
 	 * @param rowKey
@@ -105,12 +105,12 @@ public class BatchMutationManager {
 	 * @param value
 	 * @param timestamp
 	 */
-	public void addSuperColumn(ExecutionContext context, String columnFamily,
-			String rowKey, String superColumnName, String columnName,
-			byte[] value, long timestamp) {
-		getMutations(context).addSuperColumn(columnFamily, rowKey,
-				superColumnName, columnName, value, timestamp);
-	}
+//	public void addSuperColumn(ExecutionContext context, String columnFamily,
+//			String rowKey, String superColumnName, String columnName,
+//			byte[] value, long timestamp) {
+//		getMutations(context).addSuperColumn(columnFamily, rowKey,
+//				superColumnName, columnName, value, timestamp);
+//	}
 
 	/**
 	 * Get the mutations for this execution context

@@ -18,6 +18,7 @@ Contributors :
 
 package org.datanucleus.store.cassandra.basic;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -31,8 +32,8 @@ import javax.jdo.PersistenceManagerFactory;
 import me.prettyprint.cassandra.testutils.CassandraServer;
 
 import org.apache.thrift.transport.TTransportException;
-import org.datanucleus.store.cassandra.basic.model.UnitData;
 import org.datanucleus.store.cassandra.basic.model.PrimitiveObject;
+import org.datanucleus.store.cassandra.basic.model.UnitData;
 import org.datanucleus.store.cassandra.basic.model.UnitDataKey;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -58,7 +59,7 @@ public class PrimitiveTests {
 	@BeforeClass
 	public static void setup() throws TTransportException, IOException,
 			InterruptedException {
-		CassandraServer.INSTANCE.Run();
+		CassandraServer.INSTANCE.start();
 		
 		 pmf = JDOHelper
 			.getPersistenceManagerFactory("Test");
@@ -140,6 +141,39 @@ public class PrimitiveTests {
 		UnitData stored = (UnitData) pm2.getObjectById(UnitData.class, new UnitDataKey(key.getCreatedDate(), key.getUnitId()).toString());
 		
 		assertEquals(key, stored);
+		
+	
+
+		
+		
+
+	}
+	
+	/**
+	 * Tests an object is serialized as bytes properly
+	 */
+	@Test
+	public void testByteArray() {
+		
+		UnitData key = new UnitData();
+		key.setCreatedDate(Calendar.getInstance().getTime());
+		
+		key.setUnitId("123456");
+		
+		key.setData(new byte[]{ 0x0F, 0x0A});
+		
+		PersistenceManager pm = pmf.getPersistenceManager();
+		
+		pm.makePersistent(key);
+		
+		PersistenceManager pm2 = pmf.getPersistenceManager();
+
+		// now retrieve a copy
+		UnitData stored = (UnitData) pm2.getObjectById(UnitData.class, new UnitDataKey(key.getCreatedDate(), key.getUnitId()).toString());
+		
+		assertEquals(key, stored);
+		
+		assertArrayEquals(  key.getData(), stored.getData());
 		
 	
 

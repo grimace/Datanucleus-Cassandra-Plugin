@@ -37,7 +37,7 @@ import org.datanucleus.store.ExecutionContext;
 public class ExecutionContextMutate {
 
 	// our map by object class and column family
-	private Map<Key, ColumnFamilyMutate> mutations = new HashMap<Key, ColumnFamilyMutate>();
+	private Map<String, Map<String, ColumnFamilyMutate>> mutations = new HashMap<String, Map<String, ColumnFamilyMutate>>();
 
 	private ExecutionContext ctx;
 	private Stack<Object> instances;
@@ -134,15 +134,23 @@ public class ExecutionContextMutate {
 	 */
 	private ColumnFamilyMutate getMutation(String columnFamily, String rowKey) {
 
-		Key key = new Key(columnFamily, rowKey);
+		// Key key = new Key(columnFamily, rowKey);
 
-		ColumnFamilyMutate family = mutations.get(key);
+		Map<String, ColumnFamilyMutate> cfMutations = mutations
+				.get(columnFamily);
+
+		if (cfMutations == null) {
+			cfMutations = new HashMap<String, ColumnFamilyMutate>();
+			mutations.put(columnFamily, cfMutations);
+		}
+
+		ColumnFamilyMutate family = cfMutations.get(rowKey);
 
 		if (family == null) {
 
 			family = new ColumnFamilyMutate(columnFamily, rowKey);
 
-			mutations.put(key, family);
+			cfMutations.put(rowKey, family);
 		}
 
 		return family;
@@ -153,27 +161,30 @@ public class ExecutionContextMutate {
 
 		BatchMutation changes = new BatchMutation();
 
-		for (ColumnFamilyMutate columnFamily : mutations.values()) {
+		for (String cfName : mutations.keySet()) {
 
 			// tell cassandra which family to perform the op on
 			Stack<String> columnFamilies = new Stack<String>();
-			columnFamilies.add(columnFamily.getColumnFamily());
+			columnFamilies.add(cfName);
 
-			String key = columnFamily.getKey();
+			for (ColumnFamilyMutate columnFamily : mutations.get(cfName)
+					.values()) {
 
-			// now build all the ops from the current context.
+				String key = columnFamily.getKey();
 
-		
-			for (Column column : columnFamily.getColumns()) {
-				changes.addInsertion(key, columnFamilies, column);
-			}
+				// now build all the ops from the current context.
 
-			for (SuperColumn superColumn : columnFamily.getSuperColumns()) {
-				changes.addSuperInsertion(key, columnFamilies, superColumn);
-			}
+				for (Column column : columnFamily.getColumns()) {
+					changes.addInsertion(key, columnFamilies, column);
+				}
 
-			for (Deletion deletion : columnFamily.getDeletes()) {
-				changes.addDeletion(key, columnFamilies, deletion);
+				for (SuperColumn superColumn : columnFamily.getSuperColumns()) {
+					changes.addSuperInsertion(key, columnFamilies, superColumn);
+				}
+
+				for (Deletion deletion : columnFamily.getDeletes()) {
+					changes.addDeletion(key, columnFamilies, deletion);
+				}
 			}
 
 		}

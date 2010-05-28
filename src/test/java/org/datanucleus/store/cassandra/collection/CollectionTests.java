@@ -57,7 +57,7 @@ public class CollectionTests {
 	@BeforeClass
 	public static void setup() throws TTransportException, IOException,
 			InterruptedException {
-		CassandraServer.INSTANCE.Run();
+		CassandraServer.INSTANCE.start();
 		 pmf = JDOHelper
 			.getPersistenceManagerFactory("Test");
 	}

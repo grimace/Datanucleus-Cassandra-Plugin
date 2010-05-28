@@ -18,16 +18,19 @@ Contributors :
 package org.datanucleus.store.cassandra;
 
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getBytes;
-import static org.datanucleus.store.cassandra.utils.MetaDataUtils.convertToKey;
 import static org.datanucleus.store.cassandra.utils.MetaDataUtils.getKey;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.cassandra.thrift.ColumnPath;
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.StateManager;
+import org.datanucleus.api.ApiAdapter;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
@@ -36,7 +39,6 @@ import org.datanucleus.metadata.Relation;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.cassandra.mutate.BatchMutationManager;
-import org.datanucleus.store.mapped.exceptions.DatastoreFieldDefinitionException;
 
 /**
  * @author Todd Nine
@@ -83,10 +85,6 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
-			if (isKey(metaData, fieldNumber)) {
-				return;
-			}
-
 			String columnName = getColumnName(metaData, fieldNumber);
 
 			manager.addColumn(context, columnFamily, rowKey, columnName,
@@ -102,10 +100,6 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
-			if (isKey(metaData, fieldNumber)) {
-				return;
-			}
-
 			String columnName = getColumnName(metaData, fieldNumber);
 			manager.addColumn(context, columnFamily, rowKey, columnName,
 					new byte[] { value }, timestamp);
@@ -119,10 +113,6 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	public void storeCharField(int fieldNumber, char value) {
 
 		try {
-
-			if (isKey(metaData, fieldNumber)) {
-				return;
-			}
 
 			String columnName = getColumnName(metaData, fieldNumber);
 			manager.addColumn(context, columnFamily, rowKey, columnName,
@@ -138,10 +128,6 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
-			if (isKey(metaData, fieldNumber)) {
-				return;
-			}
-
 			String columnName = getColumnName(metaData, fieldNumber);
 			manager.addColumn(context, columnFamily, rowKey, columnName,
 					getBytes(value), timestamp);
@@ -155,10 +141,6 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	public void storeFloatField(int fieldNumber, float value) {
 
 		try {
-
-			if (isKey(metaData, fieldNumber)) {
-				return;
-			}
 
 			String columnName = getColumnName(metaData, fieldNumber);
 			manager.addColumn(context, columnFamily, rowKey, columnName,
@@ -174,10 +156,6 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
-			if (isKey(metaData, fieldNumber)) {
-				return;
-			}
-
 			String columnName = getColumnName(metaData, fieldNumber);
 			manager.addColumn(context, columnFamily, rowKey, columnName,
 					getBytes(value), timestamp);
@@ -192,10 +170,6 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
-			if (isKey(metaData, fieldNumber)) {
-				return;
-			}
-
 			String columnName = getColumnName(metaData, fieldNumber);
 			manager.addColumn(context, columnFamily, rowKey, columnName,
 					getBytes(value), timestamp);
@@ -208,10 +182,6 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	@Override
 	public void storeShortField(int fieldNumber, short value) {
 		try {
-
-			if (isKey(metaData, fieldNumber)) {
-				return;
-			}
 
 			String columnName = getColumnName(metaData, fieldNumber);
 			manager.addColumn(context, columnFamily, rowKey, columnName,
@@ -229,13 +199,12 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	public void storeObjectField(int fieldNumber, Object value) {
 		try {
 
-			// we don't serialize keys here
-			if (isKey(metaData, fieldNumber)) {
-				return;
-			}
-
 			// TODO make cascading saves happen
 			// return;
+			//			
+			// if(isKey(metaData, fieldNumber)){
+			// return;
+			// }
 
 			String columnName = getColumnName(metaData, fieldNumber);
 
@@ -280,7 +249,6 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 						timestamp);
 
 				return;
-				// add it to a super column on this object
 			}
 
 			if (relationType == Relation.MANY_TO_MANY_BI
@@ -293,72 +261,104 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 				if (fieldMetaData.hasCollection()) {
 
-					int index = 0;
+					List<String> serializedKeys = new ArrayList<String>(
+							((Collection) value).size());
+
+					Object persisted = null;
 
 					for (Object element : (Collection) value) {
 						// persist the object
-						Object persisted = context.persistObjectInternal(
-								element, op, -1, StateManager.PC);
+						persisted = context.persistObjectInternal(element, op,
+								-1, StateManager.PC);
 
-						this.manager.addSuperColumn(context, columnFamily,
-								rowKey, columnName, String.valueOf(index),
-								getBytes(getKey(this.context, persisted)),
-								timestamp);
+						serializedKeys.add(getKey(this.context, persisted));
 
-						index++;
 					}
+
+					this.manager.addColumn(context, columnFamily, rowKey,
+							columnName, getBytes(serializedKeys), timestamp);
 
 				} else if (fieldMetaData.hasMap()) {
 
+					ApiAdapter adapter = context.getApiAdapter();
+
 					Map map = ((Map) value);
+					Object mapValue = null;
+
+					Map<Object, Object> serializedMap = new HashMap<Object, Object>(
+							map.size());
+					Object serializedKey = null;
+					Object serializedValue = null;
+					Object persisted = null;
+
 					// get each element and persist it.
-					for (Object key : map.keySet()) {
+					for (Object mapKey : map.keySet()) {
 
+						mapValue = map.get(mapKey);
 						// now we're persisted, create the supercolumn map
-						Object persisted = context.persistObjectInternal(map
-								.get(key), op, -1, StateManager.PC);
 
-						this.manager
-								.addSuperColumn(context, columnFamily, rowKey,
-										columnName, convertToKey(context, key),
-										getBytes(getKey(context, persisted)),
-										timestamp);
+						// handle the case if our key is a persitable class
+						// itself
+						if (adapter.isPersistable(mapKey)) {
+
+							persisted = context.persistObjectInternal(mapKey,
+									op, -1, StateManager.PC);
+
+							serializedKey = getKey(this.context, persisted);
+						} else {
+							serializedKey = mapKey;
+						}
+
+						// persist the value if it can be persisted
+						if (adapter.isPersistable(mapValue)) {
+
+							persisted = context.persistObjectInternal(mapValue,
+									op, -1, StateManager.PC);
+
+							serializedValue = getKey(this.context, persisted);
+						} else {
+							serializedKey = mapValue;
+						}
+
+						serializedMap.put(serializedKey, serializedValue);
+
+						//						
+						// this.manager
+						// .addSuperColumn(context, columnFamily, rowKey,
+						// columnName, convertToKey(context, key),
+						// getBytes(getKey(context, persisted)),
+						// timestamp);
 
 					}
+
+					this.manager.addColumn(context, columnFamily, rowKey,
+							columnName, getBytes(serializedMap), timestamp);
 
 				} else if (fieldMetaData.hasArray()) {
 
+					List<String> serializedKeys = new ArrayList<String>(Array
+							.getLength(value));
+
+					Object persisted = null;
+
 					for (int i = 0; i < Array.getLength(value); i++) {
 						// persist the object
-						Object persisted = context.persistObjectInternal(Array
-								.get(value, i), op, -1, StateManager.PC);
+						persisted = context.persistObjectInternal(Array.get(
+								value, i), op, -1, StateManager.PC);
 
-						this.manager.addSuperColumn(context, columnFamily,
-								rowKey, columnName, String.valueOf(i),
-								getBytes(getKey(this.context, persisted)),
-								timestamp);
-
+						serializedKeys.add(getKey(this.context, persisted));
 					}
+
+					this.manager.addColumn(context, columnFamily, rowKey,
+							columnName, getBytes(serializedKeys), timestamp);
 
 				}
 
 				return;
 			}
 
-			try {
-				String stringValue = convertToKey(context, value);
-
-				manager.addColumn(context, columnFamily, rowKey, columnName,
-						getBytes(stringValue), timestamp);
-			} catch (DatastoreFieldDefinitionException e) {
-
-				// TODO Handle embedded objects
-				throw new NucleusDataStoreException(
-						String
-								.format(
-										"Unable to save object %s.  The object must either be embedded, or have a defined ObjectStringConverter",
-										value), e);
-			}
+			// default case where we persist raw objects
+			manager.addColumn(context, columnFamily, rowKey, columnName,getBytes(value), timestamp);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -368,10 +368,6 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	@Override
 	public void storeStringField(int fieldNumber, String value) {
 		try {
-
-			if (isKey(metaData, fieldNumber)) {
-				return;
-			}
 
 			String columnName = getColumnName(metaData, fieldNumber);
 
