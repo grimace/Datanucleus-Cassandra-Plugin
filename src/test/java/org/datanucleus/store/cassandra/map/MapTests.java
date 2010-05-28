@@ -95,9 +95,9 @@ public class MapTests {
 
 		assertNotNull(saved.getCards());
 
-		assertEquals(saved.getCards().get(aceSpades.getName()), aceSpades);
+		assertEquals(aceSpades, saved.getCards().get(aceSpades.getName()));
 
-		assertEquals(saved.getCards().get(jackHearts.getName()), jackHearts);
+		assertEquals(jackHearts, saved.getCards().get(jackHearts.getName()));
 
 	}
 	
@@ -124,9 +124,9 @@ public class MapTests {
 
 		assertNotNull(saved.getCards());
 
-		assertEquals(saved.getCards().get(aceSpades.getTime()), aceSpades);
+		assertEquals(aceSpades, saved.getCards().get(aceSpades.getTime()));
 
-		assertEquals(saved.getCards().get(jackHearts.getTime()), jackHearts);
+		assertEquals(jackHearts, saved.getCards().get(jackHearts.getTime()));
 
 	}
 

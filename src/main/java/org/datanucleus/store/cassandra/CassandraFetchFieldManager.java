@@ -363,16 +363,13 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 							context.getClassLoaderResolver(),
 							context.getMetaDataManager());
 					
-					Map<Object, Object> outputMap = new HashMap<Object, Object>();
 
 //					Map map = (Map) value;
 					ApiAdapter api = context.getApiAdapter();
 					
-					Set keys = map.keySet();
-					Iterator iter = keys.iterator();
 					
-					while (iter.hasNext()) {
-						Object mapKey = iter.next();
+					for(Object mapKey: serializedMap.keySet()) {
+						
 						Object key = null;
 
 						if (adapter.isPersistable(keyClass)) {
@@ -382,7 +379,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 							key = mapKey;
 						}
 
-						Object mapValue = map.get(key);
+						Object mapValue = serializedMap.get(key);
 						Object value = null;
 
 						if (adapter.isPersistable(valueClass)) { 
@@ -391,11 +388,11 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 							value = mapValue;
 						}
 
-						outputMap.put(key, value);
+						map.put(key, value);
 					}
 					
 
-					return stateManager.wrapSCOField(fieldNumber, outputMap, false, false, true);
+					return stateManager.wrapSCOField(fieldNumber, map, false, false, true);
 
 					// throw new NucleusException(
 					// "maps are currently unimplemented.");
