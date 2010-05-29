@@ -21,7 +21,7 @@ Contributors:
 <plugin>
     <!-- STORE MANAGER -->
     <extension point="org.datanucleus.store_manager">
-        <store-manager class-name="org.datanucleus.store.cassandra.CassandraStoreManager" key="cassandra" url-key="cassandra"/>
+        <store-manager class-name="com.spidertracks.datanucleus.CassandraStoreManager" key="cassandra" url-key="cassandra"/>
     </extension>
 
     <!-- QUERY LANGUAGES TODO
@@ -32,13 +32,13 @@ Contributors:
 
     <!-- CONNECTION FACTORY -->
     <extension point="org.datanucleus.store_connectionfactory">
-        <connectionfactory name="cassandra" class-name="org.datanucleus.store.cassandra.ConnectionFactoryImpl" transactional="true"
+        <connectionfactory name="cassandra" class-name="com.spidertracks.datanucleus.ConnectionFactoryImpl" transactional="true"
             datastore="cassandra"/>
     </extension> 
     
      <!-- CASSANDRA'S RECOMMENDED UUID  -->
     <extension point="org.datanucleus.store_valuegenerator">
-    	<valuegenerator name="uuid-cassandra" class-name="org.datanucleus.store.cassandra.identity.CassandraUUIDGenerator" unique="true"/>
+    	<valuegenerator name="uuid-cassandra" class-name="com.spidertracks.datanucleus.identity.CassandraUUIDGenerator" unique="true"/>
     </extension> 
     
     <!-- Extension point for custom serialization of values -->
@@ -46,19 +46,19 @@ Contributors:
     
     	<!-- keep all the default properties, but override the string converter for cassandra -->
            <java-type name="java.util.Date" persistent="true" dfg="true" embedded="true" wrapper-type="org.datanucleus.sco.simple.Date"
-            string-converter="org.datanucleus.store.cassandra.identity.DateConverter"
+            string-converter="com.spidertracks.datanucleus.identity.DateConverter"
             long-converter="org.datanucleus.store.types.DateLongConverter" override="true"/>
-        <java-type name="com.eaio.uuid.UUID" string-converter="org.datanucleus.store.cassandra.identity.UUIDConverter"  persistent="true" dfg="true" embedded="true"  />
+        <java-type name="com.eaio.uuid.UUID" string-converter="com.spidertracks.datanucleus.identity.UUIDConverter"  persistent="true" dfg="true" embedded="true"  />
     </extension>
     
     <!-- Extension for
      <extension point="org.datanucleus.store_datastoreidentity">
-        <datastoreidentity name="date-cassandra" class-name="org.datanucleus.store.cassandra.identity.DateImpl" unique="true"/>
-      <datastoreidentity name="uuid-cassandra" class-name="org.datanucleus.store.cassandra.identity.UuidImpl" unique="true"/>
+        <datastoreidentity name="date-cassandra" class-name="com.spidertracks.datanucleus.identity.DateImpl" unique="true"/>
+      <datastoreidentity name="uuid-cassandra" class-name="com.spidertracks.datanucleus.identity.UuidImpl" unique="true"/>
     </extension>
     
     <extension point="org.datanucleus.identity_translator">
-        <identitytranslator name="cassandratranslator" class-name="org.datanucleus.store.cassandra.identity.CassandraIdentityTranslator"/>
+        <identitytranslator name="cassandratranslator" class-name="com.spidertracks.datanucleus.identity.CassandraIdentityTranslator"/>
     </extension> -->
 
 </plugin>
