@@ -50,18 +50,15 @@ public class CassandraStoreManager extends AbstractStoreManager
     {
         super("cassandra", clr, omfContext);
         
-        // Handler for metadata
-//        metadataListener = new HBaseMetaDataListener(this);
-       // omfContext.getMetaDataManager().registerListener(metadataListener);
-
+ 
         // Handler for persistence process
         persistenceHandler = new CassandraPersistenceHandler(this);
 
-//        hbaseConfig = new HBaseConfiguration();
 
         PersistenceConfiguration conf = omfContext.getPersistenceConfiguration();
         boolean autoCreateSchema = conf.getBooleanProperty("datanucleus.autoCreateSchema");
         
+//       Cassandra can't do this until 0.7
         if (autoCreateSchema)
         {
             autoCreateTables = true;
@@ -147,10 +144,7 @@ public class CassandraStoreManager extends AbstractStoreManager
 	}
 
     
-//    public HBaseConfiguration getHbaseConfig()
-//    {
-//        return hbaseConfig;
-//    }
+
     
     public boolean isAutoCreateColumns()
     {

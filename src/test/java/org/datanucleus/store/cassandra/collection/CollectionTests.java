@@ -94,7 +94,47 @@ public class CollectionTests {
 
 		assertTrue(saved.getCards().contains(jackHearts));
 
+
 	}
+	
+
+	@Test
+	public void testBasicPeristAndLoadBiDirectionalCollection() throws Exception {
+
+		Pack pack = new Pack();
+
+		Card aceSpades = new Card();
+		aceSpades.setName("Ace of Spades");
+		pack.AddCard(aceSpades);
+
+		Card jackHearts = new Card();
+		jackHearts.setName("Jack of Hearts");
+		pack.AddCard(jackHearts);
+
+		pmf.getPersistenceManager().makePersistent(pack);
+
+		Pack saved = pmf.getPersistenceManager().getObjectById(Pack.class,
+				pack.getId());
+
+		assertEquals(pack, saved);
+
+		assertNotNull(saved.getCards());
+
+		assertTrue(saved.getCards().contains(aceSpades));
+
+		assertTrue(saved.getCards().contains(jackHearts));
+		
+		//saved ace spades
+		Card savedAceSpades = saved.getCards().get(saved.getCards().indexOf(aceSpades));
+		
+		assertEquals(pack, savedAceSpades.getPack());
+		
+		Card savedJackHeartsSpades = saved.getCards().get(saved.getCards().indexOf(jackHearts));
+		
+		assertEquals(pack, savedJackHeartsSpades.getPack());
+
+	}
+
 
 
 }

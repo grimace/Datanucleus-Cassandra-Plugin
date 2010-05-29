@@ -32,8 +32,7 @@ public class CassandraFieldManager extends AbstractFieldManager {
 	protected static String getColumnName(AbstractClassMetaData metaData,
 			int absoluteFieldNumber) {
 
-		AbstractMemberMetaData memberMetaData = metaData
-				.getMetaDataForManagedMemberAtAbsolutePosition(absoluteFieldNumber);
+		AbstractMemberMetaData memberMetaData = metaData.getMetaDataForManagedMemberAtAbsolutePosition(absoluteFieldNumber);
 
 		// Try the first column if specified
 		ColumnMetaData[] colmds = memberMetaData.getColumnMetaData();

@@ -30,10 +30,8 @@ import static org.datanucleus.store.cassandra.utils.ByteConverter.getString;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.cassandra.thrift.Column;
 import org.datanucleus.ClassLoaderResolver;
@@ -43,6 +41,7 @@ import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
+import org.datanucleus.metadata.MetaDataManager;
 import org.datanucleus.metadata.Relation;
 import org.datanucleus.sco.SCOUtils;
 import org.datanucleus.store.ExecutionContext;
@@ -58,6 +57,8 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 	private AbstractClassMetaData metaData;
 	private StateManager stateManager;
 	private ExecutionContext context;
+	private MetaDataManager metaDataManager;
+	private ClassLoaderResolver clr;
 
 	/**
 	 * @param columns
@@ -69,6 +70,8 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 		this.stateManager = stateManager;
 		this.metaData = stateManager.getClassMetaData();
 		this.context = stateManager.getObjectManager().getExecutionContext();
+		this.metaDataManager = this.context.getMetaDataManager();
+		this.clr = this.context.getClassLoaderResolver();
 
 		// rather than iterate over every field call for O(n) it's faster to
 		// take our O(n) hit up front then perform an O(1) lookup. Sorting and
@@ -76,10 +79,10 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 		this.columns = new HashMap<String, Column>();
 
 		for (Column column : columns) {
-			// TODO super columns are returned as nulls. This may be a bug
-			if (column == null) {
-				continue;
-			}
+//			// TODO super columns
+//			if (column == null) {
+//				continue;
+//			}
 
 			this.columns.put(getString(column.name), column);
 		}
@@ -233,28 +236,24 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Object fetchObjectField(int fieldNumber) {
 		try {
 
 			
 			String columnName = getColumnName(metaData, fieldNumber);
+			Column column = columns.get(columnName);
+			
 
-//			// check if it's an identity. If so we'll need to de-serialize it
-//			// from a string to an object using the converter utils
-//			if (isKey(this.metaData, fieldNumber)) {
-//
-//				Column column = this.columns.get(columnName);
-//
-//				return getKeyValue(this.stateManager, this.metaData,
-//						getString(column.value));
-//
-//			}
+			// No object defined
+			if (column == null) {
+				return null;
+			}
 
-			ClassLoaderResolver clr = context.getClassLoaderResolver();
-			AbstractMemberMetaData fieldMetaData = stateManager
-					.getClassMetaData()
-					.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
+			
+			AbstractMemberMetaData fieldMetaData = this.metaData.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
+			
 			int relationType = fieldMetaData.getRelationType(clr);
 
 			if (relationType == Relation.ONE_TO_ONE_BI
@@ -268,29 +267,17 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 							"Embedded objects are currently unimplemented.");
 				}
 
-				// // Stored as a String reference, so retrieve the string form
-				// of the identity, and find the object
-				// String idStr = cell.getRichStringCellValue().getString();
-				//		            
-				//		            
-				// if (idStr == null)
-				// {
-				// return null;
-				// }
-				//
-				// if (idStr.startsWith("[") && idStr.endsWith("]"))
-				// {
-				// idStr = idStr.substring(1, idStr.length()-1);
-				// AbstractClassMetaData relatedCmd =
-				// ec.getMetaDataManager().getMetaDataForClass(fieldMetaData.getType(),
-				// clr);
-				// return getObjectFromIdString(idStr, relatedCmd);
-				// }
-				// else
-				// {
-				// return null;
-				// }
+				String key = getString(column.getValue());
+				
+				AbstractClassMetaData metaData = this.metaDataManager.getMetaDataForClass(fieldMetaData.getType(), clr);
+				
+	
+				Object object = getObjectFromIdString(key, metaData	);
+				
 
+				return stateManager.wrapSCOField(fieldNumber, object, false,	false, true);
+				
+			
 			} else if (relationType == Relation.MANY_TO_MANY_BI
 					|| relationType == Relation.ONE_TO_MANY_BI
 					|| relationType == Relation.ONE_TO_MANY_UNI) {
@@ -300,8 +287,9 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 					
 					
 					Collection<Object> coll;
+					
 					try {
-						Class instanceType = SCOUtils.getContainerInstanceType(
+						Class<?> instanceType = SCOUtils.getContainerInstanceType(
 								fieldMetaData.getType(), fieldMetaData
 										.getOrderMetaData() != null);
 						coll = (Collection<Object>) instanceType.newInstance();
@@ -318,9 +306,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 					List<String> serializedIdList = getObject(columns.get(columnName).getValue());
 					
 					AbstractClassMetaData elementCmd = fieldMetaData
-					.getCollection().getElementClassMetaData(
-							context.getClassLoaderResolver(),
-							context.getMetaDataManager());
+					.getCollection().getElementClassMetaData(clr, metaDataManager);
 					
 					for (String id : serializedIdList) {
 
@@ -335,7 +321,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 					Map<Object, Object> map;
 
 					try {
-						Class instanceType = SCOUtils.getContainerInstanceType(
+						Class<?> instanceType = SCOUtils.getContainerInstanceType(
 								fieldMetaData.getType(), fieldMetaData
 										.getOrderMetaData() != null);
 						map = (Map<Object, Object>) instanceType.newInstance();
@@ -355,18 +341,14 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 					
 					AbstractClassMetaData keyCmd = fieldMetaData
 					.getMap().getKeyClassMetaData(
-							context.getClassLoaderResolver(),
-							context.getMetaDataManager());
+							clr,
+							metaDataManager);
 					
 					AbstractClassMetaData valueCmd = fieldMetaData
 					.getMap().getValueClassMetaData(
-							context.getClassLoaderResolver(),
-							context.getMetaDataManager());
-					
-
-//					Map map = (Map) value;
-					ApiAdapter api = context.getApiAdapter();
-					
+							clr,
+							metaDataManager);
+		
 					
 					for(Object mapKey: serializedMap.keySet()) {
 						
@@ -394,8 +376,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 
 					return stateManager.wrapSCOField(fieldNumber, map, false, false, true);
 
-					// throw new NucleusException(
-					// "maps are currently unimplemented.");
+				
 				} else if (fieldMetaData.getType().isArray()) {
 
 					
@@ -406,14 +387,14 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 					
 					AbstractClassMetaData elementCmd = fieldMetaData
 					.getArray().getElementClassMetaData(
-							context.getClassLoaderResolver(),
-							context.getMetaDataManager());
+							clr,
+							metaDataManager);
 
 					for (int i = 0; i < keys.size(); i ++) {
-						//
+						
 						Object element = getObjectFromIdString(keys.get(i), elementCmd);
 
-						Array.set(array, Integer.valueOf(i),			element);
+						Array.set(array, Integer.valueOf(i), element);
 					}
 
 					return stateManager.wrapSCOField(fieldNumber, array, false,
@@ -422,13 +403,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 
 			}
 
-			Column column = this.columns.get(columnName);
-
-			// No object defined
-			if (column == null) {
-				return null;
-			}
-
+		
 			return getObject(column.value);
 
 		} catch (Exception e) {
@@ -502,9 +477,6 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 	protected Object getObjectFromIdString(String idStr,
 			AbstractClassMetaData cmd) {
 
-		ExecutionContext ec = stateManager.getObjectProvider()
-				.getExecutionContext();
-		ClassLoaderResolver clr = ec.getClassLoaderResolver();
 
 		int[] pkPositions = cmd.getPKMemberPositions();
 
@@ -512,17 +484,19 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 				.getMetaDataForManagedMemberAtAbsolutePosition(pkPositions[0]);
 
 		// now get the converter based on the type
-		ObjectStringConverter converter = ec.getTypeManager()
+		ObjectStringConverter converter = this.context.getTypeManager()
 				.getStringConverter(metaData.getType());
 
 		// convert it to an instance of the type
 		Object value = converter.toObject(idStr);
 
-		Class cls = clr.classForName(cmd.getFullClassName());
+		Class<?> cls = clr.classForName(cmd.getFullClassName());
 
 		Object id = stateManager.getObjectManager().newObjectId(cls, value);
 
-		return stateManager.getObjectManager().findObject(id, true, true, null);
+		//TODO TN, are we sure we don't want to validate?  Doing so causes a recursive load issue
+		return stateManager.getObjectManager().findObject(id, false, false, cmd.getFullClassName());
 
 	}
+	
 }

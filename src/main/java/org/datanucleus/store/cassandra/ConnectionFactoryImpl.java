@@ -99,7 +99,6 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 	public ManagedConnection createManagedConnection(Object poolKey,
 			Map transactionOptions) {
 
-		// TODO T.N. clean this up
 		try {
 			return new CassandraManagedConnection(this.pool, this.keyspace);
 		} catch (Exception e) {
