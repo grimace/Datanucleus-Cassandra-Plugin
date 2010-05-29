@@ -178,11 +178,11 @@ public class ByteConverterTest {
 	 */
 	@Test
 	public void testGetObject() throws IOException, ClassNotFoundException {
-		TestClass orig = new TestClass();
+		SerializedClass orig = new SerializedClass();
 
 		byte[] bytes = ByteConverter.getBytes(orig);
 
-		TestClass serialized =  ByteConverter.getObject(bytes);
+		SerializedClass serialized =  ByteConverter.getObject(bytes);
 
 		assertEquals(orig, serialized);
 	}

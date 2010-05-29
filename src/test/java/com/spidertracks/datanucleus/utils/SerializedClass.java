@@ -24,7 +24,7 @@ import java.io.Serializable;
  *
  */
 
-public class TestClass implements Serializable{
+public class SerializedClass implements Serializable{
 	
 	/**
 	 * 
@@ -52,7 +52,7 @@ public class TestClass implements Serializable{
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		TestClass other = (TestClass) obj;
+		SerializedClass other = (SerializedClass) obj;
 		if (testBool != other.testBool)
 			return false;
 		if (testVal != other.testVal)
