@@ -20,6 +20,7 @@ package org.datanucleus.store.cassandra;
 import static org.datanucleus.store.cassandra.utils.ByteConverter.getBytes;
 import static org.datanucleus.store.cassandra.utils.MetaDataUtils.getKey;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -234,9 +235,11 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 				// identity in the cell
 
 				if (fieldMetaData.isEmbedded()) {
-					// TODO Handle embedded objects
-					throw new NucleusDataStoreException(
-							"Embedded objects are currently unimplemented.");
+
+						throw new NucleusDataStoreException(
+								"Embedded objects are unsupported.  Mark the object as persistent and use a serializable class instead");
+
+				
 				}
 
 				Object persisted = context.persistObjectInternal(value, op, -1,
@@ -358,7 +361,8 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 			}
 
 			// default case where we persist raw objects
-			manager.addColumn(context, columnFamily, rowKey, columnName,getBytes(value), timestamp);
+			manager.addColumn(context, columnFamily, rowKey, columnName,
+					getBytes(value), timestamp);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);

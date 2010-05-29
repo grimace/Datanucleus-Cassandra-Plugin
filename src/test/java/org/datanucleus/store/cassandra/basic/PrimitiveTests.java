@@ -25,6 +25,7 @@ import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import java.util.Calendar;
 
+import javax.jdo.JDOException;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
@@ -32,6 +33,7 @@ import javax.jdo.PersistenceManagerFactory;
 import me.prettyprint.cassandra.testutils.CassandraServer;
 
 import org.apache.thrift.transport.TTransportException;
+import org.datanucleus.store.cassandra.basic.model.EmbeddedObject;
 import org.datanucleus.store.cassandra.basic.model.PrimitiveObject;
 import org.datanucleus.store.cassandra.basic.model.UnitData;
 import org.datanucleus.store.cassandra.basic.model.UnitDataKey;
@@ -174,6 +176,23 @@ public class PrimitiveTests {
 		assertEquals(key, stored);
 		
 		assertArrayEquals(  key.getData(), stored.getData());
+		
+	
+
+		
+		
+
+	}
+	
+	/**
+	 * Tests an object is serialized as bytes properly
+	 */
+	@Test(expected=JDOException.class)
+	public void testEmbeddedObject() {
+		
+		EmbeddedObject object = new EmbeddedObject();
+		
+		pmf.getPersistenceManager().makePersistent(object);
 		
 	
 
