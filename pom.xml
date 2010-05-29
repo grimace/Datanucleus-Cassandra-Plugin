@@ -6,12 +6,22 @@
 	<version>0.0.1-SNAPSHOT</version>
 
 	<repositories>
-		<repository>
-			<id>local.repository</id>
-			<url>file:../../local.repository/trunk</url>
-			<layout>legacy</layout>
-		</repository>
 
+		<repository>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>interval:30</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+				<updatePolicy>daily</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</snapshots>
+			<id>eaio.com</id>
+			<name>eaio.com repository</name>
+			<url>http://eaio.com/maven2</url>
+		</repository>
 		<repository>
 			<id>DN_M2_Repo</id>
 			<url>http://www.datanucleus.org/downloads/maven2/</url>
@@ -24,95 +34,93 @@
 			used as per cassandra's recommended UUID generation
 			http://johannburkard.de/software/uuid/
 		-->
+		<dependency>
+			<groupId>javax.jdo</groupId>
+			<artifactId>jdo2-api</artifactId>
+			<version>[2.3-ec, 3.0)</version>
+		</dependency>
+		<dependency>
+			<groupId>com.eaio.uuid</groupId>
+			<artifactId>uuid</artifactId>
+			<version>3.2</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.datanucleus</groupId>
 			<artifactId>datanucleus-core</artifactId>
 			<version>2.0.4</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>me.prettyprint</groupId>
 			<artifactId>hector</artifactId>
-			<version>0.6.0-11</version>
-			<type>jar</type>
-			<systemPath>${basedir}/lib/hector-0.6.0-11.jar</systemPath>
-			<scope>system</scope>
-		</dependency>
-
-
-		<dependency>
-			<groupId>libthrift</groupId>
-			<artifactId>libthrift</artifactId>
-			<version>917130</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/libthrift-r917130.jar</systemPath>
+			<version>0.6.0-13</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
-			<artifactId>cassandra-javautils</artifactId>
-			<systemPath>${basedir}/lib/cassandra-javautils.jar</systemPath>
-			<version>1.0.0</version>
-			<scope>system</scope>
+			<artifactId>thrift</artifactId>
+			<version>r917130</version>
 		</dependency>
-
 
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra</artifactId>
-			<systemPath>${basedir}/lib/apache-cassandra-0.6.1.jar</systemPath>
-			<version>0.6.1</version>
-			<scope>system</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.cliffc.high_scale_lib</groupId>
-			<artifactId>high-scale-lib</artifactId>
-			<version>1.0.0</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/high-scale-lib.jar</systemPath>
+			<version>0.6.0</version>
 		</dependency>
 
 		<dependency>
-			<groupId>com.reardencommerce</groupId>
-			<artifactId>clhm-production</artifactId>
-			<version>1.0.0</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/clhm-production.jar</systemPath>
-		</dependency>
-
-		<dependency>
-			<groupId>com.eaio.uuid</groupId>
-			<artifactId>uuid</artifactId>
-			<systemPath>${basedir}/lib/uuid-3.2.jar</systemPath>
-			<version>3.2</version>
-			<scope>system</scope>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.15</version>
+			<type>jar</type>
 		</dependency>
 
 		<dependency>
 			<groupId>commons-pool</groupId>
 			<artifactId>commons-pool</artifactId>
-			<version>1.5.3</version>
+			<version>1.5.4</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>org.perf4j</groupId>
+			<artifactId>perf4j</artifactId>
+			<version>0.9.13</version>
+			<type>jar</type>
 		</dependency>
 
-		<!--  required for testing -->
+
+		<!--  test depencencies -->
 		<dependency>
-			<groupId>javax.jdo</groupId>
-			<artifactId>jdo2-api</artifactId>
-			<version>[2.3-ec, 3.0)</version>
+			<groupId>org.datanucleus</groupId>
+			<artifactId>datanucleus-enhancer</artifactId>
+			<version>2.0.2</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>me.prettyprint</groupId>
+			<artifactId>hector</artifactId>
+			<version>0.6.0-13</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cassandra</groupId>
+			<artifactId>cassandra-javautils</artifactId>
+			<version>0.6.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.6</version>
+			<version>4.8.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.15</version>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>3.0.2.RELEASE</version>
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
@@ -120,20 +128,31 @@
 			<groupId>com.google.collections</groupId>
 			<artifactId>google-collections</artifactId>
 			<version>1.0</version>
+			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.cliffc</groupId>
+			<artifactId>high-scale-lib</artifactId>
+			<version>1.1.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.reardencommerce</groupId>
+			<artifactId>clhm-production</artifactId>
+			<version>1.0.0</version>
+			<scope>test</scope>
+		</dependency>
+
+
 		<dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
 			<version>3.2.1</version>
+			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.googlecode.json-simple</groupId>
-			<artifactId>json-simple</artifactId>
-			<version>1.1</version>
-			<scope>test</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -153,26 +172,81 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.perf4j</groupId>
-			<artifactId>perf4j</artifactId>
-			<version>0.9.12</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.datanucleus</groupId>
-			<artifactId>datanucleus-enhancer</artifactId>
-			<version>2.0.2</version>
-			<type>jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 			<version>2.5</version>
 			<type>jar</type>
-			<scope>compile</scope>
+			<scope>test</scope>
 		</dependency>
+		<!--
+			<dependency> <groupId>org.datanucleus</groupId>
+			<artifactId>datanucleus-core</artifactId> <version>2.0.4</version>
+			<scope>provided</scope> </dependency> <dependency>
+			<groupId>me.prettyprint</groupId> <artifactId>hector</artifactId>
+			<version>0.6.0-11</version> <type>jar</type>
+			<systemPath>${basedir}/lib/hector-0.6.0-11.jar</systemPath>
+			<scope>system</scope> </dependency> <dependency>
+			<groupId>libthrift</groupId> <artifactId>libthrift</artifactId>
+			<version>917130</version> <scope>system</scope>
+			<systemPath>${basedir}/lib/libthrift-r917130.jar</systemPath>
+			</dependency> <dependency> <groupId>org.apache.cassandra</groupId>
+			<artifactId>cassandra-javautils</artifactId>
+			<systemPath>${basedir}/lib/cassandra-javautils.jar</systemPath>
+			<version>1.0.0</version> <scope>system</scope> </dependency>
+
+
+			<dependency> <groupId>org.apache.cassandra</groupId>
+			<artifactId>cassandra</artifactId>
+			<systemPath>${basedir}/lib/apache-cassandra-0.6.1.jar</systemPath>
+			<version>0.6.1</version> <scope>system</scope> </dependency>
+			<dependency> <groupId>org.cliffc.high_scale_lib</groupId>
+			<artifactId>high-scale-lib</artifactId> <version>1.0.0</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/high-scale-lib.jar</systemPath>
+			</dependency> <dependency> <groupId>com.reardencommerce</groupId>
+			<artifactId>clhm-production</artifactId> <version>1.0.0</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/clhm-production.jar</systemPath>
+			</dependency> <dependency> <groupId>com.eaio.uuid</groupId>
+			<artifactId>uuid</artifactId>
+			<systemPath>${basedir}/lib/uuid-3.2.jar</systemPath>
+			<version>3.2</version> <scope>system</scope> </dependency>
+
+			<dependency> <groupId>commons-pool</groupId>
+			<artifactId>commons-pool</artifactId> <version>1.5.3</version>
+			</dependency> <dependency> <groupId>javax.jdo</groupId>
+			<artifactId>jdo2-api</artifactId> <version>[2.3-ec, 3.0)</version>
+			<scope>test</scope> </dependency> <dependency>
+			<groupId>junit</groupId> <artifactId>junit</artifactId>
+			<version>4.6</version> <scope>test</scope> </dependency> <dependency>
+			<groupId>log4j</groupId> <artifactId>log4j</artifactId>
+			<version>1.2.15</version> <type>jar</type> <scope>test</scope>
+			</dependency> <dependency> <groupId>com.google.collections</groupId>
+			<artifactId>google-collections</artifactId> <version>1.0</version>
+			<scope>test</scope> </dependency> <dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId> <version>3.2.1</version>
+			<scope>test</scope> </dependency> <dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId> <version>1.1</version>
+			<scope>test</scope> </dependency> <dependency>
+			<groupId>org.slf4j</groupId> <artifactId>slf4j-api</artifactId>
+			<version>1.5.8</version> <scope>test</scope> </dependency>
+			<dependency> <groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId> <version>1.5.8</version>
+			<scope>test</scope> </dependency> <dependency>
+			<groupId>org.slf4j</groupId> <artifactId>jcl-over-slf4j</artifactId>
+			<version>1.5.8</version> <scope>test</scope> </dependency>
+			<dependency> <groupId>org.perf4j</groupId>
+			<artifactId>perf4j</artifactId> <version>0.9.12</version>
+			<scope>test</scope> </dependency> <dependency>
+			<groupId>org.datanucleus</groupId>
+			<artifactId>datanucleus-enhancer</artifactId>
+			<version>2.0.2</version> <type>jar</type> <scope>test</scope>
+			</dependency> <dependency> <groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId> <version>2.5</version>
+			<type>jar</type> <scope>compile</scope> </dependency>
+		-->
 	</dependencies>
 
 	<build>

@@ -19,13 +19,10 @@ package org.datanucleus.store.cassandra.utils;
 
 import javax.jdo.identity.ObjectIdentity;
 import javax.jdo.identity.SingleFieldIdentity;
-import javax.jdo.spi.PersistenceCapable;
 
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.StateManager;
 import org.datanucleus.metadata.AbstractClassMetaData;
-import org.datanucleus.metadata.IdentityMetaData;
-import org.datanucleus.metadata.IdentityType;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.mapped.exceptions.DatastoreFieldDefinitionException;
 import org.datanucleus.store.types.ObjectStringConverter;
@@ -135,7 +132,7 @@ public class MetaDataUtils {
 
 		ClassLoaderResolver clr = ec.getClassLoaderResolver();
 
-		Class targetClass = clr.classForName(targetClassName);
+		Class<?> targetClass = clr.classForName(targetClassName);
 
 		if (targetClass.equals(String.class)) {
 			return value;
@@ -167,8 +164,7 @@ public class MetaDataUtils {
 
 		ExecutionContext ec = sm.getObjectProvider().getExecutionContext();
 
-		ClassLoaderResolver clr = ec.getClassLoaderResolver();
-
+	
 		// if we get here, we can assume it's persistenceCapable
 		Object id = ec.getApiAdapter().getObjectId(sm);
 

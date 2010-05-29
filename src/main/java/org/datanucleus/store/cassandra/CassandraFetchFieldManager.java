@@ -478,17 +478,8 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			AbstractClassMetaData cmd) {
 
 
-		int[] pkPositions = cmd.getPKMemberPositions();
-
-		AbstractMemberMetaData metaData = cmd
-				.getMetaDataForManagedMemberAtAbsolutePosition(pkPositions[0]);
-
-		// now get the converter based on the type
-		ObjectStringConverter converter = this.context.getTypeManager()
-				.getStringConverter(metaData.getType());
-
 		// convert it to an instance of the type
-		Object value = converter.toObject(idStr);
+		Object value = org.datanucleus.store.cassandra.utils.MetaDataUtils.getKeyValue(this.stateManager, cmd, idStr);
 
 		Class<?> cls = clr.classForName(cmd.getFullClassName());
 
