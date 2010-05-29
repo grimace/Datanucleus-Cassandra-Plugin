@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Cassandra plugin tests
+Bundle-SymbolicName: com.spidertracks.datanucleus.cassandra.usertests;singleton:=true
+Bundle-Version: 0.0.2
+Bundle-Vendor: Spidertracks
+Require-Bundle: org.datanucleus

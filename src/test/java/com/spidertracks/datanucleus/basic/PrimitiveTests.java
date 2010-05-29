@@ -21,18 +21,20 @@ package com.spidertracks.datanucleus.basic;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.util.Calendar;
 
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 
-import org.junit.AfterClass;
 import org.junit.Test;
 
 import com.spidertracks.datanucleus.CassandraTest;
+import com.spidertracks.datanucleus.basic.converter.EnumConverter;
 import com.spidertracks.datanucleus.basic.model.EmbeddedObject;
+import com.spidertracks.datanucleus.basic.model.EnumEntity;
+import com.spidertracks.datanucleus.basic.model.EnumValues;
 import com.spidertracks.datanucleus.basic.model.PrimitiveObject;
 import com.spidertracks.datanucleus.basic.model.UnitData;
 import com.spidertracks.datanucleus.basic.model.UnitDataKey;
@@ -174,6 +176,40 @@ public class PrimitiveTests  extends CassandraTest  {
 
 		
 		
+
+	}
+
+	/**
+	 * Tests an object is serialized as string types properly
+	 */
+	public void testObjectToStringConverterOnObject() {
+		
+		EnumEntity saved = new EnumEntity();
+		
+		saved.setFirst(EnumValues.ONE);
+		
+		saved.setSecond(EnumValues.TWO);
+		
+		//check our converter has never been invoked
+		assertEquals(0, EnumConverter.getFromCount());
+		
+		assertEquals(0, EnumConverter.getToCount());
+		
+		pmf.getPersistenceManager().makePersistent(saved);
+		
+		EnumEntity returned = pmf.getPersistenceManager().getObjectById(EnumEntity.class, saved.getId());
+		
+		assertEquals(saved, returned);
+		
+		assertEquals(saved.getFirst(), returned.getFirst());
+		
+		assertEquals(saved.getSecond(), returned.getSecond());
+		
+		//now check our counters are correct  If they aren't the user's converter plugins weren't invoked
+		assertTrue(EnumConverter.getFromCount() >= 2);
+		
+		assertTrue(EnumConverter.getToCount() >= 2);
+	
 
 	}
 

@@ -38,6 +38,7 @@ import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.Relation;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
+import org.datanucleus.store.types.ObjectStringConverter;
 
 import com.spidertracks.datanucleus.mutate.BatchMutationManager;
 
@@ -348,6 +349,17 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 				}
 
 				return;
+			}
+			
+			//see if we have an objecttoString converter.  If we do convert it.
+			
+			ObjectStringConverter converter = this.context.getTypeManager().getStringConverter(fieldMetaData.getType());
+			
+			if(converter != null){
+				manager.addColumn(context, columnFamily, rowKey, columnName,
+						getBytes(converter.toString(value)), timestamp);
+				return;
+
 			}
 
 			// default case where we persist raw objects
