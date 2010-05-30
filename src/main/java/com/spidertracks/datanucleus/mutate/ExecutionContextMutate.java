@@ -68,6 +68,16 @@ public class ExecutionContextMutate {
 			String columnName, long timestamp) {
 		getMutation(columnFamily, rowKey).addDelete(columnName, timestamp);
 	}
+	
+	/**
+	 * Delete an entire row
+	 * @param columnFamily
+	 * @param rowKey
+	 * @param timestamp
+	 */
+	public void addDelete(String columnFamily, String rowKey){
+		getMutation(columnFamily, rowKey).addDelete();
+	}
 
 	/**
 	 * Add the column with data to the current execution context operations
@@ -84,23 +94,23 @@ public class ExecutionContextMutate {
 				timestamp);
 	}
 
-	/**
-	 * Add the super column with data to the current execution context
-	 * operations
-	 * 
-	 * @param columnFamily
-	 * @param rowKey
-	 * @param superColumnName
-	 * @param columnName
-	 * @param value
-	 * @param timestamp
-	 */
-	public void addSuperColumn(String columnFamily, String rowKey,
-			String superColumnName, String columnName, byte[] value,
-			long timestamp) {
-		getMutation(columnFamily, rowKey).addSuperColumn(superColumnName,
-				columnName, value, timestamp);
-	}
+//	/**
+//	 * Add the super column with data to the current execution context
+//	 * operations
+//	 * 
+//	 * @param columnFamily
+//	 * @param rowKey
+//	 * @param superColumnName
+//	 * @param columnName
+//	 * @param value
+//	 * @param timestamp
+//	 */
+//	public void addSuperColumn(String columnFamily, String rowKey,
+//			String superColumnName, String columnName, byte[] value,
+//			long timestamp) {
+//		getMutation(columnFamily, rowKey).addSuperColumn(superColumnName,
+//				columnName, value, timestamp);
+//	}
 
 	/**
 	 * Push the current on to our stack for this execution context
@@ -177,14 +187,15 @@ public class ExecutionContextMutate {
 				for (Column column : columnFamily.getColumns()) {
 					changes.addInsertion(key, columnFamilies, column);
 				}
-
-				for (SuperColumn superColumn : columnFamily.getSuperColumns()) {
-					changes.addSuperInsertion(key, columnFamilies, superColumn);
-				}
+//
+//				for (SuperColumn superColumn : columnFamily.getSuperColumns()) {
+//					changes.addSuperInsertion(key, columnFamilies, superColumn);
+//				}
 
 				for (Deletion deletion : columnFamily.getDeletes()) {
 					changes.addDeletion(key, columnFamilies, deletion);
 				}
+				
 			}
 
 		}

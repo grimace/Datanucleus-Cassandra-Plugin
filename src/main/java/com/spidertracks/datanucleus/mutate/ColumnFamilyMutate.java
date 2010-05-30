@@ -39,7 +39,7 @@ public class ColumnFamilyMutate {
 	
 	private String key;
 
-	private Map<String, SuperColumn> superColumns;
+//	private Map<String, SuperColumn> superColumns;
 
 	private  Map<String, Column> columns;
 
@@ -49,7 +49,7 @@ public class ColumnFamilyMutate {
 		this.key = key;
 		this.columnFamily = columnFamily;
 		
-		superColumns = new HashMap<String, SuperColumn>();
+//		superColumns = new HashMap<String, SuperColumn>();
 		columns =  new HashMap<String, Column>();
 		deletes =  new HashMap<String, Deletion>();
 	}
@@ -63,9 +63,9 @@ public class ColumnFamilyMutate {
 		return columnFamily;
 	}
 	
-	public Collection<SuperColumn> getSuperColumns() {
-		return superColumns.values();
-	}
+//	public Collection<SuperColumn> getSuperColumns() {
+//		return superColumns.values();
+//	}
 
 	public Collection<Column> getColumns() {
 		return columns.values();
@@ -96,6 +96,20 @@ public class ColumnFamilyMutate {
 		
 		this.deletes.put(columnName, delete);
 	}
+	
+	/**
+	 * Deletes the entire record
+	 */
+	public void addDelete(){
+		SlicePredicate slicePredicate = new SlicePredicate();
+		slicePredicate.addToColumn_names(getBytes(columnFamily));
+		
+		Deletion deletion = new Deletion();
+		deletion.setPredicate(slicePredicate);
+		
+		this.deletes.put(columnFamily, deletion);
+		
+	}
 
 	/**
 	 * Add the operation to the column
@@ -113,28 +127,28 @@ public class ColumnFamilyMutate {
 		columns.put(columnName, new Column(getBytes(columnName), value, timestamp));
 	}
 	
-	/**
-	 * Add data for a supercolumn
-	 * @param superColumnName
-	 * @param columnName
-	 * @param value
-	 * @param timestamp
-	 */
-	public void addSuperColumn(String superColumnName, String columnName, byte[] value, long timestamp){
-		
-		SuperColumn superColumn = superColumns.get(superColumnName);
-		
-		if(superColumn == null){
-			superColumn = new SuperColumn();
-			superColumn.name = getBytes(superColumnName);
-			
-			superColumns.put(superColumnName, superColumn);
-		}
-		
-		superColumn.addToColumns(new Column(getBytes(columnName), value, timestamp));
-		
-	}
-	
+//	/**
+//	 * Add data for a supercolumn
+//	 * @param superColumnName
+//	 * @param columnName
+//	 * @param value
+//	 * @param timestamp
+//	 */
+//	public void addSuperColumn(String superColumnName, String columnName, byte[] value, long timestamp){
+//		
+//		SuperColumn superColumn = superColumns.get(superColumnName);
+//		
+//		if(superColumn == null){
+//			superColumn = new SuperColumn();
+//			superColumn.name = getBytes(superColumnName);
+//			
+//			superColumns.put(superColumnName, superColumn);
+//		}
+//		
+//		superColumn.addToColumns(new Column(getBytes(columnName), value, timestamp));
+//		
+//	}
+//	
 	
 
 }

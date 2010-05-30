@@ -21,6 +21,7 @@ package com.spidertracks.datanucleus.basic;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;
@@ -44,11 +45,7 @@ import com.spidertracks.datanucleus.basic.model.UnitDataKey;
  * 
  */
 
-public class PrimitiveTests  extends CassandraTest  {
-
-	
-
-
+public class PrimitiveTests extends CassandraTest {
 
 	@Test
 	public void testBasicPeristAndLoad() throws Exception {
@@ -105,77 +102,66 @@ public class PrimitiveTests  extends CassandraTest  {
 	 */
 	@Test
 	public void testCompositeKey() {
-		
+
 		UnitData key = new UnitData();
 		key.setCreatedDate(Calendar.getInstance().getTime());
-		
+
 		key.setUnitId("123456");
-		
+
 		PersistenceManager pm = pmf.getPersistenceManager();
-		
+
 		pm.makePersistent(key);
-		
+
 		PersistenceManager pm2 = pmf.getPersistenceManager();
 
 		// now retrieve a copy
-		UnitData stored = (UnitData) pm2.getObjectById(UnitData.class, new UnitDataKey(key.getCreatedDate(), key.getUnitId()).toString());
-		
-		assertEquals(key, stored);
-		
-	
+		UnitData stored = (UnitData) pm2.getObjectById(UnitData.class,
+				new UnitDataKey(key.getCreatedDate(), key.getUnitId())
+						.toString());
 
-		
-		
+		assertEquals(key, stored);
 
 	}
-	
+
 	/**
 	 * Tests an object is serialized as bytes properly
 	 */
 	@Test
 	public void testByteArray() {
-		
+
 		UnitData key = new UnitData();
 		key.setCreatedDate(Calendar.getInstance().getTime());
-		
+
 		key.setUnitId("123456");
-		
-		key.setData(new byte[]{ 0x0F, 0x0A});
-		
+
+		key.setData(new byte[] { 0x0F, 0x0A });
+
 		PersistenceManager pm = pmf.getPersistenceManager();
-		
+
 		pm.makePersistent(key);
-		
+
 		PersistenceManager pm2 = pmf.getPersistenceManager();
 
 		// now retrieve a copy
-		UnitData stored = (UnitData) pm2.getObjectById(UnitData.class, new UnitDataKey(key.getCreatedDate(), key.getUnitId()).toString());
-		
-		assertEquals(key, stored);
-		
-		assertArrayEquals(  key.getData(), stored.getData());
-		
-	
+		UnitData stored = (UnitData) pm2.getObjectById(UnitData.class,
+				new UnitDataKey(key.getCreatedDate(), key.getUnitId())
+						.toString());
 
-		
-		
+		assertEquals(key, stored);
+
+		assertArrayEquals(key.getData(), stored.getData());
 
 	}
-	
+
 	/**
 	 * Tests an object is serialized as bytes properly
 	 */
-	@Test(expected=JDOException.class)
+	@Test(expected = JDOException.class)
 	public void testEmbeddedObject() {
-		
-		EmbeddedObject object = new EmbeddedObject();
-		
-		pmf.getPersistenceManager().makePersistent(object);
-		
-	
 
-		
-		
+		EmbeddedObject object = new EmbeddedObject();
+
+		pmf.getPersistenceManager().makePersistent(object);
 
 	}
 
@@ -183,33 +169,89 @@ public class PrimitiveTests  extends CassandraTest  {
 	 * Tests an object is serialized as string types properly
 	 */
 	public void testObjectToStringConverterOnObject() {
-		
+
 		EnumEntity saved = new EnumEntity();
-		
+
 		saved.setFirst(EnumValues.ONE);
-		
+
 		saved.setSecond(EnumValues.TWO);
-		
-		//check our converter has never been invoked
+
+		// check our converter has never been invoked
 		assertEquals(0, EnumConverter.getFromCount());
-		
+
 		assertEquals(0, EnumConverter.getToCount());
-		
+
 		pmf.getPersistenceManager().makePersistent(saved);
-		
-		EnumEntity returned = pmf.getPersistenceManager().getObjectById(EnumEntity.class, saved.getId());
-		
+
+		EnumEntity returned = pmf.getPersistenceManager().getObjectById(
+				EnumEntity.class, saved.getId());
+
 		assertEquals(saved, returned);
-		
+
 		assertEquals(saved.getFirst(), returned.getFirst());
-		
+
 		assertEquals(saved.getSecond(), returned.getSecond());
-		
-		//now check our counters are correct  If they aren't the user's converter plugins weren't invoked
+
+		// now check our counters are correct If they aren't the user's
+		// converter plugins weren't invoked
 		assertTrue(EnumConverter.getFromCount() >= 2);
-		
+
 		assertTrue(EnumConverter.getToCount() >= 2);
-	
+
+	}
+
+	@Test
+	public void testDelete() throws Exception {
+
+		PersistenceManager pm = pmf.getPersistenceManager();
+
+		PrimitiveObject object = new PrimitiveObject();
+		object.setTestByte((byte) 0xf1);
+		object.setTestBool(true);
+		object.setTestChar('t');
+		
+
+		// now save our object
+		pm.makePersistent(object);
+
+		// don't want it to come from the cache, get a new pm
+		PersistenceManager pm2 = pmf.getPersistenceManager();
+
+		// now retrieve a copy
+		PrimitiveObject stored = (PrimitiveObject) pm2.getObjectById(
+				PrimitiveObject.class, object.getId());
+
+		// make sure they're not the same instance, we want a new one from the
+		// data source
+		assertFalse(object == stored);
+
+		assertEquals(object.getId(), stored.getId());
+
+		assertEquals(object.getTestByte(), stored.getTestByte());
+
+		assertEquals(object.isTestBool(), stored.isTestBool());
+
+		assertEquals(object.getTestChar(), stored.getTestChar());
+
+		assertEquals(object.getTestDouble(), stored.getTestDouble(), 0);
+
+		assertEquals(object.getTestFloat(), stored.getTestFloat(), 0);
+
+		assertEquals(object.getTestInt(), stored.getTestInt());
+
+		assertEquals(object.getTestLong(), stored.getTestLong());
+
+		assertEquals(object.getTestString(), stored.getTestString());
+		
+		//now delete our object
+		pm2.deletePersistent(stored);
+		
+		PersistenceManager pm3 = pmf.getPersistenceManager();
+		
+		
+		PrimitiveObject deletedRecord = pm3.getObjectById(PrimitiveObject.class, object.getId());
+		
+		assertNull(deletedRecord);
 
 	}
 

@@ -79,6 +79,18 @@ public class BatchMutationManager {
 		getMutations(context).addDelete(columnFamily, rowKey, columnName,
 				timestamp);
 	}
+	
+	/**
+	 * Delete the entire row
+	 * @param context
+	 * @param columnFamily
+	 * @param rowKey
+	 * @param timestamp
+	 */
+	public void addDelete(ExecutionContext context, String columnFamily,
+			String rowKey) {
+		getMutations(context).addDelete(columnFamily, rowKey);
+	}
 
 	/**
 	 * Add the column with data to the current execution context operations

@@ -54,14 +54,13 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 	@Override
 	public void deleteObject(StateManager sm) {
-
+		
 		CassandraManagedConnection conn = null;
 
 		try {
 			// delete the whole column family for this key
 			conn = getConnection(sm);
-			conn.getKeyspace().remove(getKey(sm),
-					getClassColumnFamily(sm.getClassMetaData()));
+			conn.getKeyspace().remove(getKey(sm), getClassColumnFamily(sm.getClassMetaData()));
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
 		} finally {
@@ -69,6 +68,36 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 				conn.close();
 			}
 		}
+
+//			ExecutionContext ec = sm.getObjectProvider().getExecutionContext();
+//
+//			// delete the whole column family for this key
+//			// signal a write is about to start
+//			this.batchManager.beginWrite(ec, sm);
+//
+//			this.batchManager.addDelete(ec, getColumnFamily(sm
+//					.getClassMetaData()), getKey(sm));
+//
+//			BatchMutation mutate = this.batchManager.endWrite(ec, sm);
+//
+//			// this is the root object, perform a write operation to cassandra
+//			if (mutate != null) {
+//
+//				CassandraManagedConnection conn = null;
+//				try {
+//					conn = getConnection(sm);
+//					conn.getKeyspace().batchMutate(mutate);
+//				} catch (Exception e) {
+//					throw new NucleusDataStoreException(e.getMessage(), e);
+//				} finally {
+//					if (conn != null) {
+//						conn.close();
+//					}
+//				}
+//
+//			}
+
+		
 	}
 
 	@Override
@@ -137,7 +166,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		this.batchManager.beginWrite(ec, sm);
 
 		CassandraInsertFieldManager manager = new CassandraInsertFieldManager(
-				this.batchManager, sm, metaData.getTable(), getKey(sm),
+				this.batchManager, sm, getColumnFamily(metaData), getKey(sm),
 				this.manager.getTimestamp().getTime());
 
 		sm.provideFields(metaData.getAllMemberPositions(), manager);
@@ -176,7 +205,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 	 * @return
 	 */
 	private ColumnPath getClassColumnFamily(AbstractClassMetaData metaData) {
-		return new ColumnPath(metaData.getTable());
+		return new ColumnPath(getColumnFamily(metaData));
 
 	}
 
@@ -188,7 +217,24 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 	 * @return
 	 */
 	private ColumnParent getColumnParent(AbstractClassMetaData metaData) {
-		return new ColumnParent(metaData.getTable());
+		return new ColumnParent(getColumnFamily(metaData));
+	}
+
+	/**
+	 * Get the name of the column family. Uses table name, if one doesn't exist,
+	 * it uses the simple name of the class
+	 * 
+	 * @param metaData
+	 * @return
+	 */
+	private String getColumnFamily(AbstractClassMetaData metaData) {
+		String name = metaData.getTable();
+
+		if (name == null) {
+			name = metaData.getName();
+		}
+
+		return name;
 	}
 
 	/**
