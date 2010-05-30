@@ -75,8 +75,8 @@ public class ExecutionContextMutate {
 	 * @param rowKey
 	 * @param timestamp
 	 */
-	public void addDelete(String columnFamily, String rowKey){
-		getMutation(columnFamily, rowKey).addDelete();
+	public void addDelete(String columnFamily, String rowKey, long timestamp){
+		getMutation(columnFamily, rowKey).addDelete(timestamp);
 	}
 
 	/**

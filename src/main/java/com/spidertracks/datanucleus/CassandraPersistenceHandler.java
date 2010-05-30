@@ -31,6 +31,7 @@ import org.apache.cassandra.thrift.SliceRange;
 import org.datanucleus.ObjectManager;
 import org.datanucleus.StateManager;
 import org.datanucleus.exceptions.NucleusDataStoreException;
+import org.datanucleus.exceptions.NucleusObjectNotFoundException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.store.AbstractPersistenceHandler;
 import org.datanucleus.store.ExecutionContext;
@@ -60,7 +61,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		try {
 			// delete the whole column family for this key
 			conn = getConnection(sm);
-			conn.getKeyspace().remove(getKey(sm), getClassColumnFamily(sm.getClassMetaData()));
+			conn.getKeyspace().remove(getKey(sm), getClassColumnFamily(sm.getClassMetaData()), this.manager.getTimestamp().getTime());
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
 		} finally {
@@ -69,14 +70,15 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 			}
 		}
 
-//			ExecutionContext ec = sm.getObjectProvider().getExecutionContext();
+//			TODO.  Get delete for entire row working via batch mutation
+//		ExecutionContext ec = sm.getObjectProvider().getExecutionContext();
 //
 //			// delete the whole column family for this key
 //			// signal a write is about to start
 //			this.batchManager.beginWrite(ec, sm);
 //
 //			this.batchManager.addDelete(ec, getColumnFamily(sm
-//					.getClassMetaData()), getKey(sm));
+//					.getClassMetaData()), getKey(sm),this.manager.getTimestamp().getTime());
 //
 //			BatchMutation mutate = this.batchManager.endWrite(ec, sm);
 //
@@ -113,6 +115,10 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 			String key = getKey(sm);
 			List<Column> columns = conn.getKeyspace().getSlice(key,
 					getColumnParent(metaData), getSliceprediCate(metaData));
+			
+			if(columns == null || columns.size() == 0){
+				 throw new NucleusObjectNotFoundException();
+			}
 
 			CassandraFetchFieldManager manager = new CassandraFetchFieldManager(
 					columns, sm);

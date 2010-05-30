@@ -88,8 +88,8 @@ public class BatchMutationManager {
 	 * @param timestamp
 	 */
 	public void addDelete(ExecutionContext context, String columnFamily,
-			String rowKey) {
-		getMutations(context).addDelete(columnFamily, rowKey);
+			String rowKey, long timestamp) {
+		getMutations(context).addDelete(columnFamily, rowKey, timestamp);
 	}
 
 	/**

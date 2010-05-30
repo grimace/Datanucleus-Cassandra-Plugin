@@ -100,11 +100,11 @@ public class ColumnFamilyMutate {
 	/**
 	 * Deletes the entire record
 	 */
-	public void addDelete(){
+	public void addDelete(long timestamp){
 		SlicePredicate slicePredicate = new SlicePredicate();
 		slicePredicate.addToColumn_names(getBytes(columnFamily));
 		
-		Deletion deletion = new Deletion();
+		Deletion deletion = new Deletion(timestamp);
 		deletion.setPredicate(slicePredicate);
 		
 		this.deletes.put(columnFamily, deletion);

@@ -26,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;
 
+import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 
@@ -200,7 +201,7 @@ public class PrimitiveTests extends CassandraTest {
 
 	}
 
-	@Test
+	@Test(expected=JDODataStoreException.class)
 	public void testDelete() throws Exception {
 
 		PersistenceManager pm = pmf.getPersistenceManager();
@@ -248,10 +249,10 @@ public class PrimitiveTests extends CassandraTest {
 		
 		PersistenceManager pm3 = pmf.getPersistenceManager();
 		
-		
+		//should throw an exception
 		PrimitiveObject deletedRecord = pm3.getObjectById(PrimitiveObject.class, object.getId());
 		
-		assertNull(deletedRecord);
+	
 
 	}
 
