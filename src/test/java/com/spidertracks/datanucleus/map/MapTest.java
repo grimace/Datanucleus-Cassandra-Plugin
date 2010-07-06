@@ -16,94 +16,86 @@ Contributors :
     ...
  ***********************************************************************/
 
-package com.spidertracks.datanucleus.collection;
+package com.spidertracks.datanucleus.map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import com.spidertracks.datanucleus.CassandraTest;
-import com.spidertracks.datanucleus.collection.model.Card;
-import com.spidertracks.datanucleus.collection.model.Pack;
+import com.spidertracks.datanucleus.map.model.CardMap;
+import com.spidertracks.datanucleus.map.model.CardMapDate;
+import com.spidertracks.datanucleus.map.model.PackMap;
+import com.spidertracks.datanucleus.map.model.PackMapDate;
 
 /**
  * @author Todd Nine
  * 
  */
 
-public class CollectionTests extends CassandraTest  {
+public class MapTest  extends CassandraTest {
 
 
 
 	@Test
-	public void testBasicPeristAndLoadOneToManyCollection() throws Exception {
+	public void testBasicPeristAndLoadOneToManyMap() throws Exception {
 
-		Pack pack = new Pack();
+		
 
-		Card aceSpades = new Card();
+		PackMap pack = new PackMap();
+
+		CardMap aceSpades = new CardMap();
 		aceSpades.setName("Ace of Spades");
 		pack.AddCard(aceSpades);
 
-		Card jackHearts = new Card();
+		CardMap jackHearts = new CardMap();
 		jackHearts.setName("Jack of Hearts");
 		pack.AddCard(jackHearts);
 
 		pmf.getPersistenceManager().makePersistent(pack);
 
-		Pack saved = pmf.getPersistenceManager().getObjectById(Pack.class,
-				pack.getId());
+		PackMap saved = pmf.getPersistenceManager().getObjectById(
+				PackMap.class, pack.getId());
 
 		assertEquals(pack, saved);
 
 		assertNotNull(saved.getCards());
 
-		assertTrue(saved.getCards().contains(aceSpades));
+		assertEquals(aceSpades, saved.getCards().get(aceSpades.getName()));
 
-		assertTrue(saved.getCards().contains(jackHearts));
-
+		assertEquals(jackHearts, saved.getCards().get(jackHearts.getName()));
 
 	}
 	
 
 	@Test
-	public void testBasicPeristAndLoadBiDirectionalCollection() throws Exception {
+	public void testBasicPeristAndLoadOneToManyMapByDate() throws Exception {
 
-		Pack pack = new Pack();
+		PackMapDate pack = new PackMapDate();
 
-		Card aceSpades = new Card();
+		CardMapDate aceSpades = new CardMapDate(2010,05,01);
 		aceSpades.setName("Ace of Spades");
 		pack.AddCard(aceSpades);
 
-		Card jackHearts = new Card();
+		CardMapDate jackHearts = new CardMapDate(2010,05,02);
 		jackHearts.setName("Jack of Hearts");
 		pack.AddCard(jackHearts);
 
 		pmf.getPersistenceManager().makePersistent(pack);
 
-		Pack saved = pmf.getPersistenceManager().getObjectById(Pack.class,
-				pack.getId());
+		PackMapDate saved = pmf.getPersistenceManager().getObjectById(
+				PackMapDate.class, pack.getId());
 
 		assertEquals(pack, saved);
 
 		assertNotNull(saved.getCards());
 
-		assertTrue(saved.getCards().contains(aceSpades));
+		assertEquals(aceSpades, saved.getCards().get(aceSpades.getTime()));
 
-		assertTrue(saved.getCards().contains(jackHearts));
-		
-		//saved ace spades
-		Card savedAceSpades = saved.getCards().get(saved.getCards().indexOf(aceSpades));
-		
-		assertEquals(pack, savedAceSpades.getPack());
-		
-		Card savedJackHeartsSpades = saved.getCards().get(saved.getCards().indexOf(jackHearts));
-		
-		assertEquals(pack, savedJackHeartsSpades.getPack());
+		assertEquals(jackHearts, saved.getCards().get(jackHearts.getTime()));
 
 	}
-
 
 
 }

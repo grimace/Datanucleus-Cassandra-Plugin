@@ -41,7 +41,7 @@ public class Pack extends BaseEntity {
 	private List<Card> cards;
 	
 	public Pack(){
-		cards = new ArrayList<Card>();
+		
 	}
 
 	/**
@@ -52,6 +52,10 @@ public class Pack extends BaseEntity {
 	}
 	
 	public void AddCard(Card card){
+		if(this.cards == null){
+			cards = new ArrayList<Card>();
+		}
+		
 		this.cards.add(card);
 		card.setPack(this);
 	}

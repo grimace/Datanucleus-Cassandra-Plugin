@@ -12,13 +12,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Contributors :
-    ...
+Contributors : Pedro Gomes and Universidade do Minho.
+    		 : Todd Nine
  ***********************************************************************/
 package com.spidertracks.datanucleus;
 
 import static com.spidertracks.datanucleus.utils.ByteConverter.getBytes;
-import static com.spidertracks.datanucleus.utils.MetaDataUtils.getKey;
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnName;
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.getRowKey;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -27,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.cassandra.thrift.ColumnPath;
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.StateManager;
 import org.datanucleus.api.ApiAdapter;
@@ -38,47 +38,43 @@ import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.Relation;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
+import org.datanucleus.store.fieldmanager.AbstractFieldManager;
 import org.datanucleus.store.types.ObjectStringConverter;
+import org.wyki.cassandra.pelops.Mutator;
 
-import com.spidertracks.datanucleus.mutate.BatchMutationManager;
+import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 /**
  * @author Todd Nine
  * 
  */
-public class CassandraInsertFieldManager extends CassandraFieldManager {
+public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 	// private List<Column> updates;
 	// private List<SuperColumn> superColumns;
 	// private List<Deletion> deletes;
 	private ExecutionContext context;
-	private BatchMutationManager manager;
+	private Mutator mutator;
 	private AbstractClassMetaData metaData;
-	private StateManager stateManager;
+	// private StateManager stateManager;
+	private ObjectProvider objectProvider;
 	private String columnFamily;
-	private String rowKey;
-	private long timestamp;
+	private String key;
 
 	/**
 	 * @param columns
 	 * @param metaData
 	 */
-	public CassandraInsertFieldManager(BatchMutationManager manager,
-			StateManager stateManager, String tableName, String rowKey,
-			long updateTimestamp) {
+	public CassandraInsertFieldManager(Mutator mutator, ObjectProvider op,
+			String columnFamily, String key) {
 		super();
 
-		this.manager = manager;
-		this.stateManager = stateManager;
-		this.metaData = stateManager.getClassMetaData();
-		this.context = stateManager.getObjectProvider().getExecutionContext();
-
-		// this.updates = updates;
-		// this.superColumns = superColumns;
-		// this.deletes = deletes;
-		this.columnFamily = tableName;
-		this.rowKey = rowKey;
-		this.timestamp = updateTimestamp;
+		this.mutator = mutator;
+		this.objectProvider = op;
+		this.metaData = op.getClassMetaData();
+		this.context = op.getExecutionContext();
+		this.columnFamily = columnFamily;
+		this.key = key;
 
 	}
 
@@ -86,11 +82,9 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	public void storeBooleanField(int fieldNumber, boolean value) {
 
 		try {
-
-			String columnName = getColumnName(metaData, fieldNumber);
-
-			manager.addColumn(context, columnFamily, rowKey, columnName,
-					getBytes(value), timestamp);
+			mutator.writeColumn(key, columnFamily, mutator.newColumn(
+					getColumnName(metaData, fieldNumber), getBytes(value)));
+			indexField(fieldNumber, value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -102,9 +96,11 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 		try {
 
-			String columnName = getColumnName(metaData, fieldNumber);
-			manager.addColumn(context, columnFamily, rowKey, columnName,
-					new byte[] { value }, timestamp);
+			mutator
+					.writeColumn(key, columnFamily, mutator.newColumn(
+							getColumnName(metaData, fieldNumber),
+							new byte[] { value }));
+			indexField(fieldNumber, value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -115,11 +111,9 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	public void storeCharField(int fieldNumber, char value) {
 
 		try {
-
-			String columnName = getColumnName(metaData, fieldNumber);
-			manager.addColumn(context, columnFamily, rowKey, columnName,
-					getBytes(value), timestamp);
-
+			mutator.writeColumn(key, columnFamily, mutator.newColumn(
+					getColumnName(metaData, fieldNumber), getBytes(value)));
+			indexField(fieldNumber, value);
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
 		}
@@ -129,11 +123,9 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	public void storeDoubleField(int fieldNumber, double value) {
 
 		try {
-
-			String columnName = getColumnName(metaData, fieldNumber);
-			manager.addColumn(context, columnFamily, rowKey, columnName,
-					getBytes(value), timestamp);
-
+			mutator.writeColumn(key, columnFamily, mutator.newColumn(
+					getColumnName(metaData, fieldNumber), getBytes(value)));
+			indexField(fieldNumber, value);
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
 		}
@@ -143,11 +135,9 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	public void storeFloatField(int fieldNumber, float value) {
 
 		try {
-
-			String columnName = getColumnName(metaData, fieldNumber);
-			manager.addColumn(context, columnFamily, rowKey, columnName,
-					getBytes(value), timestamp);
-
+			mutator.writeColumn(key, columnFamily, mutator.newColumn(
+					getColumnName(metaData, fieldNumber), getBytes(value)));
+			indexField(fieldNumber, value);
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
 		}
@@ -157,10 +147,9 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	public void storeIntField(int fieldNumber, int value) {
 
 		try {
-
-			String columnName = getColumnName(metaData, fieldNumber);
-			manager.addColumn(context, columnFamily, rowKey, columnName,
-					getBytes(value), timestamp);
+			mutator.writeColumn(key, columnFamily, mutator.newColumn(
+					getColumnName(metaData, fieldNumber), getBytes(value)));
+			indexField(fieldNumber, value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -171,11 +160,9 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	public void storeLongField(int fieldNumber, long value) {
 
 		try {
-
-			String columnName = getColumnName(metaData, fieldNumber);
-			manager.addColumn(context, columnFamily, rowKey, columnName,
-					getBytes(value), timestamp);
-
+			mutator.writeColumn(key, columnFamily, mutator.newColumn(
+					getColumnName(metaData, fieldNumber), getBytes(value)));
+			indexField(fieldNumber, value);
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
 		}
@@ -184,39 +171,39 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 	@Override
 	public void storeShortField(int fieldNumber, short value) {
 		try {
-
-			String columnName = getColumnName(metaData, fieldNumber);
-			manager.addColumn(context, columnFamily, rowKey, columnName,
-					getBytes(value), timestamp);
-
+			mutator.writeColumn(key, columnFamily, mutator.newColumn(
+					getColumnName(metaData, fieldNumber), getBytes(value)));
+			indexField(fieldNumber, value);
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
 		}
 	}
 
-
-
 	@Override
 	public void storeObjectField(int fieldNumber, Object value) {
 		try {
-
 
 			String columnName = getColumnName(metaData, fieldNumber);
 
 			// delete operation
 			if (value == null) {
+				// TODO TN we need a way to update secondary indexing if this
+				// field was deleted.
+				// how can we get the previous value? Only loading the current
+				// value
+				// then removing will work
+				this.mutator.deleteColumn(key, columnFamily, columnName);
 
-				this.manager.addDelete(context, columnFamily, rowKey,
-						columnName, timestamp);
+				removeIndex(fieldNumber);
 
 				return;
 
 			}
 
-			ObjectProvider op = stateManager.getObjectProvider();
-
 			ClassLoaderResolver clr = context.getClassLoaderResolver();
-			AbstractMemberMetaData fieldMetaData = metaData.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
+			AbstractMemberMetaData fieldMetaData = metaData
+					.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
+
 			int relationType = fieldMetaData.getRelationType(clr);
 
 			// check if this is a relationship
@@ -229,20 +216,20 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 				if (fieldMetaData.isEmbedded()) {
 
-						throw new NucleusDataStoreException(
-								"Embedded objects are unsupported.  Mark the object as persistent and use a serializable class instead");
+					throw new NucleusDataStoreException(
+							"Embedded objects are unsupported.  Mark the object as persistent and use a serializable class instead");
 
-				
 				}
 
-				Object persisted = context.persistObjectInternal(value, op, -1,
-						StateManager.PC);
+				Object persisted = context.persistObjectInternal(value,
+						objectProvider, fieldNumber, StateManager.PC);
 
 				// TODO add this data to the supercolumn info
 
-				this.manager.addColumn(context, columnFamily, rowKey,
-						columnName, getBytes(getKey(this.context, persisted)),
-						timestamp);
+				Object objectPk = context.getApiAdapter().getIdForObject(persisted);
+				
+				mutator.writeColumn(key, columnFamily, mutator.newColumn(
+						columnName, getBytes(objectPk)));
 
 				return;
 			}
@@ -254,42 +241,45 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 				if (fieldMetaData.hasCollection()) {
 
-					List<String> serializedKeys = new ArrayList<String>(
+					List<Object> serializedKeys = new ArrayList<Object>(
 							((Collection<?>) value).size());
 
 					Object persisted = null;
+					Object objectPk = null;
 
 					for (Object element : (Collection<?>) value) {
 						// persist the object
-						persisted = context.persistObjectInternal(element, op,
-								-1, StateManager.PC);
+						persisted = context.persistObjectInternal(element,
+								objectProvider, fieldNumber, StateManager.PC);
 
-						serializedKeys.add(getKey(this.context, persisted));
+						objectPk = context.getApiAdapter().getIdForObject(persisted);
+						
+						serializedKeys.add(objectPk);
 
 					}
 
-					this.manager.addColumn(context, columnFamily, rowKey,
-							columnName, getBytes(serializedKeys), timestamp);
-					
+					mutator.writeColumn(key, columnFamily, mutator.newColumn(
+							columnName, getBytes(serializedKeys)));
+
 					return;
 
 				} else if (fieldMetaData.hasMap()) {
 
 					ApiAdapter adapter = context.getApiAdapter();
 
-					Map<?,?> map = ((Map<?,?>) value);
-					
-					Map<Object, Object> serializedMap = new HashMap<Object, Object>(map.size());
-					
-					//serialized values to store per item
+					Map<?, ?> map = ((Map<?, ?>) value);
+
+					Map<Object, Object> serializedMap = new HashMap<Object, Object>(
+							map.size());
+
+					// serialized values to store per item
 					Object serializedKey = null;
 					Object serializedValue = null;
 
-					//value set by the user in the  map
+					// value set by the user in the map
 					Object mapValue = null;
 
-					
-					//pointer to what we persisted
+					// pointer to what we persisted
 					Object persisted = null;
 
 					// get each element and persist it.
@@ -297,13 +287,14 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 						mapValue = map.get(mapKey);
 
-						// handle the case if our key is a persistent class itself
+						// handle the case if our key is a persistent class
+						// itself
 						if (adapter.isPersistable(mapKey)) {
 
 							persisted = context.persistObjectInternal(mapKey,
-									op, -1, StateManager.PC);
+									objectProvider, fieldNumber, StateManager.PC);
 
-							serializedKey = getKey(this.context, persisted);
+							serializedKey = context.getApiAdapter().getIdForObject(persisted);
 						} else {
 							serializedKey = mapKey;
 						}
@@ -312,9 +303,9 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 						if (adapter.isPersistable(mapValue)) {
 
 							persisted = context.persistObjectInternal(mapValue,
-									op, -1, StateManager.PC);
+									objectProvider, fieldNumber, StateManager.PC);
 
-							serializedValue = getKey(this.context, persisted);
+							serializedValue = context.getApiAdapter().getIdForObject(persisted);;
 						} else {
 							serializedKey = mapValue;
 						}
@@ -323,48 +314,54 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 
 					}
 
-					this.manager.addColumn(context, columnFamily, rowKey,
-							columnName, getBytes(serializedMap), timestamp);
-					
+					mutator.writeColumn(key, columnFamily, mutator.newColumn(
+							columnName, getBytes(serializedMap)));
+
 					return;
 
 				} else if (fieldMetaData.hasArray()) {
 
-					List<String> serializedKeys = new ArrayList<String>(Array
+					List<Object> serializedKeys = new ArrayList<Object>(Array
 							.getLength(value));
 
 					Object persisted = null;
-
+					Object objectPk = null;
+					
 					for (int i = 0; i < Array.getLength(value); i++) {
 						// persist the object
 						persisted = context.persistObjectInternal(Array.get(
-								value, i), op, -1, StateManager.PC);
+								value, i), objectProvider, fieldNumber, StateManager.PC);
+						
+						objectPk = context.getApiAdapter().getIdForObject(persisted);
 
-						serializedKeys.add(getKey(this.context, persisted));
+						serializedKeys.add(objectPk);
 					}
 
-					this.manager.addColumn(context, columnFamily, rowKey,
-							columnName, getBytes(serializedKeys), timestamp);
+					mutator.writeColumn(key, columnFamily, mutator.newColumn(
+							columnName, getBytes(serializedKeys)));
 
 				}
 
 				return;
 			}
-			
-			//see if we have an objecttoString converter.  If we do convert it.
-			
-			ObjectStringConverter converter = this.context.getTypeManager().getStringConverter(fieldMetaData.getType());
-			
-			if(converter != null){
-				manager.addColumn(context, columnFamily, rowKey, columnName,
-						getBytes(converter.toString(value)), timestamp);
-				return;
+
+			// see if we have an objecttoString converter. If we do convert it.
+
+			ObjectStringConverter converter = this.context.getTypeManager()
+					.getStringConverter(fieldMetaData.getType());
+
+			if (converter != null) {
+
+				mutator.writeColumn(key, columnFamily, mutator.newColumn(
+						columnName, getBytes(converter.toString(value))));
+
+			} else {
+				mutator.writeColumn(key, columnFamily, mutator.newColumn(
+						columnName, getBytes(value)));
 
 			}
 
-			// default case where we persist raw objects
-			manager.addColumn(context, columnFamily, rowKey, columnName,
-					getBytes(value), timestamp);
+			indexField(fieldNumber, value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -378,26 +375,89 @@ public class CassandraInsertFieldManager extends CassandraFieldManager {
 			String columnName = getColumnName(metaData, fieldNumber);
 
 			if (value == null) {
-				manager.addDelete(context, columnFamily, rowKey, columnName,
-						fieldNumber);
+				mutator.deleteColumn(key, columnFamily, columnName);
+				removeIndex(fieldNumber);
 				return;
 			}
+			mutator.writeColumn(key, columnFamily, mutator.newColumn(
+					columnName, getBytes(value)));
 
-			manager.addColumn(context, columnFamily, rowKey, columnName,
-					getBytes(value), timestamp);
+			indexField(fieldNumber, value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
 		}
 	}
 
-	protected ColumnPath getColumnPath(AbstractClassMetaData metaData,
-			int absoluteFieldNumber) {
-		ColumnPath columnPath = new ColumnPath(metaData.getTable());
-		columnPath.setColumn(getBytes(getColumnName(metaData,
-				absoluteFieldNumber)));
+	/**
+	 * Index the field if required
+	 * 
+	 * @param fieldNumber
+	 * @param value
+	 */
+	protected void indexField(int fieldNumber, Object value) {
+		// convert it to a string so we can key it
 
-		return columnPath;
+		AbstractMemberMetaData fieldMetaData = metaData
+				.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
+
+		String secondaryCfName = MetaDataUtils.getIndexName(metaData,
+				fieldMetaData);
+
+		// nothing to index
+		if (secondaryCfName == null) {
+			return;
+		}
+
+		String indexKey = MetaDataUtils.convertToRowKey(this.objectProvider
+				.getExecutionContext(), value);
+		
+		//no value, can't index it
+		if(indexKey == null || indexKey.length() == 0){
+			return;
+		}
+
+		// now write it with our reverse index column family
+		mutator.writeColumn(indexKey, secondaryCfName, mutator.newColumn(key,
+				new byte[] { 0x00 }));
+
+	}
+
+	/**
+	 * Should only be invoked when the inserted object is null
+	 * 
+	 * @param fieldNumber
+	 */
+	protected void removeIndex(int fieldNumber) {
+
+		AbstractMemberMetaData fieldMetaData = metaData
+				.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
+
+		String secondaryCfName = MetaDataUtils.getIndexName(metaData,
+				fieldMetaData);
+
+		// nothing to index
+		if (secondaryCfName == null) {
+			return;
+		}
+
+		// load the original value from the DS to un-index it
+
+		try {
+			objectProvider.loadFieldFromDatastore(fieldNumber);
+		} catch (NucleusDataStoreException ne) {
+			// our field didn't exist previously, ignore the error
+			return;
+		}
+
+		Object oldValue = objectProvider.provideField(fieldNumber);
+
+		String indexKey = MetaDataUtils.convertToRowKey(this.objectProvider
+				.getExecutionContext(), oldValue);
+
+		// blitz the column
+		mutator.deleteColumn(indexKey, secondaryCfName, key);
+
 	}
 
 }

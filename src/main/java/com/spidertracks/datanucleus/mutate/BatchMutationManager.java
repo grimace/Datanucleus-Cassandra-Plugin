@@ -12,21 +12,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Contributors :
-    ...
+Contributors : Todd Nine
  ***********************************************************************/
 package com.spidertracks.datanucleus.mutate;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import me.prettyprint.cassandra.service.BatchMutation;
-
-import org.datanucleus.StateManager;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.datanucleus.store.ExecutionContext;
+import org.wyki.cassandra.pelops.Mutator;
 
 /**
- * Internalizes all pending operations for a given Execution context.
+ * Internalises all pending operations for a given Execution context.
  * 
  * @author Todd Nine
  * 
@@ -39,8 +37,10 @@ public class BatchMutationManager {
 
 	}
 
-	public void beginWrite(ExecutionContext context, StateManager sm) {
-		getMutations(context).pushInstance();
+	public void beginWrite(ExecutionContext context, Mutator mutator) {
+		ExecutionContextMutate mutationContext = getMutations(context);
+		mutationContext.pushInstance();
+		mutationContext.pushMutation(mutator);
 	}
 
 	/**
@@ -50,80 +50,22 @@ public class BatchMutationManager {
 	 * @param context
 	 * @param sm
 	 * @return
+	 * @throws Exception 
 	 */
-	public BatchMutation endWrite(ExecutionContext context, StateManager sm) {
+	public void endWrite(ExecutionContext context, ConsistencyLevel consistency) throws Exception {
 		// not our root instance, don't create a batch mutation
 		if (!getMutations(context).popInstance()) {
-			return null;
+			return;
 		}
 
 		// it is our root instance, create the batch mutation.
 
-		BatchMutation changes = getMutations(context).createBatchMutation();
+		getMutations(context).execute(consistency);
 		removeMutations(context);
 
-		return changes;
 
-	}
-
-	/**
-	 *  Add the delete to the current execution context operations
-	 * @param context
-	 * @param columnFamily
-	 * @param rowKey
-	 * @param columnName
-	 * @param timestamp
-	 */
-	public void addDelete(ExecutionContext context, String columnFamily,
-			String rowKey, String columnName, long timestamp) {
-		getMutations(context).addDelete(columnFamily, rowKey, columnName,
-				timestamp);
 	}
 	
-	/**
-	 * Delete the entire row
-	 * @param context
-	 * @param columnFamily
-	 * @param rowKey
-	 * @param timestamp
-	 */
-	public void addDelete(ExecutionContext context, String columnFamily,
-			String rowKey, long timestamp) {
-		getMutations(context).addDelete(columnFamily, rowKey, timestamp);
-	}
-
-	/**
-	 * Add the column with data to the current execution context operations
-	 * @param context
-	 * @param columnFamily
-	 * @param rowKey
-	 * @param columnName
-	 * @param value
-	 * @param timestamp
-	 */
-	public void addColumn(ExecutionContext context, String columnFamily,
-			String rowKey, String columnName, byte[] value, long timestamp) {
-		getMutations(context).addColumn(columnFamily, rowKey, columnName,
-				value, timestamp);
-	}
-
-	/**
-	 * Add the super column with data to the current execution context operations Not currently used
-	 * @param context
-	 * @param columnFamily
-	 * @param rowKey
-	 * @param superColumnName
-	 * @param columnName
-	 * @param value
-	 * @param timestamp
-	 */
-//	public void addSuperColumn(ExecutionContext context, String columnFamily,
-//			String rowKey, String superColumnName, String columnName,
-//			byte[] value, long timestamp) {
-//		getMutations(context).addSuperColumn(columnFamily, rowKey,
-//				superColumnName, columnName, value, timestamp);
-//	}
-
 	/**
 	 * Get the mutations for this execution context
 	 * 

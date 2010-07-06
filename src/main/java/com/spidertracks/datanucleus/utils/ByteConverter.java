@@ -12,8 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Contributors :
-    ...
+Contributors : Todd Nine
  ***********************************************************************/
 package com.spidertracks.datanucleus.utils;
 
@@ -24,7 +23,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 
+import org.wyki.cassandra.pelops.NumberHelper;
+
 /**
+ * Utility class to convert data types to byte streams
+ * 
  * @author Todd Nine
  * 
  */
@@ -34,164 +37,111 @@ public class ByteConverter {
 
 	/**
 	 * Write to byte array
+	 * 
 	 * @param value
 	 * @return
 	 * @throws IOException
 	 */
 	public static byte[] getBytes(boolean value) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream(bos);
-		oos.writeBoolean(value);
-		oos.flush();
+		short saved = (short) (value ? 1 : 0);
 
-		byte[] bytes = bos.toByteArray();
+		return NumberHelper.toBytes(saved);
 
-		oos.close();
-		bos.close();
-
-		return bytes;
 	}
 
 	/**
 	 * Read byte array to boolean
+	 * 
 	 * @param bytes
 	 * @return
 	 * @throws IOException
 	 */
 	public static boolean getBoolean(byte[] bytes) throws IOException {
-		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-		ObjectInputStream ois = new ObjectInputStream(bis);
-		boolean serialized = ois.readBoolean();
-		ois.close();
-		bis.close();
+		short saved = NumberHelper.toShort(bytes);
 
-		return serialized;
+		return saved == 1;
 	}
-	
+
 	/**
 	 * Write to byte array
+	 * 
 	 * @param value
 	 * @return
 	 * @throws IOException
 	 */
 	public static byte[] getBytes(short value) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream(bos);
-		oos.writeShort(value);
-		oos.flush();
-
-		byte[] bytes = bos.toByteArray();
-
-		oos.close();
-		bos.close();
-
-		return bytes;
+		return NumberHelper.toBytes(value);
 	}
 
 	/**
 	 * Read byte array to boolean
+	 * 
 	 * @param bytes
 	 * @return
 	 * @throws IOException
 	 */
 	public static short getShort(byte[] bytes) throws IOException {
-		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-		ObjectInputStream ois = new ObjectInputStream(bis);
-		short serialized = ois.readShort();
-		ois.close();
-		bis.close();
-
-		return serialized;
+		return NumberHelper.toShort(bytes);
 	}
-	
 
 	/**
 	 * Write to byte array
+	 * 
 	 * @param value
 	 * @return
 	 * @throws IOException
 	 */
 	public static byte[] getBytes(int value) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream(bos);
-		oos.writeInt(value);
-		oos.flush();
-
-		byte[] bytes = bos.toByteArray();
-
-		oos.close();
-		bos.close();
-
-		return bytes;
+		return NumberHelper.toBytes(value);
 	}
 
 	/**
 	 * Read byte array to boolean
+	 * 
 	 * @param bytes
 	 * @return
 	 * @throws IOException
 	 */
 	public static int getInt(byte[] bytes) throws IOException {
-		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-		ObjectInputStream ois = new ObjectInputStream(bis);
-		int serialized = ois.readInt();
-		ois.close();
-		bis.close();
-
-		return serialized;
+		return NumberHelper.toInt(bytes);
 	}
-	
 
 	/**
 	 * Write to byte array
+	 * 
 	 * @param value
 	 * @return
 	 * @throws IOException
 	 */
 	public static byte[] getBytes(long value) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream(bos);
-		oos.writeLong(value);
-		oos.flush();
-
-		byte[] bytes = bos.toByteArray();
-
-		oos.close();
-		bos.close();
-
-		return bytes;
+		return NumberHelper.toBytes(value);
 	}
 
 	/**
 	 * Read byte array to boolean
+	 * 
 	 * @param bytes
 	 * @return
 	 * @throws IOException
 	 */
 	public static long getLong(byte[] bytes) throws IOException {
-		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-		ObjectInputStream ois = new ObjectInputStream(bis);
-		long serialized = ois.readLong();
-		ois.close();
-		bis.close();
-
-		return serialized;
+		return NumberHelper.toLong(bytes);
 	}
-	
 
 	/**
 	 * Write to byte array
+	 * 
 	 * @param value
 	 * @return
 	 * @throws IOException
 	 */
 	public static byte[] getBytes(char value) throws IOException {
-				
-		return getBytes(new String(new char[]{value}));
+		return getBytes(new String(new char[] { value }));
 	}
 
 	/**
 	 * Read byte array to boolean
+	 * 
 	 * @param bytes
 	 * @return
 	 * @throws IOException
@@ -200,83 +150,53 @@ public class ByteConverter {
 		return getString(bytes).charAt(0);
 	}
 
-	
 	/**
 	 * Write to byte array
+	 * 
 	 * @param value
 	 * @return
 	 * @throws IOException
 	 */
 	public static byte[] getBytes(float value) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream(bos);
-		oos.writeFloat(value);
-		oos.flush();
-
-		byte[] bytes = bos.toByteArray();
-
-		oos.close();
-		bos.close();
-
-		return bytes;
+		return getBytes(Float.floatToIntBits(value));
 	}
 
 	/**
 	 * Read byte array to boolean
+	 * 
 	 * @param bytes
 	 * @return
 	 * @throws IOException
 	 */
 	public static float getFloat(byte[] bytes) throws IOException {
-		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-		ObjectInputStream ois = new ObjectInputStream(bis);
-		float serialized = ois.readFloat();
-		ois.close();
-		bis.close();
-
-		return serialized;
+		return Float.intBitsToFloat(NumberHelper.toInt(bytes));
 	}
-	
-	
+
 	/**
 	 * Write to byte array
+	 * 
 	 * @param value
 	 * @return
 	 * @throws IOException
 	 */
 	public static byte[] getBytes(double value) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream(bos);
-		oos.writeDouble(value);
-		oos.flush();
-
-		byte[] bytes = bos.toByteArray();
-
-		oos.close();
-		bos.close();
-
-		return bytes;
+		return NumberHelper.toBytes(Double.doubleToLongBits(value));
 	}
 
 	/**
 	 * Read byte array to boolean
+	 * 
 	 * @param bytes
 	 * @return
 	 * @throws IOException
 	 */
 	public static double getDouble(byte[] bytes) throws IOException {
-		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-		ObjectInputStream ois = new ObjectInputStream(bis);
-		double serialized = ois.readDouble();
-		ois.close();
-		bis.close();
-
-		return serialized;
+		return Double.longBitsToDouble(NumberHelper.toLong(bytes));
 	}
-	
 
 	/**
 	 * Write to byte array
+	 * 
 	 * @param value
 	 * @return
 	 * @throws IOException
@@ -297,13 +217,15 @@ public class ByteConverter {
 
 	/**
 	 * Read byte array to boolean
+	 * 
 	 * @param bytes
 	 * @return
 	 * @throws IOException
-	 * @throws ClassNotFoundException 
+	 * @throws ClassNotFoundException
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T getObject(byte[] bytes) throws IOException, ClassNotFoundException {
+	public static <T> T getObject(byte[] bytes) throws IOException,
+			ClassNotFoundException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
 		ObjectInputStream ois = new ObjectInputStream(bis);
 		T serialized = (T) ois.readObject();
@@ -312,8 +234,6 @@ public class ByteConverter {
 
 		return serialized;
 	}
-
-
 
 	/**
 	 * Get the UTF8 bytes of a string

@@ -12,8 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Contributors :
-    ...
+Contributors : Todd Nine
  ***********************************************************************/
 package com.spidertracks.datanucleus.identity;
 
@@ -22,6 +21,7 @@ import org.datanucleus.store.types.ObjectStringConverter;
 import com.eaio.uuid.UUID;
 
 /**
+ * Converts from UUID to string
  * @author Todd Nine
  * 
  */

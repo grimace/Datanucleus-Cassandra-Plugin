@@ -22,11 +22,11 @@ import java.io.IOException;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManagerFactory;
 
-import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
-
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+
+import com.spidertracks.datanucleus.cassandra.EmbeddedServerHelper;
 
 /**
  * @author Todd Nine
@@ -35,7 +35,7 @@ import org.junit.BeforeClass;
 public abstract class CassandraTest {
 
 
-	
+	protected static EmbeddedServerHelper defaultPool;
 	protected static PersistenceManagerFactory pmf;
 	
 
@@ -50,7 +50,8 @@ public abstract class CassandraTest {
 	public static void setup() throws TTransportException, IOException,
 			InterruptedException {
 		
-		CassandraServer.INSTANCE.start();
+		defaultPool = new EmbeddedServerHelper();
+		defaultPool.setup(true);
 		
 		pmf = JDOHelper.getPersistenceManagerFactory("Test");
 	}
@@ -58,5 +59,6 @@ public abstract class CassandraTest {
 	@AfterClass
 	public static void teardown() throws IOException {
 		//no shutdown for now
+		defaultPool.teardown();
 	}
 }

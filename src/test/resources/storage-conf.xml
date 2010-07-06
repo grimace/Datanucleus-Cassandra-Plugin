@@ -114,6 +114,7 @@
 
   	 
 		<ColumnFamily CompareWith="UTF8Type" Name="PrimitiveObject"/>
+		<ColumnFamily CompareWith="UTF8Type" Name="PrimitiveObjectSubclass"/>
 		
 		<!--  Our pack has a many relationship (collection).  As such we're going to need to make it a super column
 -->
@@ -136,6 +137,13 @@
         <ColumnFamily CompareWith="UTF8Type" Name="UnitData"/>
   
   
+ 		 <!--  Our person column family and it's secondary index CF -->
+		<ColumnFamily CompareWith="UTF8Type" Name="Person" />
+		<ColumnFamily CompareWith="UTF8Type" Name="Person_FirstName" />
+		<ColumnFamily CompareWith="UTF8Type" Name="Person_LastName" />
+		<ColumnFamily CompareWith="UTF8Type" Name="Person_email" />
+		<ColumnFamily CompareWith="UTF8Type" Name="Person_LastLogin" />
+ 
       <!--
        ~ Strategy: Setting this to the class that implements
        ~ IReplicaPlacementStrategy will change the way the node picker works.

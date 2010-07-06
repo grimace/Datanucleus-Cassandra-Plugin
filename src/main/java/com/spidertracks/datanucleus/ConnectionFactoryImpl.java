@@ -12,38 +12,30 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Contributors :
-    ...
- ***********************************************************************/
+Contributors : Todd Nine
+
+***********************************************************************/
 package com.spidertracks.datanucleus;
 
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import me.prettyprint.cassandra.service.CassandraClientPool;
-import me.prettyprint.cassandra.service.CassandraClientPoolFactory;
-import me.prettyprint.cassandra.service.CassandraHostConfigurator;
-
 import org.datanucleus.OMFContext;
-import org.datanucleus.exceptions.NucleusException;
+import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.store.connection.AbstractConnectionFactory;
 import org.datanucleus.store.connection.ManagedConnection;
+import org.wyki.cassandra.pelops.Pelops;
+import org.wyki.cassandra.pelops.Policy;
 
 /**
  * Implementation of a ConnectionFactory for HBase.
  */
 public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 
-	// matches the pattern cassandra:<keyspace>:host1:port, host2:port,
-	// host3:port etc
+	// matches the pattern cassandra:<poolname>:<keyspace>:<connectionport>:host1, host2, host3... etc
 	private static final Pattern URL = Pattern
-			.compile("cassandra:(\\w+):(\\s*\\w+:\\d+[\\s*,\\s*\\w+:\\d+]*)");
-
-	// create our pool
-	private CassandraClientPool pool = null;
-
-	private String keyspace = null;
+			.compile("cassandra:(\\w+):(\\w+):(\\d+):(\\s*\\w+[.\\w+]*[\\s*,\\s*\\w+[.\\w+]*]*)");
 
 	/**
 	 * Constructor.
@@ -66,22 +58,29 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 
 		if (!hostMatcher.matches()) {
 			throw new UnsupportedOperationException(
-					"Your URL must be in the format of cassandra:host1:port[,hostN:port]");
+					"Your URL must be in the format of cassandra:poolname:keyspace:port:host1[,hostN");
 		}
 
-		// set our keyspace
-		keyspace = hostMatcher.group(1);
+		//pool name
+		String poolName = hostMatcher.group(1);
 		
-		String hosts = hostMatcher.group(2);
+		// set our keyspace
+		String keyspace = hostMatcher.group(2);
+		
+		//grab our port
+		int defaultPort = Integer.parseInt(hostMatcher.group(3));
+		
+		String[] hosts = hostMatcher.group(4).split(",");
+		
+		//by default we won't discover other nodes we're not explicitly connected to.  May change in future
+		Pelops.addPool(poolName, hosts, defaultPort, false, keyspace, new Policy());
+		
+		CassandraStoreManager manager = (CassandraStoreManager)omfContext.getStoreManager();
+		manager.setKeyspace(keyspace);
+		manager.setPoolName(poolName);
+		
 
-		// now we're configured our cassandra hosts, put them into a pool
-		CassandraHostConfigurator casHostConfigurator = new CassandraHostConfigurator(
-				hosts);
-
-		// create our pool
-		this.pool = CassandraClientPoolFactory.INSTANCE
-				.createNew(casHostConfigurator);
-
+	
 	}
 
 	/**
@@ -100,20 +99,16 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 	public ManagedConnection createManagedConnection(Object poolKey,
 			Map transactionOptions) {
 
-		try {
-			return new CassandraManagedConnection(this.pool, this.keyspace);
-		} catch (Exception e) {
-			throw new NucleusException("Couldn't connect to cassandra", e);
-		}
+//		try {
+//			return new CassandraManagedConnection(this.keyspace);
+//		} catch (Exception e) {
+//			throw new NucleusException("Couldn't connect to cassandra", e);
+//		}
 
+		throw new NucleusDataStoreException("Not supported");
 
 	}
 
-	/**
-	 * @return the keyspace of this connection
-	 */
-	public String getKeyspace() {
-		return keyspace;
-	}
+	
 
 }

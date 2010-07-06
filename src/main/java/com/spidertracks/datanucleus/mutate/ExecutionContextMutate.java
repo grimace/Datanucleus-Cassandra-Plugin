@@ -12,21 +12,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Contributors :
-    ...
+Contributors : Todd Nine
  ***********************************************************************/
 package com.spidertracks.datanucleus.mutate;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Stack;
 
-import me.prettyprint.cassandra.service.BatchMutation;
-
-import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.Deletion;
-import org.apache.cassandra.thrift.SuperColumn;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.datanucleus.store.ExecutionContext;
+import org.wyki.cassandra.pelops.Mutator;
 
 /**
  * Holds all mutations for the current execution context
@@ -37,7 +32,7 @@ import org.datanucleus.store.ExecutionContext;
 public class ExecutionContextMutate {
 
 	// our map by object class and column family
-	private Map<String, Map<String, ColumnFamilyMutate>> mutations = new HashMap<String, Map<String, ColumnFamilyMutate>>();
+	private List<Mutator> mutations = new Stack<Mutator>();;
 
 	private ExecutionContext ctx;
 	private Stack<Object> instances;
@@ -57,60 +52,15 @@ public class ExecutionContextMutate {
 	}
 
 	/**
-	 * Add the delete to the current execution context operations
+	 * Add the mutator
 	 * 
-	 * @param columnFamily
-	 * @param rowKey
-	 * @param columnName
-	 * @param timestamp
+	 * @param mutator
 	 */
-	public void addDelete(String columnFamily, String rowKey,
-			String columnName, long timestamp) {
-		getMutation(columnFamily, rowKey).addDelete(columnName, timestamp);
-	}
-	
-	/**
-	 * Delete an entire row
-	 * @param columnFamily
-	 * @param rowKey
-	 * @param timestamp
-	 */
-	public void addDelete(String columnFamily, String rowKey, long timestamp){
-		getMutation(columnFamily, rowKey).addDelete(timestamp);
+	public void pushMutation(Mutator mutator) {
+		mutations.add(mutator);
 	}
 
-	/**
-	 * Add the column with data to the current execution context operations
-	 * 
-	 * @param columnFamily
-	 * @param rowKey
-	 * @param columnName
-	 * @param value
-	 * @param timestamp
-	 */
-	public void addColumn(String columnFamily, String rowKey,
-			String columnName, byte[] value, long timestamp) {
-		getMutation(columnFamily, rowKey).addColumn(columnName, value,
-				timestamp);
-	}
 
-//	/**
-//	 * Add the super column with data to the current execution context
-//	 * operations
-//	 * 
-//	 * @param columnFamily
-//	 * @param rowKey
-//	 * @param superColumnName
-//	 * @param columnName
-//	 * @param value
-//	 * @param timestamp
-//	 */
-//	public void addSuperColumn(String columnFamily, String rowKey,
-//			String superColumnName, String columnName, byte[] value,
-//			long timestamp) {
-//		getMutation(columnFamily, rowKey).addSuperColumn(superColumnName,
-//				columnName, value, timestamp);
-//	}
 
 	/**
 	 * Push the current on to our stack for this execution context
@@ -133,126 +83,11 @@ public class ExecutionContextMutate {
 		return instances.size() == 0;
 
 	}
-
-	/**
-	 * Get our mutation manager for this column family. If one doesn't exist
-	 * it's created
-	 * 
-	 * @param columnFamily
-	 * @param rowKey
-	 * @return
-	 */
-	private ColumnFamilyMutate getMutation(String columnFamily, String rowKey) {
-
-		// Key key = new Key(columnFamily, rowKey);
-
-		Map<String, ColumnFamilyMutate> cfMutations = mutations
-				.get(columnFamily);
-
-		if (cfMutations == null) {
-			cfMutations = new HashMap<String, ColumnFamilyMutate>();
-			mutations.put(columnFamily, cfMutations);
+	
+	public void execute(ConsistencyLevel consistency) throws Exception{
+		for(Mutator mutator: mutations){
+			mutator.execute(consistency);
 		}
-
-		ColumnFamilyMutate family = cfMutations.get(rowKey);
-
-		if (family == null) {
-
-			family = new ColumnFamilyMutate(columnFamily, rowKey);
-
-			cfMutations.put(rowKey, family);
-		}
-
-		return family;
-
-	}
-
-	public BatchMutation createBatchMutation() {
-
-		BatchMutation changes = new BatchMutation();
-
-		for (String cfName : mutations.keySet()) {
-
-			// tell cassandra which family to perform the op on
-			Stack<String> columnFamilies = new Stack<String>();
-			columnFamilies.add(cfName);
-
-			for (ColumnFamilyMutate columnFamily : mutations.get(cfName)
-					.values()) {
-
-				String key = columnFamily.getKey();
-
-				// now build all the ops from the current context.
-
-				for (Column column : columnFamily.getColumns()) {
-					changes.addInsertion(key, columnFamilies, column);
-				}
-//
-//				for (SuperColumn superColumn : columnFamily.getSuperColumns()) {
-//					changes.addSuperInsertion(key, columnFamilies, superColumn);
-//				}
-
-				for (Deletion deletion : columnFamily.getDeletes()) {
-					changes.addDeletion(key, columnFamilies, deletion);
-				}
-				
-			}
-
-		}
-
-		return changes;
-
-	}
-
-	private class Key {
-
-		private String key;
-		private String columnFamily;
-
-		public Key(String columnFamily, String key) {
-			this.key = key;
-			this.columnFamily = columnFamily;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + getOuterType().hashCode();
-			result = prime * result
-					+ ((columnFamily == null) ? 0 : columnFamily.hashCode());
-			result = prime * result + ((key == null) ? 0 : key.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			Key other = (Key) obj;
-			if (!getOuterType().equals(other.getOuterType()))
-				return false;
-			if (columnFamily == null) {
-				if (other.columnFamily != null)
-					return false;
-			} else if (!columnFamily.equals(other.columnFamily))
-				return false;
-			if (key == null) {
-				if (other.key != null)
-					return false;
-			} else if (!key.equals(other.key))
-				return false;
-			return true;
-		}
-
-		private ExecutionContextMutate getOuterType() {
-			return ExecutionContextMutate.this;
-		}
-
 	}
 
 }

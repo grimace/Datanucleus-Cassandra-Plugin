@@ -12,9 +12,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Contributors :
-    ...
-***********************************************************************/
+
+Contributors : Pedro Gomes and Universidade do Minho.
+    		 : Todd Nine
+ ***********************************************************************/
 package com.spidertracks.datanucleus;
 
 import java.util.Collection;
@@ -28,142 +29,146 @@ import org.datanucleus.store.AbstractStoreManager;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.NucleusConnection;
 
-public class CassandraStoreManager extends AbstractStoreManager
-{
-	
-	//    MetaDataListener metadataListener;
- 
-    private boolean autoCreateTables = false;
-    private boolean autoCreateColumns = false;
+public class CassandraStoreManager extends AbstractStoreManager {
 
-    private int poolTimeBetweenEvictionRunsMillis; 
-    private int poolMinEvictableIdleTimeMillis;
-    
-    private ColumnTimestamp columnTimestamp;
-   
+	// MetaDataListener metadataListener;
+
+	private boolean autoCreateTables = false;
+	private boolean autoCreateColumns = false;
+
+	private int poolTimeBetweenEvictionRunsMillis;
+	private int poolMinEvictableIdleTimeMillis;
+
+	private String keySpace;
+	private String poolName;
+
 	/**
-     * Constructor.
-     * @param clr ClassLoader resolver
-     * @param omfContext ObjectManagerFactory context
-     */
-    public CassandraStoreManager(ClassLoaderResolver clr, OMFContext omfContext)
-    {
-        super("cassandra", clr, omfContext);
-        
- 
-        // Handler for persistence process
-        persistenceHandler = new CassandraPersistenceHandler(this);
+	 * Constructor.
+	 * 
+	 * @param clr
+	 *            ClassLoader resolver
+	 * @param omfContext
+	 *            ObjectManagerFactory context
+	 */
+	public CassandraStoreManager(ClassLoaderResolver clr, OMFContext omfContext) {
+		super("cassandra", clr, omfContext);
 
+		// Handler for persistence process
+		persistenceHandler2 = new CassandraPersistenceHandler(this);
 
-        PersistenceConfiguration conf = omfContext.getPersistenceConfiguration();
-        boolean autoCreateSchema = conf.getBooleanProperty("datanucleus.autoCreateSchema");
-        
-//       Cassandra can't do this until 0.7
-        if (autoCreateSchema)
-        {
-            autoCreateTables = true;
-            autoCreateColumns = true;
-        }
-        else
-        {
-            autoCreateTables = conf.getBooleanProperty("datanucleus.autoCreateTables");
-            autoCreateColumns = conf.getBooleanProperty("datanucleus.autoCreateColumns");
-        }        
-        // how often should the evictor run
-        poolTimeBetweenEvictionRunsMillis = conf.getIntProperty("datanucleus.connectionPool.timeBetweenEvictionRunsMillis");
-        
-        if (poolTimeBetweenEvictionRunsMillis == 0)
-        {
-            poolTimeBetweenEvictionRunsMillis = 15 * 1000; // default, 15 secs
-        }
-         
-        // how long may a connection sit idle in the pool before it may be evicted
-        poolMinEvictableIdleTimeMillis = conf.getIntProperty("datanucleus.connectionPool.minEvictableIdleTimeMillis");
-        
-        if (poolMinEvictableIdleTimeMillis == 0)
-        {
-            poolMinEvictableIdleTimeMillis = 30 * 1000; // default, 30 secs
-        }
-        
-        String timeClassName = conf.getStringProperty("datanucleus.store.cassandra.timestamp");
-        
-        //try and load the class they've specified
-        if(timeClassName != null){
-        	try {
-				this.columnTimestamp = (ColumnTimestamp) this.getClass().getClassLoader().loadClass(timeClassName).newInstance();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-        }else{
-        	this.columnTimestamp = new DefaultColumnTimestamp();
-        }
-      
-       
-        
-        logConfiguration();
-    }
+		PersistenceConfiguration conf = omfContext
+				.getPersistenceConfiguration();
+		boolean autoCreateSchema = conf
+				.getBooleanProperty("datanucleus.autoCreateSchema");
 
-    protected void registerConnectionMgr()
-    {
-        super.registerConnectionMgr();
-        this.connectionMgr.disableConnectionPool();
-    }
+		// Cassandra can't do this until 0.7
+		if (autoCreateSchema) {
+			autoCreateTables = true;
+			autoCreateColumns = true;
+		} else {
+			autoCreateTables = conf
+					.getBooleanProperty("datanucleus.autoCreateTables");
+			autoCreateColumns = conf
+					.getBooleanProperty("datanucleus.autoCreateColumns");
+		}
+		// how often should the evictor run
+		poolTimeBetweenEvictionRunsMillis = conf
+				.getIntProperty("datanucleus.connectionPool.timeBetweenEvictionRunsMillis");
 
+		if (poolTimeBetweenEvictionRunsMillis == 0) {
+			poolTimeBetweenEvictionRunsMillis = 15 * 1000; // default, 15 secs
+		}
 
-    /**
-     * Release of resources
-     */
-    public void close()
-    {
-//        omfContext.getMetaDataManager().deregisterListener(metadataListener);
-        super.close();
-    }
+		// how long may a connection sit idle in the pool before it may be
+		// evicted
+		poolMinEvictableIdleTimeMillis = conf
+				.getIntProperty("datanucleus.connectionPool.minEvictableIdleTimeMillis");
 
-    public NucleusConnection getNucleusConnection(ExecutionContext om)
-    {
-        throw new UnsupportedOperationException();
-    }
+		if (poolMinEvictableIdleTimeMillis == 0) {
+			poolMinEvictableIdleTimeMillis = 30 * 1000; // default, 30 secs
+		}
 
-    /**
-     * Accessor for the supported options in string form
-     */
-    @SuppressWarnings("unchecked")
-	public Collection getSupportedOptions()
-    {
-        Set set = new HashSet();
-        set.add("ApplicationIdentity");
-        set.add("TransactionIsolationLevel.read-committed");
-        //could happen if writing to "one" or reading from "one" node
-        set.add("TransactionIsolationLevel.read-uncommitted");
-        return set;
-    }
-    
-    
-    public ColumnTimestamp getTimestamp() {
-		return columnTimestamp;
+		logConfiguration();
 	}
 
-    
+	protected void registerConnectionMgr() {
+		super.registerConnectionMgr();
+		this.connectionMgr.disableConnectionPool();
+	}
 
-    
-    public boolean isAutoCreateColumns()
-    {
-        return autoCreateColumns;
-    }
-    
-    public boolean isAutoCreateTables()
-    {
-        return autoCreateTables;
-    }
-    
-    public int getPoolMinEvictableIdleTimeMillis()
-    {
-        return poolMinEvictableIdleTimeMillis;
-    }
-    
-    public int getPoolTimeBetweenEvictionRunsMillis()
-    {
-        return poolTimeBetweenEvictionRunsMillis;
-    }
+	/**
+	 * Release of resources
+	 */
+	public void close() {
+		// omfContext.getMetaDataManager().deregisterListener(metadataListener);
+		super.close();
+	}
+
+	public NucleusConnection getNucleusConnection(ExecutionContext om) {
+		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * Accessor for the supported options in string form
+	 */
+	@SuppressWarnings("unchecked")
+	public Collection getSupportedOptions() {
+		Set set = new HashSet();
+		set.add("ApplicationIdentity");
+		set.add("TransactionIsolationLevel.read-committed");
+		// could happen if writing to "one" or reading from "one" node
+		set.add("TransactionIsolationLevel.read-uncommitted");
+		return set;
+	}
+
+
+	public boolean isAutoCreateColumns() {
+		return autoCreateColumns;
+	}
+
+	public boolean isAutoCreateTables() {
+		return autoCreateTables;
+	}
+
+	public int getPoolMinEvictableIdleTimeMillis() {
+		return poolMinEvictableIdleTimeMillis;
+	}
+
+	public int getPoolTimeBetweenEvictionRunsMillis() {
+		return poolTimeBetweenEvictionRunsMillis;
+	}
+
+	/**
+	 * @return the defaultKeyspace
+	 */
+	public String getKeyspace() {
+		return keySpace;
+	}
+
+	/**
+	 * DO NOT CALL OUTSIDE OF FRAMEWORK
+	 * 
+	 * @param defaultKeyspace
+	 *            the defaultKeyspace to set
+	 */
+	public void setKeyspace(String defaultKeyspace) {
+		this.keySpace = defaultKeyspace;
+	}
+
+	/**
+	 * @return the poolName
+	 */
+	public String getPoolName() {
+		return poolName;
+	}
+
+	/**
+	 * DO NOT CALL OUTSIDE OF FRAMEWORK
+	 * 
+	 * @param poolName
+	 *            the poolName to set
+	 */
+	public void setPoolName(String poolName) {
+		this.poolName = poolName;
+	}
 }

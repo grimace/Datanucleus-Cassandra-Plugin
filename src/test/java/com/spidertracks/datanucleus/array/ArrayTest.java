@@ -33,7 +33,7 @@ import com.spidertracks.datanucleus.array.model.PackArray;
  * 
  */
 
-public class ArrayTests extends CassandraTest {
+public class ArrayTest extends CassandraTest {
 
 
 	@Test

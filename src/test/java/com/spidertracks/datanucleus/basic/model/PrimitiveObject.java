@@ -18,8 +18,7 @@ import com.spidertracks.datanucleus.model.BaseEntity;
  * Basic object for testing primitive persistence.  Only support types in java.lang
  * 
  */
-@PersistenceCapable(table = "PrimitiveObject", identityType = IdentityType.APPLICATION)
-@Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
+@PersistenceCapable(table = "PrimitiveObject")
 public class PrimitiveObject extends BaseEntity{
 
 

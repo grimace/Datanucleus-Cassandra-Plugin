@@ -17,6 +17,7 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.model;
 
+import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.Inheritance;
 import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
@@ -29,7 +30,7 @@ import com.eaio.uuid.UUID;
  * @author Todd Nine
  *
  */
-@PersistenceCapable
+@PersistenceCapable(identityType= IdentityType.APPLICATION)
 @Inheritance(strategy = InheritanceStrategy.SUBCLASS_TABLE)
 public abstract class BaseEntity {
 

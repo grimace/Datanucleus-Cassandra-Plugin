@@ -15,26 +15,33 @@ limitations under the License.
 Contributors :
     ...
  ***********************************************************************/
-package com.spidertracks.datanucleus;
+package com.spidertracks.datanucleus.basic.model;
 
-import java.util.Calendar;
-import java.util.TimeZone;
+import javax.jdo.annotations.PersistenceCapable;
+import javax.jdo.annotations.Persistent;
 
 /**
- * Gets the timestamp in milliseconds in UTC timezone
  * @author Todd Nine
  *
  */
-public class DefaultColumnTimestamp implements ColumnTimestamp {
+@PersistenceCapable(table="PrimitiveObjectSubclass")
+public class PrimitiveObjectSubclass extends PrimitiveObject {
 
-	private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
-	
-	/* (non-Javadoc)
-	 * @see org.datanucleus.store.cassandra.CassandraTimeService#getTime()
+	@Persistent
+	private String subClassString;
+
+	/**
+	 * @return the subClassString
 	 */
-	@Override
-	public long getTime() {
-		return Calendar.getInstance(UTC).getTimeInMillis();
+	public String getSubClassString() {
+		return subClassString;
 	}
 
+	/**
+	 * @param subClassString the subClassString to set
+	 */
+	public void setSubClassString(String subClassString) {
+		this.subClassString = subClassString;
+	}
+	
 }

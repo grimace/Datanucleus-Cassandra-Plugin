@@ -24,11 +24,6 @@ Contributors:
         <store-manager class-name="com.spidertracks.datanucleus.CassandraStoreManager" key="cassandra" url-key="cassandra"/>
     </extension>
 
-    <!-- QUERY LANGUAGES TODO
-    <extension point="org.datanucleus.store_query_query">
-        <query class-name="org.datanucleus.store.hbase.query.JDOQLQuery" datastore="hbase" name="JDOQL"/>
-        <query class-name="org.datanucleus.store.hbase.query.JPQLQuery" datastore="hbase" name="JPQL"/>
-    </extension> -->
 
     <!-- CONNECTION FACTORY -->
     <extension point="org.datanucleus.store_connectionfactory">
@@ -45,20 +40,22 @@ Contributors:
     <extension point="org.datanucleus.java_type">
     
     	<!-- keep all the default properties, but override the string converter for cassandra -->
-           <java-type name="java.util.Date" persistent="true" dfg="true" embedded="true" wrapper-type="org.datanucleus.sco.simple.Date"
+           <java-type name="java.util.Date" persistent="true" dfg="true" embedded="true" wrapper-type="org.datanucleus.store.types.sco.simple.Date"
             string-converter="com.spidertracks.datanucleus.identity.DateConverter"
             long-converter="org.datanucleus.store.types.DateLongConverter" override="true"/>
         <java-type name="com.eaio.uuid.UUID" string-converter="com.spidertracks.datanucleus.identity.UUIDConverter"  persistent="true" dfg="true" embedded="true"  />
     </extension>
     
-    <!-- Extension for
-     <extension point="org.datanucleus.store_datastoreidentity">
-        <datastoreidentity name="date-cassandra" class-name="com.spidertracks.datanucleus.identity.DateImpl" unique="true"/>
-      <datastoreidentity name="uuid-cassandra" class-name="com.spidertracks.datanucleus.identity.UuidImpl" unique="true"/>
-    </extension>
-    
-    <extension point="org.datanucleus.identity_translator">
-        <identitytranslator name="cassandratranslator" class-name="com.spidertracks.datanucleus.identity.CassandraIdentityTranslator"/>
-    </extension> -->
+  <!-- Query languages-->
+      <extension
+            point="org.datanucleus.store_query_query">      
+            <query class-name="com.spidertracks.datanucleus.query.JDOQLQuery" datastore="cassandra" name="javax.jdo.query.JDOQL"/>
+            <query class-name="com.spidertracks.datanucleus.query.JDOQLQuery" datastore="cassandra" name="JDOQL"/>
+         <query
+               class-name="com.spidertracks.datanucleus.query.JDOQLQuery"
+               datastore="cassandra"
+               name="cassandra">
+         </query>
+      </extension>
 
 </plugin>

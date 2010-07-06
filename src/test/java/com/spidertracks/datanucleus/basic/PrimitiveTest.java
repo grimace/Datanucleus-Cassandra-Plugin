@@ -21,7 +21,6 @@ package com.spidertracks.datanucleus.basic;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;
@@ -30,14 +29,17 @@ import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
+import com.eaio.uuid.UUID;
 import com.spidertracks.datanucleus.CassandraTest;
 import com.spidertracks.datanucleus.basic.converter.EnumConverter;
 import com.spidertracks.datanucleus.basic.model.EmbeddedObject;
 import com.spidertracks.datanucleus.basic.model.EnumEntity;
 import com.spidertracks.datanucleus.basic.model.EnumValues;
 import com.spidertracks.datanucleus.basic.model.PrimitiveObject;
+import com.spidertracks.datanucleus.basic.model.PrimitiveObjectSubclass;
 import com.spidertracks.datanucleus.basic.model.UnitData;
 import com.spidertracks.datanucleus.basic.model.UnitDataKey;
 
@@ -46,7 +48,7 @@ import com.spidertracks.datanucleus.basic.model.UnitDataKey;
  * 
  */
 
-public class PrimitiveTests extends CassandraTest {
+public class PrimitiveTest extends CassandraTest {
 
 	@Test
 	public void testBasicPeristAndLoad() throws Exception {
@@ -254,6 +256,63 @@ public class PrimitiveTests extends CassandraTest {
 		
 	
 
+	}
+	
+//	@Test
+	@Ignore("Waiting to hear back from Andy at datanuclues.  Not sure if this is a valid test")
+	public void subClassReturned(){
+
+		PrimitiveObject primitive = new PrimitiveObject();
+		
+		primitive.setTestByte((byte) 0xf1);
+		primitive.setTestBool(true);
+		primitive.setTestChar('t');
+		primitive.setTestDouble(100.10);
+		primitive.setTestFloat((float) 200.20);
+		primitive.setTestInt(40);
+		primitive.setTestLong(200);
+		primitive.setTestShort((short) 5);
+		primitive.setTestString("foobar");
+		
+		
+		PrimitiveObjectSubclass subclass = new PrimitiveObjectSubclass();
+		
+		subclass.setTestByte((byte) 0xf1);
+		subclass.setTestBool(true);
+		subclass.setTestChar('t');
+		subclass.setTestDouble(100.10);
+		subclass.setTestFloat((float) 200.20);
+		subclass.setTestInt(40);
+		subclass.setTestLong(200);
+		subclass.setTestShort((short) 5);
+		subclass.setTestString("foobar");
+		subclass.setSubClassString("subclassString");
+		
+		
+		
+
+		PersistenceManager pm = pmf.getPersistenceManager();
+
+		pm.makePersistent(primitive);
+		pm.makePersistent(subclass);
+		
+		UUID primitiveId = primitive.getId();
+		UUID subclassId = subclass.getId();
+		
+		PersistenceManager pm2 = pmf.getPersistenceManager();
+		
+		PrimitiveObject subclassInstance = pm2.getObjectById(PrimitiveObject.class, subclassId);
+		
+		boolean correctInstance = subclassInstance instanceof PrimitiveObjectSubclass;
+		
+		assertTrue(correctInstance);
+		
+		PrimitiveObject instance = pm2.getObjectById(PrimitiveObject.class, primitiveId);
+		
+		correctInstance = instance instanceof PrimitiveObject;
+		
+		assertTrue(correctInstance);
+		
 	}
 
 }

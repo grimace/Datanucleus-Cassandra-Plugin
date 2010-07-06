@@ -21,6 +21,7 @@ package com.spidertracks.datanucleus.basic.model;
 import java.util.Date;
 
 import javax.jdo.annotations.PersistenceCapable;
+import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
 /**
@@ -31,11 +32,14 @@ import javax.jdo.annotations.PrimaryKey;
 public class UnitData {
 
 	@PrimaryKey
+	@Persistent
 	private Date createdDate;
 	
 	@PrimaryKey
+	@Persistent
 	private String unitId;
 	
+	@Persistent
 	private byte[] data;
 	
 	

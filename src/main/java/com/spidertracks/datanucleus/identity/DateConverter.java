@@ -12,8 +12,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Contributors :
-    ...
+Contributors :Todd Nine
+  
  ***********************************************************************/
 package com.spidertracks.datanucleus.identity;
 
@@ -22,6 +22,7 @@ import java.util.Date;
 import org.datanucleus.store.types.ObjectStringConverter;
 
 /**
+ * Converts all dates to a range scannable key
  * @author Todd Nine
  *
  */

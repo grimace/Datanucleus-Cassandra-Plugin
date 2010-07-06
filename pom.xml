@@ -2,12 +2,12 @@
 	<parent>
 		<artifactId>settings</artifactId>
 		<groupId>com.spidertracks.standards</groupId>
-		<version>1.0.1</version>
+		<version>1.0.4</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.spidertracks.datanucleus</groupId>
 	<artifactId>cassandra</artifactId>
-	<version>0.0.5-SNAPSHOT</version>
+	<version>0.0.4.5-SNAPSHOT</version>
 
 	<repositories>
 
@@ -33,7 +33,7 @@
 
 
 	</repositories>
-	
+
 	<dependencies>
 		<!--
 			used as per cassandra's recommended UUID generation
@@ -44,76 +44,30 @@
 			<artifactId>jdo2-api</artifactId>
 			<version>[2.3-ec, 3.0)</version>
 		</dependency>
-		<dependency>
-			<groupId>com.eaio.uuid</groupId>
-			<artifactId>uuid</artifactId>
-			<version>3.2</version>
-		</dependency>
+
+
 
 		<dependency>
 			<groupId>org.datanucleus</groupId>
 			<artifactId>datanucleus-core</artifactId>
-			<version>2.0.4</version>
+			<version>${datanucleus.version}</version>
 		</dependency>
 
 		<dependency>
-			<groupId>me.prettyprint</groupId>
-			<artifactId>hector</artifactId>
-			<version>0.6.0-13</version>
+			<groupId>org.wyki</groupId>
+			<artifactId>pelops</artifactId>
+			<version>0.0.1</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.cassandra</groupId>
-			<artifactId>thrift</artifactId>
-			<version>r917130</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.cassandra</groupId>
-			<artifactId>cassandra</artifactId>
-			<version>0.6.2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.15</version>
-			<type>jar</type>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-pool</groupId>
-			<artifactId>commons-pool</artifactId>
-			<version>1.5.4</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>org.perf4j</groupId>
-			<artifactId>perf4j</artifactId>
-			<version>0.9.13</version>
-			<type>jar</type>
-		</dependency>
 
 
 		<!--  test depencencies -->
+
 		<dependency>
 			<groupId>org.datanucleus</groupId>
 			<artifactId>datanucleus-enhancer</artifactId>
-			<version>2.0.2</version>
+			<version>${datanucleus.plugin.version}</version>
 			<type>jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>me.prettyprint</groupId>
-			<artifactId>hector</artifactId>
-			<version>0.6.0-13</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cassandra</groupId>
-			<artifactId>cassandra-javautils</artifactId>
-			<version>0.6.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -159,106 +113,23 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.5.8</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.5.8</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>jcl-over-slf4j</artifactId>
-			<version>1.5.8</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 			<version>2.5</version>
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
-		<!--
-			<dependency> <groupId>org.datanucleus</groupId>
-			<artifactId>datanucleus-core</artifactId> <version>2.0.4</version>
-			<scope>provided</scope> </dependency> <dependency>
-			<groupId>me.prettyprint</groupId> <artifactId>hector</artifactId>
-			<version>0.6.0-11</version> <type>jar</type>
-			<systemPath>${basedir}/lib/hector-0.6.0-11.jar</systemPath>
-			<scope>system</scope> </dependency> <dependency>
-			<groupId>libthrift</groupId> <artifactId>libthrift</artifactId>
-			<version>917130</version> <scope>system</scope>
-			<systemPath>${basedir}/lib/libthrift-r917130.jar</systemPath>
-			</dependency> <dependency> <groupId>org.apache.cassandra</groupId>
-			<artifactId>cassandra-javautils</artifactId>
-			<systemPath>${basedir}/lib/cassandra-javautils.jar</systemPath>
-			<version>1.0.0</version> <scope>system</scope> </dependency>
+
+		<!--  we still use hector for testing -->
 
 
-			<dependency> <groupId>org.apache.cassandra</groupId>
-			<artifactId>cassandra</artifactId>
-			<systemPath>${basedir}/lib/apache-cassandra-0.6.1.jar</systemPath>
-			<version>0.6.1</version> <scope>system</scope> </dependency>
-			<dependency> <groupId>org.cliffc.high_scale_lib</groupId>
-			<artifactId>high-scale-lib</artifactId> <version>1.0.0</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/high-scale-lib.jar</systemPath>
-			</dependency> <dependency> <groupId>com.reardencommerce</groupId>
-			<artifactId>clhm-production</artifactId> <version>1.0.0</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/clhm-production.jar</systemPath>
-			</dependency> <dependency> <groupId>com.eaio.uuid</groupId>
-			<artifactId>uuid</artifactId>
-			<systemPath>${basedir}/lib/uuid-3.2.jar</systemPath>
-			<version>3.2</version> <scope>system</scope> </dependency>
-
-			<dependency> <groupId>commons-pool</groupId>
-			<artifactId>commons-pool</artifactId> <version>1.5.3</version>
-			</dependency> <dependency> <groupId>javax.jdo</groupId>
-			<artifactId>jdo2-api</artifactId> <version>[2.3-ec, 3.0)</version>
-			<scope>test</scope> </dependency> <dependency>
-			<groupId>junit</groupId> <artifactId>junit</artifactId>
-			<version>4.6</version> <scope>test</scope> </dependency> <dependency>
-			<groupId>log4j</groupId> <artifactId>log4j</artifactId>
-			<version>1.2.15</version> <type>jar</type> <scope>test</scope>
-			</dependency> <dependency> <groupId>com.google.collections</groupId>
-			<artifactId>google-collections</artifactId> <version>1.0</version>
-			<scope>test</scope> </dependency> <dependency>
-			<groupId>commons-collections</groupId>
-			<artifactId>commons-collections</artifactId> <version>3.2.1</version>
-			<scope>test</scope> </dependency> <dependency>
-			<groupId>com.googlecode.json-simple</groupId>
-			<artifactId>json-simple</artifactId> <version>1.1</version>
-			<scope>test</scope> </dependency> <dependency>
-			<groupId>org.slf4j</groupId> <artifactId>slf4j-api</artifactId>
-			<version>1.5.8</version> <scope>test</scope> </dependency>
-			<dependency> <groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId> <version>1.5.8</version>
-			<scope>test</scope> </dependency> <dependency>
-			<groupId>org.slf4j</groupId> <artifactId>jcl-over-slf4j</artifactId>
-			<version>1.5.8</version> <scope>test</scope> </dependency>
-			<dependency> <groupId>org.perf4j</groupId>
-			<artifactId>perf4j</artifactId> <version>0.9.12</version>
-			<scope>test</scope> </dependency> <dependency>
-			<groupId>org.datanucleus</groupId>
-			<artifactId>datanucleus-enhancer</artifactId>
-			<version>2.0.2</version> <type>jar</type> <scope>test</scope>
-			</dependency> <dependency> <groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId> <version>2.5</version>
-			<type>jar</type> <scope>compile</scope> </dependency>
-		-->
 	</dependencies>
 
 	<scm>
 		<connection>scm:svn:https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/</connection>
 		<url>https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/</url>
-	  <developerConnection>scm:svn:https://staff.spidertracks.com/svn/clustering/standards/settings/tags/settings-1.0.1/cassandra</developerConnection>
-  </scm>
+		<developerConnection>scm:svn:https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/</developerConnection>
+	</scm>
 	<build>
 
 		<plugins>
@@ -287,7 +158,7 @@
 			<plugin>
 				<groupId>org.datanucleus</groupId>
 				<artifactId>maven-datanucleus-plugin</artifactId>
-				<version>2.0.1</version>
+				<version>${datanucleus.plugin.version}</version>
 				<configuration>
 					<metadataDirectory>${project.build.testOutputDirectory}
 					</metadataDirectory>
@@ -307,9 +178,25 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<!--
+					do not remove this configuration! Required to fork each test in
+					it's own thread otherwise the embedded cassandra causes the tests
+					to hang
+				-->
+				<configuration>
+					<forkMode>always</forkMode>
+				</configuration>
+			</plugin>
 
 
 
 		</plugins>
 	</build>
+	<properties>
+		<datanucleus.version>2.1.1</datanucleus.version>
+		<datanucleus.plugin.version>2.1.0-release</datanucleus.plugin.version>
+	</properties>
 </project>

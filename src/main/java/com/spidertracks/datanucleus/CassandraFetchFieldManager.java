@@ -12,13 +12,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Contributors :
-    ...
+Contributors : Pedro Gomes and Universidade do Minho.
+    		 : Todd Nine
  ***********************************************************************/
 package com.spidertracks.datanucleus;
 
 import static com.spidertracks.datanucleus.utils.ByteConverter.getBoolean;
-import static com.spidertracks.datanucleus.utils.ByteConverter.getBytes;
 import static com.spidertracks.datanucleus.utils.ByteConverter.getChar;
 import static com.spidertracks.datanucleus.utils.ByteConverter.getDouble;
 import static com.spidertracks.datanucleus.utils.ByteConverter.getFloat;
@@ -27,6 +26,7 @@ import static com.spidertracks.datanucleus.utils.ByteConverter.getLong;
 import static com.spidertracks.datanucleus.utils.ByteConverter.getObject;
 import static com.spidertracks.datanucleus.utils.ByteConverter.getShort;
 import static com.spidertracks.datanucleus.utils.ByteConverter.getString;
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnName;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -35,8 +35,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.datanucleus.ClassLoaderResolver;
-import org.datanucleus.StateManager;
 import org.datanucleus.api.ApiAdapter;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusException;
@@ -44,19 +44,22 @@ import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.MetaDataManager;
 import org.datanucleus.metadata.Relation;
-import org.datanucleus.sco.SCOUtils;
 import org.datanucleus.store.ExecutionContext;
+import org.datanucleus.store.ObjectProvider;
+import org.datanucleus.store.fieldmanager.AbstractFieldManager;
 import org.datanucleus.store.types.ObjectStringConverter;
+import org.datanucleus.store.types.sco.SCOUtils;
 
 /**
  * @author Todd Nine
  * 
  */
-public class CassandraFetchFieldManager extends CassandraFieldManager {
+public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 	private Map<String, Column> columns;
 	private AbstractClassMetaData metaData;
-	private StateManager stateManager;
+	//private StateManager stateManager;
+	private ObjectProvider objectProvider;
 	private ExecutionContext context;
 	private MetaDataManager metaDataManager;
 	private ClassLoaderResolver clr;
@@ -66,12 +69,12 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 	 * @param metaData
 	 */
 	public CassandraFetchFieldManager(List<Column> columns,
-			StateManager stateManager) {
+			ObjectProvider op) {
 		super();
-
-		this.stateManager = stateManager;
-		this.metaData = stateManager.getClassMetaData();
-		this.context = stateManager.getObjectManager().getExecutionContext();
+		
+		this.objectProvider = op;
+		this.metaData = op.getClassMetaData();
+		this.context = op.getExecutionContext();
 		this.metaDataManager = this.context.getMetaDataManager();
 		this.clr = this.context.getClassLoaderResolver();
 
@@ -86,11 +89,13 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 			// continue;
 			// }
 
-			this.columns.put(getString(column.name), column);
+			this.columns.put(getString(column.getName()), column);
 		}
 
 	}
 
+
+	
 	@Override
 	public boolean fetchBooleanField(int fieldNumber) {
 
@@ -266,14 +271,14 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 							"Embedded objects are currently unimplemented.");
 				}
 
-				String key = getString(column.getValue());
+				Object key = getObject(column.getValue());
 
 				AbstractClassMetaData metaData = this.metaDataManager
 						.getMetaDataForClass(fieldMetaData.getType(), clr);
 
-				Object object = getObjectFromIdString(key, metaData);
+				Object object = context.findObject(key, false, false,fieldMetaData.getTypeName());
 
-				return stateManager.wrapSCOField(fieldNumber, object, false,
+				return objectProvider.wrapSCOField(fieldNumber, object, false,
 						false, true);
 
 			} else if (relationType == Relation.MANY_TO_MANY_BI
@@ -298,20 +303,20 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 
 					// get our list of Strings
 
-					List<String> serializedIdList = getObject(columns.get(
+					List<Object> serializedIdList = getObject(columns.get(
 							columnName).getValue());
 
 					AbstractClassMetaData elementCmd = fieldMetaData
 							.getCollection().getElementClassMetaData(clr,
 									metaDataManager);
 
-					for (String id : serializedIdList) {
+					for (Object key : serializedIdList) {
 
-						Object element = getObjectFromIdString(id, elementCmd);
+						Object element = context.findObject(key, false, false,fieldMetaData.getTypeName());
 						coll.add(element);
 					}
 
-					return stateManager.wrapSCOField(fieldNumber, coll, false,
+					return objectProvider.wrapSCOField(fieldNumber, coll, false,
 							false, true);
 				} else if (Map.class.isAssignableFrom(fieldMetaData.getType())) {
 
@@ -327,8 +332,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 						throw new NucleusDataStoreException(e.getMessage(), e);
 					}
 
-					ApiAdapter adapter = stateManager.getObjectManager()
-							.getExecutionContext().getApiAdapter();
+					ApiAdapter adapter = objectProvider.getExecutionContext().getApiAdapter();
 
 					Map<Object, Object> serializedMap = getObject(columns.get(
 							columnName).getValue());
@@ -349,8 +353,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 						Object key = null;
 
 						if (adapter.isPersistable(keyClass)) {
-							key = getObjectFromIdString((String) mapKey, keyCmd);
-
+							key = context.findObject(mapKey, false, false,fieldMetaData.getTypeName());
 						} else {
 							key = mapKey;
 						}
@@ -359,8 +362,7 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 						Object value = null;
 
 						if (adapter.isPersistable(valueClass)) {
-							value = getObjectFromIdString((String) mapValue,
-									valueCmd);
+							value = context.findObject(mapValue, false, false,fieldMetaData.getTypeName());
 						} else {
 							value = mapValue;
 						}
@@ -368,12 +370,12 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 						map.put(key, value);
 					}
 
-					return stateManager.wrapSCOField(fieldNumber, map, false,
+					return objectProvider.wrapSCOField(fieldNumber, map, false,
 							false, true);
 
 				} else if (fieldMetaData.getType().isArray()) {
 
-					List<String> keys = getObject(columns.get(columnName)
+					List<Object> keys = getObject(columns.get(columnName)
 							.getValue());
 
 					Object array = Array.newInstance(fieldMetaData.getType()
@@ -384,13 +386,12 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 
 					for (int i = 0; i < keys.size(); i++) {
 
-						Object element = getObjectFromIdString(keys.get(i),
-								elementCmd);
-
+						Object element = context.findObject(keys.get(i), false, false,fieldMetaData.getTypeName());
+				
 						Array.set(array, Integer.valueOf(i), element);
 					}
 
-					return stateManager.wrapSCOField(fieldNumber, array, false,
+					return objectProvider.wrapSCOField(fieldNumber, array, false,
 							false, true);
 				}
 
@@ -463,32 +464,6 @@ public class CassandraFetchFieldManager extends CassandraFieldManager {
 		}
 	}
 
-	/**
-	 * Convenience method to find an object given a string form of its identity,
-	 * and the metadata for the class (or a superclass).
-	 * 
-	 * @param idStr
-	 *            The id string
-	 * @param cmd
-	 *            Metadata for the class
-	 * @return The object
-	 */
-	protected Object getObjectFromIdString(String idStr,
-			AbstractClassMetaData cmd) {
-
-		// convert it to an instance of the type
-		Object value = com.spidertracks.datanucleus.utils.MetaDataUtils
-				.getKeyValue(this.stateManager, cmd, idStr);
-
-		Class<?> cls = clr.classForName(cmd.getFullClassName());
-
-		Object id = stateManager.getObjectManager().newObjectId(cls, value);
-
-		// TODO TN, are we sure we don't want to validate? Doing so causes a
-		// recursive load issue
-		return stateManager.getObjectManager().findObject(id, false, false,
-				cmd.getFullClassName());
-
-	}
+	
 
 }
