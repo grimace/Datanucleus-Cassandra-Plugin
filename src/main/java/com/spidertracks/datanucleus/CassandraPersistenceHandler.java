@@ -130,7 +130,9 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 			//nothing to do
 			if (columns == null || columns.size() == 0) {
-				return;
+				//check if the pk field was requested.  If so, throw an exception b/c the object doesn't exist
+				pksearched(metaData, fieldNumbers);
+			
 			}
 
 			CassandraFetchFieldManager manager = new CassandraFetchFieldManager(
@@ -144,6 +146,27 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 	}
 
+	/**
+	 * Checks if a pk field was requested to be loaded.  If it is null a NucleusObjectNotFoundException is thrown because we only 
+	 * call this with 0 column results
+	 * @param metaData
+	 * @param requestedFields
+	 */
+	private void pksearched(AbstractClassMetaData metaData, int[] requestedFields){
+	
+		int[] pkPositions = metaData.getPKMemberPositions();
+		
+		for(int pkPosition: pkPositions){
+			for(int requestedField: requestedFields){
+				//our pk was a requested field, throw an exception b/c we didn't find anything
+				if(requestedField == pkPosition){
+					throw new NucleusObjectNotFoundException( );
+				}
+			}
+		}
+	}
+	
+	
 	@Override
 	public Object findObject(ExecutionContext ectx, Object id) {
 		// do nothing, we use locate instead
@@ -195,6 +218,8 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		}
 
 	}
+	
+	
 
 
 }

@@ -451,6 +451,11 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 		}
 
 		Object oldValue = objectProvider.provideField(fieldNumber);
+		
+		//no old value, nothing to do
+		if(oldValue == null){
+			return;
+		}
 
 		String indexKey = MetaDataUtils.convertToRowKey(this.objectProvider
 				.getExecutionContext(), oldValue);
