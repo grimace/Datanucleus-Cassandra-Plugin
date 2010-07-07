@@ -19,7 +19,6 @@ package com.spidertracks.datanucleus;
 
 import static com.spidertracks.datanucleus.utils.ByteConverter.getBytes;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnName;
-import static com.spidertracks.datanucleus.utils.MetaDataUtils.getRowKey;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -50,13 +49,10 @@ import com.spidertracks.datanucleus.utils.MetaDataUtils;
  */
 public class CassandraInsertFieldManager extends AbstractFieldManager {
 
-	// private List<Column> updates;
-	// private List<SuperColumn> superColumns;
-	// private List<Deletion> deletes;
+	
 	private ExecutionContext context;
 	private Mutator mutator;
 	private AbstractClassMetaData metaData;
-	// private StateManager stateManager;
 	private ObjectProvider objectProvider;
 	private String columnFamily;
 	private String key;

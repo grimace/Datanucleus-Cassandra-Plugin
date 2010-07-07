@@ -35,14 +35,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.api.ApiAdapter;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
-import org.datanucleus.metadata.MetaDataManager;
 import org.datanucleus.metadata.Relation;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
@@ -58,10 +56,8 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 	private Map<String, Column> columns;
 	private AbstractClassMetaData metaData;
-	//private StateManager stateManager;
 	private ObjectProvider objectProvider;
 	private ExecutionContext context;
-	private MetaDataManager metaDataManager;
 	private ClassLoaderResolver clr;
 
 	/**
@@ -75,7 +71,6 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 		this.objectProvider = op;
 		this.metaData = op.getClassMetaData();
 		this.context = op.getExecutionContext();
-		this.metaDataManager = this.context.getMetaDataManager();
 		this.clr = this.context.getClassLoaderResolver();
 
 		// rather than iterate over every field call for O(n) it's faster to
@@ -84,11 +79,6 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 		this.columns = new HashMap<String, Column>();
 
 		for (Column column : columns) {
-			// // TODO super columns
-			// if (column == null) {
-			// continue;
-			// }
-
 			this.columns.put(getString(column.getName()), column);
 		}
 
@@ -273,9 +263,6 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 				Object key = getObject(column.getValue());
 
-				AbstractClassMetaData metaData = this.metaDataManager
-						.getMetaDataForClass(fieldMetaData.getType(), clr);
-
 				Object object = context.findObject(key, false, false,fieldMetaData.getTypeName());
 
 				return objectProvider.wrapSCOField(fieldNumber, object, false,
@@ -305,10 +292,6 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 					List<Object> serializedIdList = getObject(columns.get(
 							columnName).getValue());
-
-					AbstractClassMetaData elementCmd = fieldMetaData
-							.getCollection().getElementClassMetaData(clr,
-									metaDataManager);
 
 					for (Object key : serializedIdList) {
 
@@ -342,12 +325,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 					Class valueClass = clr.classForName(fieldMetaData.getMap()
 							.getValueType());
 
-					AbstractClassMetaData keyCmd = fieldMetaData.getMap()
-							.getKeyClassMetaData(clr, metaDataManager);
-
-					AbstractClassMetaData valueCmd = fieldMetaData.getMap()
-							.getValueClassMetaData(clr, metaDataManager);
-
+				
 					for (Object mapKey : serializedMap.keySet()) {
 
 						Object key = null;
@@ -380,9 +358,6 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 					Object array = Array.newInstance(fieldMetaData.getType()
 							.getComponentType(), keys.size());
-
-					AbstractClassMetaData elementCmd = fieldMetaData.getArray()
-							.getElementClassMetaData(clr, metaDataManager);
 
 					for (int i = 0; i < keys.size(); i++) {
 
@@ -446,15 +421,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 				return null;
 			}
 
-			// ByteArrayInputStream bis = new
-			// ByteArrayInputStream(column.value);
-			//			
-			//
-			// // always return UTF 8 values as UTF 8 shoudl always be stored
-			// String value = ois.readUTF();
-			//			
-			//			
-
+		
 			String value = getString(column.value);
 
 			return value;
