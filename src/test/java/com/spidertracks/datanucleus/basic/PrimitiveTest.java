@@ -46,6 +46,7 @@ import com.spidertracks.datanucleus.basic.model.UnitDataKey;
 /**
  * @author Todd Nine
  * 
+ * TODO test 2 primitives A and B with bidirectional link and defaultFetchGroup="true"
  */
 
 public class PrimitiveTest extends CassandraTest {
