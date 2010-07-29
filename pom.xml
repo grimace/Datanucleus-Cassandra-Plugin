@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<artifactId>settings</artifactId>
 		<groupId>com.spidertracks.standards</groupId>
@@ -7,7 +8,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.spidertracks.datanucleus</groupId>
 	<artifactId>cassandra</artifactId>
-	<version>0.0.4.7-SNAPSHOT</version>
+	<version>0.0.4.7</version>
 
 	<repositories>
 
@@ -126,9 +127,9 @@
 	</dependencies>
 
 	<scm>
-		<connection>scm:svn:https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/</connection>
-		<url>https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/</url>
-		<developerConnection>scm:svn:https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/</developerConnection>
+		<connection>scm:svn:https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/tags/cassandra-0.0.4.7</connection>
+		<url>https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/tags/cassandra-0.0.4.7</url>
+		<developerConnection>scm:svn:https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/tags/cassandra-0.0.4.7</developerConnection>
 	</scm>
 	<build>
 
@@ -144,6 +145,7 @@
 						</goals>
 					</execution>
 				</executions>
+				
 			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -177,6 +179,13 @@
 						</goals>
 					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.datanucleus</groupId>
+						<artifactId>datanucleus-core</artifactId>
+						<version>${datanucleus.version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
