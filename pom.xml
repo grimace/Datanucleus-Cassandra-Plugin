@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<artifactId>settings</artifactId>
 		<groupId>com.spidertracks.standards</groupId>
@@ -56,7 +57,7 @@
 		<dependency>
 			<groupId>org.wyki</groupId>
 			<artifactId>pelops</artifactId>
-			<version>0.0.2</version>
+			<version>0.0.3</version>
 		</dependency>
 
 
@@ -69,6 +70,12 @@
 			<version>${datanucleus.plugin.version}</version>
 			<type>jar</type>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.datanucleus</groupId>
+					<artifactId>datanucleus-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -169,7 +176,15 @@
 					<verbose>true</verbose>
 					<enhancerName>ASM</enhancerName>
 					<!-- <props>${basedir}/datanucleus.properties</props> -->
+
 				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.datanucleus</groupId>
+						<artifactId>datanucleus-core</artifactId>
+						<version>${datanucleus.version}</version>
+					</dependency>
+				</dependencies>
 				<executions>
 					<execution>
 						<phase>process-test-classes</phase>
@@ -178,13 +193,6 @@
 						</goals>
 					</execution>
 				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>org.datanucleus</groupId>
-						<artifactId>datanucleus-core</artifactId>
-						<version>${datanucleus.version}</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
