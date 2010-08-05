@@ -18,9 +18,7 @@ Contributors :
 package com.spidertracks.datanucleus.query;
 
 import static com.spidertracks.datanucleus.utils.ByteConverter.getString;
-import static com.spidertracks.datanucleus.utils.MetaDataUtils.convertToRowKey;
-import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnFamily;
-import static com.spidertracks.datanucleus.utils.MetaDataUtils.getIndexName;
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.*;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -28,7 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.Stack;
 
 import org.apache.cassandra.thrift.Column;
@@ -247,7 +244,7 @@ public class CassandraQueryExpressionEvaluator extends
 			range.setStart_key(indexKey);
 			range.setEnd_key("");
 
-			SortedMap<String, List<Column>> columns = selector
+			Map<String, List<Column>> columns = selector
 					.getColumnsFromRows(range, indexName, Selector
 							.newColumnsPredicateAll(true, MAXCOUNT),
 							MetaDataUtils.DEFAULT);
@@ -295,7 +292,7 @@ public class CassandraQueryExpressionEvaluator extends
 					OrderType.UTF8Type)));
 			range.setEnd_key("");
 
-			SortedMap<String, List<Column>> columns = selector
+			Map<String, List<Column>> columns = selector
 					.getColumnsFromRows(range, indexName, Selector
 							.newColumnsPredicateAll(true, MAXCOUNT),
 							MetaDataUtils.DEFAULT);
@@ -342,7 +339,7 @@ public class CassandraQueryExpressionEvaluator extends
 			range.setStart_key("");
 			range.setEnd_key(indexKey);
 
-			SortedMap<String, List<Column>> columns = selector
+			Map<String, List<Column>> columns = selector
 					.getColumnsFromRows(range, indexName, Selector
 							.newColumnsPredicateAll(true, MAXCOUNT),
 							MetaDataUtils.DEFAULT);
@@ -389,7 +386,7 @@ public class CassandraQueryExpressionEvaluator extends
 			range.setEnd_key(getString(Selector.bumpDownColumnName(indexKey,
 					OrderType.UTF8Type)));
 
-			SortedMap<String, List<Column>> columns = selector
+			Map<String, List<Column>> columns = selector
 					.getColumnsFromRows(range, indexName, Selector
 							.newColumnsPredicateAll(true, MAXCOUNT),
 							MetaDataUtils.DEFAULT);
@@ -438,7 +435,7 @@ public class CassandraQueryExpressionEvaluator extends
 			range.setEnd_key(getString(Selector.bumpDownColumnName(indexKey,
 					OrderType.UTF8Type)));
 
-			SortedMap<String, List<Column>> columns = selector
+			Map<String, List<Column>> columns = selector
 					.getColumnsFromRows(range, indexName, Selector
 							.newColumnsPredicateAll(true, MAXCOUNT),
 							MetaDataUtils.DEFAULT);
@@ -618,7 +615,7 @@ public class CassandraQueryExpressionEvaluator extends
 	 * @return
 	 */
 	private static Set<String> convertToColumns(
-			SortedMap<String, List<Column>> columns) {
+			Map<String, List<Column>> columns) {
 
 		Set<String> merged = new HashSet<String>();
 
@@ -634,7 +631,7 @@ public class CassandraQueryExpressionEvaluator extends
 	 * @return
 	 */
 	private static void convertToColumns(
-			SortedMap<String, List<Column>> columns, Set<String> set) {
+			Map<String, List<Column>> columns, Set<String> set) {
 
 		
 		for (List<Column> rowColumns : columns.values()) {
@@ -673,7 +670,7 @@ public class CassandraQueryExpressionEvaluator extends
 	}
 
 	private static Set<String> convertKeysToIndexColumns(
-			SortedMap<String, List<Column>> columns) {
+			Map<String, List<Column>> columns) {
 		Set<String> merged = new HashSet<String>();
 
 		for (String key : columns.keySet()) {

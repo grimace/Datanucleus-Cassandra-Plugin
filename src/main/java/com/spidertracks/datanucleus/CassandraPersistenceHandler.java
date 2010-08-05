@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.SlicePredicate;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusObjectNotFoundException;
 import org.datanucleus.metadata.AbstractClassMetaData;
@@ -65,7 +64,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 			KeyDeletor deletor = Pelops.createKeyDeletor(poolName, keySpace);
 
-			deletor.deleteColumnFamily(key, getColumnFamily(op
+			deletor.deleteRow(key, getColumnFamily(op
 					.getClassMetaData()), ConsistencyLevel.ONE);
 
 			// delete our secondary index as well
