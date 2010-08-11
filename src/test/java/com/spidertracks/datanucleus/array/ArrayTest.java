@@ -18,15 +18,21 @@ Contributors :
 
 package com.spidertracks.datanucleus.array;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
+import javax.jdo.JDODataStoreException;
+import javax.jdo.PersistenceManager;
+import javax.jdo.Transaction;
+
+import org.datanucleus.exceptions.NucleusObjectNotFoundException;
 import org.junit.Test;
 
+import com.eaio.uuid.UUID;
 import com.spidertracks.datanucleus.CassandraTest;
 import com.spidertracks.datanucleus.array.model.CardArray;
 import com.spidertracks.datanucleus.array.model.PackArray;
+import com.spidertracks.datanucleus.collection.model.Card;
+import com.spidertracks.datanucleus.collection.model.Pack;
 
 /**
  * @author Todd Nine
@@ -34,7 +40,6 @@ import com.spidertracks.datanucleus.array.model.PackArray;
  */
 
 public class ArrayTest extends CassandraTest {
-
 
 	@Test
 	public void testBasicPeristAndLoadOneToManyArray() throws Exception {
@@ -63,4 +68,78 @@ public class ArrayTest extends CassandraTest {
 		assertTrue(saved.getCards()[1].equals(jackHearts));
 
 	}
+
+	@Test
+	public void testDeleteMap() throws Exception {
+
+		PackArray pack = new PackArray();
+
+		CardArray aceSpades = new CardArray();
+		aceSpades.setName("Ace of Spades");
+		pack.getCards()[0] = (aceSpades);
+
+		CardArray jackHearts = new CardArray();
+		jackHearts.setName("Jack of Hearts");
+		pack.getCards()[1] = jackHearts;
+
+		pmf.getPersistenceManager().makePersistent(pack);
+
+		PersistenceManager pm = pmf.getPersistenceManager();
+		Transaction trans = pm.currentTransaction();
+		trans.begin();
+
+		PackArray saved = pm.getObjectById(PackArray.class, pack.getId());
+
+		assertEquals(pack, saved);
+
+		assertNotNull(saved.getCards());
+
+		assertTrue(saved.getCards()[0].equals(aceSpades));
+
+		assertTrue(saved.getCards()[1].equals(jackHearts));
+		
+		UUID packId = pack.getId();
+		UUID aceId = aceSpades.getId();
+		UUID jackId = jackHearts.getId();
+
+
+		pm.deletePersistent(saved);
+
+		trans.commit();
+
+		boolean deleted = false;
+
+		try {
+			pmf.getPersistenceManager().getObjectById(Pack.class, packId);
+		} catch (JDODataStoreException n) {
+			deleted = n.getCause() instanceof NucleusObjectNotFoundException;
+		}
+
+		assertTrue(deleted);
+
+		deleted = false;
+
+		// now check the cards are gone as well
+		try {
+			pmf.getPersistenceManager().getObjectById(Card.class, aceId);
+		} catch (JDODataStoreException n) {
+			deleted = n.getCause() instanceof NucleusObjectNotFoundException;
+		}
+
+		assertTrue(deleted);
+
+		deleted = false;
+		try {
+			pmf.getPersistenceManager().getObjectById(Card.class, jackId);
+
+		} catch (JDODataStoreException n) {
+			deleted = n.getCause() instanceof NucleusObjectNotFoundException;
+		}
+
+		assertTrue(deleted);
+
+		deleted = false;
+
+	}
+
 }

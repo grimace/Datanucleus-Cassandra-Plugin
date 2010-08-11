@@ -19,17 +19,17 @@ Contributors :
 package com.spidertracks.datanucleus.collection;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import javax.jdo.JDODataStoreException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Transaction;
 
+import org.datanucleus.exceptions.NucleusObjectNotFoundException;
 import org.junit.Test;
 
+import com.eaio.uuid.UUID;
 import com.spidertracks.datanucleus.CassandraTest;
 import com.spidertracks.datanucleus.collection.model.Card;
 import com.spidertracks.datanucleus.collection.model.Pack;
@@ -127,7 +127,7 @@ public class CollectionTest extends CassandraTest {
 		pm.makePersistent(pack);
 
 		Pack saved = pm.getObjectById(Pack.class, pack.getId());
-		
+
 		assertEquals(pack, saved);
 
 		assertNotNull(saved.getCards());
@@ -147,9 +147,11 @@ public class CollectionTest extends CassandraTest {
 
 		assertEquals(pack, savedJackHeartsSpades.getPack());
 	}
-	
+
 	/**
-	 * Tests that when an empty collection is persisted then lazy loaded, no exceptions occur.
+	 * Tests that when an empty collection is persisted then lazy loaded, no
+	 * exceptions occur.
+	 * 
 	 * @throws Exception
 	 */
 	@Test
@@ -162,19 +164,102 @@ public class CollectionTest extends CassandraTest {
 		pm.makePersistent(pack);
 
 		PersistenceManager pm2 = pmf.getPersistenceManager();
-		
+
 		Transaction tx = pm2.currentTransaction();
 		tx.begin();
 		Pack saved = pm2.getObjectById(Pack.class, pack.getId());
-		
-		
+
 		List<Card> emptyList = saved.getCards();
-		
+
 		tx.commit();
-		
+
 		assertNull(emptyList);
+
+	}
+
+	@Test
+	public void testDeleteDependencies() throws Exception {
+
+		Pack pack = new Pack();
+
+		Card aceSpades = new Card();
+		aceSpades.setName("Ace of Spades");
+		pack.AddCard(aceSpades);
+
+		Card jackHearts = new Card();
+		jackHearts.setName("Jack of Hearts");
+		pack.AddCard(jackHearts);
+
+		pmf.getPersistenceManager().makePersistent(pack);
+
+		PersistenceManager pm = pmf.getPersistenceManager();
+		Transaction trans = pm.currentTransaction();
+		trans.begin();
+
+		Pack saved = pm.getObjectById(Pack.class, pack.getId());
+
+		assertEquals(pack, saved);
+
+		assertNotNull(saved.getCards());
+
+		assertTrue(saved.getCards().contains(aceSpades));
+
+		assertTrue(saved.getCards().contains(jackHearts));
+
+		// saved ace spades
+		Card savedAceSpades = saved.getCards().get(
+				saved.getCards().indexOf(aceSpades));
+
+		assertEquals(pack, savedAceSpades.getPack());
+
+		Card savedJackHearts = saved.getCards().get(
+				saved.getCards().indexOf(jackHearts));
+
+		assertEquals(pack, savedJackHearts.getPack());
 		
-		
+		UUID packId = pack.getId();
+		UUID aceId = aceSpades.getId();
+		UUID jackId = jackHearts.getId();
+
+		// now perform a delete and ensure that everything is deleted
+
+		pm.deletePersistent(saved);
+		trans.commit();
+
+		boolean deleted = false;
+
+		try {
+			pmf.getPersistenceManager().getObjectById(Pack.class,packId);
+		} catch (JDODataStoreException n) {
+			deleted = n.getCause() instanceof NucleusObjectNotFoundException;
+		}
+
+		assertTrue(deleted);
+
+		deleted = false;
+
+		// now check the cards are gone as well
+		try {
+			pmf.getPersistenceManager().getObjectById(Card.class,
+					aceId);
+		} catch (JDODataStoreException n) {
+			deleted = n.getCause() instanceof NucleusObjectNotFoundException;
+		}
+
+		assertTrue(deleted);
+
+		deleted = false;
+		try {
+			pmf.getPersistenceManager().getObjectById(Card.class,
+					jackId);
+
+		} catch (JDODataStoreException n) {
+			deleted = n.getCause() instanceof NucleusObjectNotFoundException;
+		}
+
+		assertTrue(deleted);
+
+		deleted = false;
 	}
 
 }

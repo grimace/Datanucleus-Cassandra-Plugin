@@ -17,35 +17,43 @@ Contributors : Pedro Gomes and Universidade do Minho.
  ***********************************************************************/
 package com.spidertracks.datanucleus;
 
+import static com.spidertracks.datanucleus.utils.ByteConverter.getBytes;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.*;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.datanucleus.ClassLoaderResolver;
+import org.datanucleus.StateManager;
+import org.datanucleus.api.ApiAdapter;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusObjectNotFoundException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
+import org.datanucleus.metadata.Relation;
 import org.datanucleus.store.AbstractPersistenceHandler;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
-import org.wyki.cassandra.pelops.KeyDeletor;
 import org.wyki.cassandra.pelops.Mutator;
 import org.wyki.cassandra.pelops.Pelops;
 import org.wyki.cassandra.pelops.Selector;
 
 import com.spidertracks.datanucleus.mutate.BatchMutationManager;
+import com.spidertracks.datanucleus.mutate.ExecutionContextDelete;
 
 public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
-	
 	private CassandraStoreManager manager;
 	private BatchMutationManager batchManager;
 
 	public CassandraPersistenceHandler(CassandraStoreManager manager) {
 		this.manager = manager;
-		this.batchManager = new BatchMutationManager();
+		this.batchManager = new BatchMutationManager(manager);
 	}
 
 	@Override
@@ -57,34 +65,31 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 	public void deleteObject(ObjectProvider op) {
 		try {
 
-			String poolName = manager.getPoolName();
-			String keySpace = manager.getKeyspace();
-
 			String key = getRowKey(op);
 
-			KeyDeletor deletor = Pelops.createKeyDeletor(poolName, keySpace);
+			String columnFamily = getColumnFamily(op.getClassMetaData());
 
-			deletor.deleteRow(key, getColumnFamily(op
-					.getClassMetaData()), ConsistencyLevel.ONE);
+			ExecutionContext ec = op.getExecutionContext();
+
+			ExecutionContextDelete delete = this.batchManager.beginDelete(ec,
+					op);
+
+			// we've already visited this object, do nothing
+			if (!delete.addDeletion(op, key, columnFamily)) {
+				return;
+			}
 
 			// delete our secondary index as well
-
 			AbstractClassMetaData metaData = op.getClassMetaData();
 
-			int[] fields = metaData.getAllMemberPositions();
+			// signal a write is about to start
+			Mutator mutator = this.batchManager.beginWrite(ec).getMutator();
 
-			Mutator mutator = Pelops.createMutator(poolName, keySpace);
+			int[] fields = metaData.getAllMemberPositions();
 
 			for (int current : fields) {
 				AbstractMemberMetaData fieldMetaData = metaData
 						.getMetaDataForManagedMemberAtAbsolutePosition(current);
-
-				String secondaryCfName = getIndexName(metaData, fieldMetaData);
-
-				// nothing to index
-				if (secondaryCfName == null) {
-					continue;
-				}
 
 				// here we have the field value
 				Object value = op.provideField(current);
@@ -93,20 +98,101 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 					continue;
 				}
 
-				// convert it to a string so we can key it
-				String keyValue = convertToRowKey(op.getExecutionContext(), value);
+				// if we're a collection, delete each element
+				// recurse to delete this object if it's marked as dependent
+				if (fieldMetaData.isDependent() || (fieldMetaData.getCollection() != null && fieldMetaData.getCollection().isDependentElement())) {
 
-				//no value to remove
-				if(keyValue == null || keyValue.length() == 0){
+					ClassLoaderResolver clr = ec.getClassLoaderResolver();
+
+					int relationType = fieldMetaData.getRelationType(clr);
+
+					// check if this is a relationship
+
+					if (relationType == Relation.ONE_TO_ONE_BI
+							|| relationType == Relation.ONE_TO_ONE_UNI
+							|| relationType == Relation.MANY_TO_ONE_BI) {
+						// Persistable object - persist the related object and
+						// store the
+						// identity in the cell
+
+						ec.deleteObjectInternal(value);
+					}
+
+					else if (relationType == Relation.MANY_TO_MANY_BI
+							|| relationType == Relation.ONE_TO_MANY_BI
+							|| relationType == Relation.ONE_TO_MANY_UNI) {
+						// Collection/Map/Array
+
+						if (fieldMetaData.hasCollection()) {
+
+							for (Object element : (Collection<?>) value) {
+								// delete the object
+								ec.deleteObjectInternal(element);
+							}
+
+						} else if (fieldMetaData.hasMap()) {
+							ApiAdapter adapter = ec.getApiAdapter();
+
+							Map<?, ?> map = ((Map<?, ?>) value);
+							Object mapValue;
+
+							// get each element and persist it.
+							for (Object mapKey : map.keySet()) {
+
+								mapValue = map.get(mapKey);
+
+								// handle the case if our key is a persistent
+								// class
+								// itself
+								if (adapter.isPersistable(mapKey)) {
+									ec.deleteObjectInternal(mapKey);
+
+								}
+								// persist the value if it can be persisted
+								if (adapter.isPersistable(mapValue)) {
+									ec.deleteObjectInternal(mapValue);
+								}
+
+							}
+
+						} else if (fieldMetaData.hasArray()) {
+							Object persisted = null;
+
+							for (int i = 0; i < Array.getLength(value); i++) {
+								// persist the object
+								persisted = Array.get(value, i);
+								ec.deleteObjectInternal(persisted);
+							}
+						}
+
+					}
+
+				}
+
+				//delete secondary indexes
+				String secondaryCfName = getIndexName(metaData, fieldMetaData);
+
+				// nothing to index
+				if (secondaryCfName == null) {
 					continue;
 				}
-				
+
+				// convert it to a string so we can key it
+				String keyValue = convertToRowKey(op.getExecutionContext(),
+						value);
+
+				// no value to remove
+				if (keyValue == null || keyValue.length() == 0) {
+					continue;
+				}
+
 				// blitz the reverse index
 				mutator.deleteColumn(keyValue, secondaryCfName, key);
 
 			}
 
-			mutator.execute(ConsistencyLevel.ONE);
+			this.batchManager.endWrite(ec, DEFAULT);
+			this.batchManager.endDelete(ec, DEFAULT);
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -127,11 +213,12 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 					getColumnFamily(metaData), getFetchColumnList(metaData,
 							fieldNumbers), DEFAULT);
 
-			//nothing to do
+			// nothing to do
 			if (columns == null || columns.size() == 0) {
-				//check if the pk field was requested.  If so, throw an exception b/c the object doesn't exist
+				// check if the pk field was requested. If so, throw an
+				// exception b/c the object doesn't exist
 				pksearched(metaData, fieldNumbers);
-			
+
 			}
 
 			CassandraFetchFieldManager manager = new CassandraFetchFieldManager(
@@ -146,26 +233,29 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 	}
 
 	/**
-	 * Checks if a pk field was requested to be loaded.  If it is null a NucleusObjectNotFoundException is thrown because we only 
-	 * call this with 0 column results
+	 * Checks if a pk field was requested to be loaded. If it is null a
+	 * NucleusObjectNotFoundException is thrown because we only call this with 0
+	 * column results
+	 * 
 	 * @param metaData
 	 * @param requestedFields
 	 */
-	private void pksearched(AbstractClassMetaData metaData, int[] requestedFields){
-	
+	private void pksearched(AbstractClassMetaData metaData,
+			int[] requestedFields) {
+
 		int[] pkPositions = metaData.getPKMemberPositions();
-		
-		for(int pkPosition: pkPositions){
-			for(int requestedField: requestedFields){
-				//our pk was a requested field, throw an exception b/c we didn't find anything
-				if(requestedField == pkPosition){
-					throw new NucleusObjectNotFoundException( );
+
+		for (int pkPosition : pkPositions) {
+			for (int requestedField : requestedFields) {
+				// our pk was a requested field, throw an exception b/c we
+				// didn't find anything
+				if (requestedField == pkPosition) {
+					throw new NucleusObjectNotFoundException();
 				}
 			}
 		}
 	}
-	
-	
+
 	@Override
 	public Object findObject(ExecutionContext ectx, Object id) {
 		// do nothing, we use locate instead
@@ -194,11 +284,8 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 		ExecutionContext ec = op.getExecutionContext();
 
-		Mutator mutator = Pelops.createMutator(manager.getPoolName(), manager
-				.getKeyspace());
-
 		// signal a write is about to start
-		this.batchManager.beginWrite(ec, mutator);
+		Mutator mutator = this.batchManager.beginWrite(ec).getMutator();
 
 		String key = getRowKey(op);
 
@@ -217,8 +304,5 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		}
 
 	}
-	
-	
-
 
 }

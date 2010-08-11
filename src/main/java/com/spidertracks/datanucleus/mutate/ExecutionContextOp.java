@@ -12,39 +12,53 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Contributors : Todd Nine
+Contributors :
+    ...
  ***********************************************************************/
 package com.spidertracks.datanucleus.mutate;
 
-import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.datanucleus.store.ExecutionContext;
-import org.wyki.cassandra.pelops.Mutator;
 
 /**
- * Holds all mutations for the current execution context
- * 
  * @author Todd Nine
- * 
+ *
  */
-public class ExecutionContextMutate extends ExecutionContextOp {
+public abstract class ExecutionContextOp {
+	
+	private ExecutionContext ctx;
+	private int count;
 
-	// operations of mutations to perform
-	private Mutator mutator;
-
-	public ExecutionContextMutate(ExecutionContext ctx, Mutator mutator) {
-		super(ctx);
-		this.mutator = mutator;
-	}
-
-	public void execute(ConsistencyLevel consistency) throws Exception {
-		mutator.execute(consistency);
+	public ExecutionContextOp(ExecutionContext ctx) {
+		this.ctx = ctx;
+		this.count = 0;
 	}
 
 	/**
-	 * @return the mutator
+	 * Get the execution context this mutate belongs to
+	 * 
+	 * @return
 	 */
-	public Mutator getMutator() {
-		return mutator;
+	public ExecutionContext getExecutionContext() {
+		return ctx;
+	}
+	/**
+	 * Push the current on to our stack for this execution context
+	 * 
+	 * @param instance
+	 */
+	public void pushInstance() {
+		count++;
 	}
 
+	/**
+	 * Pop the current instance from our execution context
+	 * 
+	 * @param instnace
+	 * @return
+	 */
+	public boolean popInstance() {
+		count--;
+		return count == 0;
+
+	}
 }

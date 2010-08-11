@@ -143,6 +143,10 @@
 		<ColumnFamily CompareWith="UTF8Type" Name="Person_LastName" />
 		<ColumnFamily CompareWith="UTF8Type" Name="Person_email" />
 		<ColumnFamily CompareWith="UTF8Type" Name="Person_LastLogin" />
+		
+		
+		<ColumnFamily CompareWith="UTF8Type" Name="InvitationToken" />
+		<ColumnFamily CompareWith="UTF8Type" Name="InvitedPerson" />
  
       <!--
        ~ Strategy: Setting this to the class that implements

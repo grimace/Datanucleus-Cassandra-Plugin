@@ -21,7 +21,10 @@ import java.util.Map;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.datanucleus.store.ExecutionContext;
-import org.wyki.cassandra.pelops.Mutator;
+import org.datanucleus.store.ObjectProvider;
+import org.wyki.cassandra.pelops.Pelops;
+
+import com.spidertracks.datanucleus.CassandraStoreManager;
 
 /**
  * Internalises all pending operations for a given Execution context.
@@ -32,15 +35,26 @@ import org.wyki.cassandra.pelops.Mutator;
 public class BatchMutationManager {
 
 	private Map<ExecutionContext, ExecutionContextMutate> contextMutations = new HashMap<ExecutionContext, ExecutionContextMutate>();
+	private Map<ExecutionContext, ExecutionContextDelete> contextDeletions = new HashMap<ExecutionContext, ExecutionContextDelete>();
 
-	public BatchMutationManager() {
+	private CassandraStoreManager manager;
+
+	public BatchMutationManager(CassandraStoreManager manager) {
+		this.manager = manager;
+	}
+
+	public ExecutionContextDelete beginDelete(ExecutionContext context,
+			ObjectProvider op) {
+		ExecutionContextDelete deleteContext = getDeletions(context);
+		deleteContext.pushInstance();
+		return deleteContext;
 
 	}
 
-	public void beginWrite(ExecutionContext context, Mutator mutator) {
+	public ExecutionContextMutate beginWrite(ExecutionContext context) {
 		ExecutionContextMutate mutationContext = getMutations(context);
 		mutationContext.pushInstance();
-		mutationContext.pushMutation(mutator);
+		return mutationContext;
 	}
 
 	/**
@@ -50,9 +64,33 @@ public class BatchMutationManager {
 	 * @param context
 	 * @param sm
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	public void endWrite(ExecutionContext context, ConsistencyLevel consistency) throws Exception {
+	public void endDelete(ExecutionContext context, ConsistencyLevel consistency)
+			throws Exception {
+		// not our root instance, don't create a batch mutation
+		if (!getDeletions(context).popInstance()) {
+			return;
+		}
+
+		// it is our root instance, create the batch mutation.
+
+		getDeletions(context).execute(consistency);
+		contextDeletions.remove(context);
+
+	}
+
+	/**
+	 * Returns true if this is the last object to end writing. This mean the
+	 * mutation for this context should be saved
+	 * 
+	 * @param context
+	 * @param sm
+	 * @return
+	 * @throws Exception
+	 */
+	public void endWrite(ExecutionContext context, ConsistencyLevel consistency)
+			throws Exception {
 		// not our root instance, don't create a batch mutation
 		if (!getMutations(context).popInstance()) {
 			return;
@@ -61,11 +99,10 @@ public class BatchMutationManager {
 		// it is our root instance, create the batch mutation.
 
 		getMutations(context).execute(consistency);
-		removeMutations(context);
-
+		contextMutations.remove(context);
 
 	}
-	
+
 	/**
 	 * Get the mutations for this execution context
 	 * 
@@ -76,7 +113,9 @@ public class BatchMutationManager {
 		ExecutionContextMutate operations = contextMutations.get(context);
 
 		if (operations == null) {
-			operations = new ExecutionContextMutate(context);
+			operations = new ExecutionContextMutate(context,
+					Pelops.createMutator(manager.getPoolName(), manager
+							.getKeyspace()));
 			contextMutations.put(context, operations);
 		}
 
@@ -84,12 +123,22 @@ public class BatchMutationManager {
 	}
 
 	/**
-	 * Remove our mutations from the cache
+	 * Get the mutations for this execution context
 	 * 
 	 * @param context
+	 * @return
 	 */
-	private void removeMutations(ExecutionContext context) {
-		contextMutations.remove(context);
+	private ExecutionContextDelete getDeletions(ExecutionContext context) {
+		ExecutionContextDelete operations = contextDeletions.get(context);
+
+		if (operations == null) {
+			operations = new ExecutionContextDelete(context, Pelops
+					.createKeyDeletor(manager.getPoolName(), manager
+							.getKeyspace()));
+			contextDeletions.put(context, operations);
+		}
+
+		return operations;
 	}
 
 }

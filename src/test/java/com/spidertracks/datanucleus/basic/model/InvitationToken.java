@@ -15,48 +15,52 @@ limitations under the License.
 Contributors :
     ...
  ***********************************************************************/
-package com.spidertracks.datanucleus.map.model;
+package com.spidertracks.datanucleus.basic.model;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.jdo.annotations.Element;
 import javax.jdo.annotations.IdentityType;
-import javax.jdo.annotations.Inheritance;
-import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
-
-import com.spidertracks.datanucleus.model.BaseEntity;
+import javax.jdo.annotations.PrimaryKey;
 
 /**
- * An object with a collection to many objects
- * 
  * @author Todd Nine
+ *
  */
-@PersistenceCapable(table = "PackMap", identityType = IdentityType.APPLICATION)
-@Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
-public class PackMap extends BaseEntity {
+@PersistenceCapable(table="InvitationToken", identityType = IdentityType.APPLICATION)
+public class InvitationToken {
 
-	@Persistent(mappedBy = "pack")
-	@Element(dependent="true")
-	private Map<String, CardMap> cards;
+	@PrimaryKey
+	@Persistent
+	private String token;
 
-	public PackMap() {
-		cards = new  HashMap<String, CardMap>();
+	@Persistent(dependent="true", defaultFetchGroup="true")
+	private InvitedPerson person;
+
+	/**
+	 * @return the token
+	 */
+	public String getToken() {
+		return token;
 	}
 
 	/**
-	 * @return the manyToOne
+	 * @param token the token to set
 	 */
-	public Map<String, CardMap> getCards() {
-		return cards;
-	}
-	
-
-	public void AddCard(CardMap card){
-		this.cards.put(card.getName(), card);
-		card.setPack(this);
+	public void setToken(String token) {
+		this.token = token;
 	}
 
+	/**
+	 * @return the person
+	 */
+	public InvitedPerson getPerson() {
+		return person;
+	}
+
+	/**
+	 * @param person the person to set
+	 */
+	public void setPerson(InvitedPerson person) {
+		this.person = person;
+	}
 }

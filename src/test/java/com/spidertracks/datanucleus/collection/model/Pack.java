@@ -20,6 +20,7 @@ package com.spidertracks.datanucleus.collection.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.jdo.annotations.Element;
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.Inheritance;
 import javax.jdo.annotations.InheritanceStrategy;
@@ -38,6 +39,7 @@ public class Pack extends BaseEntity {
 	
 	
 	@Persistent(mappedBy="pack")
+	@Element(dependent="true")
 	private List<Card> cards;
 	
 	public Pack(){

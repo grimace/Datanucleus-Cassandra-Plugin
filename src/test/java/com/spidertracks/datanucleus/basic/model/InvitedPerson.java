@@ -15,42 +15,32 @@ limitations under the License.
 Contributors :
     ...
  ***********************************************************************/
-package com.spidertracks.datanucleus.array.model;
+package com.spidertracks.datanucleus.basic.model;
 
-import javax.jdo.annotations.Element;
-import javax.jdo.annotations.IdentityType;
-import javax.jdo.annotations.Inheritance;
-import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 
-import com.spidertracks.datanucleus.model.BaseEntity;
-
 /**
- * An object with a collection to many objects
- * @author Todd Nine 
+ * @author Todd Nine
+ *
  */
-@PersistenceCapable(table = "PackArray", identityType = IdentityType.APPLICATION)
-@Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
-public class PackArray extends BaseEntity {
-	
-	
-	@Persistent(mappedBy="pack")
-	@Element(dependent="true")
-	private CardArray[] cards;
-	
-	public PackArray(){
-		cards = new CardArray[2];
+@PersistenceCapable
+public class InvitedPerson extends Person {
+
+	@Persistent(dependent="true", defaultFetchGroup="true")
+	private InvitationToken token;
+
+	/**
+	 * @return the token
+	 */
+	public InvitationToken getToken() {
+		return token;
 	}
 
 	/**
-	 * @return the manyToOne
+	 * @param token the token to set
 	 */
-	public CardArray[] getCards() {
-		return cards;
+	public void setToken(InvitationToken token) {
+		this.token = token;
 	}
-	
-	
-
-	
 }
