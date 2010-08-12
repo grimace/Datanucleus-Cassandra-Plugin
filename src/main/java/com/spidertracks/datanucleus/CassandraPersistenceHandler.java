@@ -17,24 +17,22 @@ Contributors : Pedro Gomes and Universidade do Minho.
  ***********************************************************************/
 package com.spidertracks.datanucleus;
 
-import static com.spidertracks.datanucleus.utils.ByteConverter.getBytes;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.*;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.SlicePredicate;
 import org.datanucleus.ClassLoaderResolver;
-import org.datanucleus.StateManager;
 import org.datanucleus.api.ApiAdapter;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusObjectNotFoundException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
+import org.datanucleus.metadata.DiscriminatorMetaData;
 import org.datanucleus.metadata.Relation;
 import org.datanucleus.store.AbstractPersistenceHandler;
 import org.datanucleus.store.ExecutionContext;
@@ -100,7 +98,9 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 				// if we're a collection, delete each element
 				// recurse to delete this object if it's marked as dependent
-				if (fieldMetaData.isDependent() || (fieldMetaData.getCollection() != null && fieldMetaData.getCollection().isDependentElement())) {
+				if (fieldMetaData.isDependent()
+						|| (fieldMetaData.getCollection() != null && fieldMetaData
+								.getCollection().isDependentElement())) {
 
 					ClassLoaderResolver clr = ec.getClassLoaderResolver();
 
@@ -169,7 +169,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 				}
 
-				//delete secondary indexes
+				// delete secondary indexes
 				String secondaryCfName = getIndexName(metaData, fieldMetaData);
 
 				// nothing to index
@@ -209,9 +209,20 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 			Selector selector = Pelops.createSelector(manager.getPoolName(),
 					manager.getKeyspace());
 
+			
+			SlicePredicate predicate = null;
+
+		
+			// if we have a discriminator, get all columns because we don't know what data we need to load yet
+			if (metaData.hasDiscriminatorStrategy()) {
+				predicate = getFetchAllColumnList();
+			}else{
+				//no descriminator, only load the columns we need
+				predicate = getFetchColumnList(metaData, fieldNumbers);
+			}
+
 			List<Column> columns = selector.getColumnsFromRow(key,
-					getColumnFamily(metaData), getFetchColumnList(metaData,
-							fieldNumbers), DEFAULT);
+					getColumnFamily(metaData), predicate, DEFAULT);
 
 			// nothing to do
 			if (columns == null || columns.size() == 0) {
@@ -288,12 +299,26 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		Mutator mutator = this.batchManager.beginWrite(ec).getMutator();
 
 		String key = getRowKey(op);
+		String columnFamily = getColumnFamily(metaData);
 
 		// Write our all our primary object data
 		CassandraInsertFieldManager manager = new CassandraInsertFieldManager(
-				mutator, op, getColumnFamily(metaData), key);
+				mutator, op, columnFamily, key);
 
 		op.provideFields(metaData.getAllMemberPositions(), manager);
+
+		
+		// if we have a discriminator, write the value
+		if (metaData.hasDiscriminatorStrategy()) {
+			DiscriminatorMetaData discriminator = metaData.getDiscriminatorMetaData();
+			
+			String colName = getDiscriminatorColumnName(discriminator);
+			
+			String value = discriminator.getValue();
+
+			mutator.writeColumn(key, columnFamily, mutator.newColumn(colName,
+					value));
+		}
 
 		try {
 

@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.cassandra.thrift.Column;
 import org.datanucleus.query.evaluator.JDOQLEvaluator;
 import org.datanucleus.query.evaluator.JavaQueryEvaluator;
 import org.datanucleus.query.expression.Expression;

@@ -147,6 +147,8 @@
 		
 		<ColumnFamily CompareWith="UTF8Type" Name="InvitationToken" />
 		<ColumnFamily CompareWith="UTF8Type" Name="InvitedPerson" />
+		
+		<ColumnFamily CompareWith="UTF8Type" Name="Child" />
  
       <!--
        ~ Strategy: Setting this to the class that implements

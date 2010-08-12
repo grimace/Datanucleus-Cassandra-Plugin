@@ -40,9 +40,8 @@ import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 public class CassandraQuery {
 
-	public static int search_slice_ratio = 1000; // should come from the
+	public static int search_slice_ratio = 1000; // should come from the settings file
 
-	// properties
 
 	/**
 	 * Used to load all keys from a given persistence row
@@ -98,8 +97,8 @@ public class CassandraQuery {
 	 * @param startKey
 	 * @return
 	 */
-	public static List getObjectsOfCandidateType(final ExecutionContext ec,
-			Class candidateClass, Set<String> keys, boolean subclasses,
+	public static List<?> getObjectsOfCandidateType(final ExecutionContext ec,
+			Class<?> candidateClass, Set<String> keys, boolean subclasses,
 			boolean ignoreCache, int limit, String startKey) {
 		CassandraStoreManager manager = ((CassandraStoreManager) ec
 				.getStoreManager());
@@ -137,7 +136,7 @@ public class CassandraQuery {
 							.getAllMemberPositions()), MetaDataUtils.DEFAULT);
 
 		} catch (Exception e) {
-			throw new NucleusDataStoreException("Unable to laod results", e);
+			throw new NucleusDataStoreException("Unable to load results", e);
 		}
 
 		return loadResults(rows, ec, acmd, clr);

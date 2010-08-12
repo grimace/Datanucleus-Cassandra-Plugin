@@ -41,12 +41,15 @@ import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
+import org.datanucleus.metadata.DiscriminatorMetaData;
 import org.datanucleus.metadata.Relation;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
 import org.datanucleus.store.types.ObjectStringConverter;
 import org.datanucleus.store.types.sco.SCOUtils;
+
+import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 /**
  * @author Todd Nine
@@ -59,15 +62,16 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 	private ObjectProvider objectProvider;
 	private ExecutionContext context;
 	private ClassLoaderResolver clr;
+	
+	
 
 	/**
 	 * @param columns
 	 * @param metaData
 	 */
-	public CassandraFetchFieldManager(List<Column> columns,
-			ObjectProvider op) {
+	public CassandraFetchFieldManager(List<Column> columns, ObjectProvider op) {
 		super();
-		
+
 		this.objectProvider = op;
 		this.metaData = op.getClassMetaData();
 		this.context = op.getExecutionContext();
@@ -82,10 +86,34 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 			this.columns.put(getString(column.getName()), column);
 		}
 
+		if (metaData.hasDiscriminatorStrategy()) {
+
+			DiscriminatorMetaData discriminatorMetaData = metaData
+					.getDiscriminatorMetaData();
+			Column descriminatorColumn = this.columns.get(MetaDataUtils
+					.getDiscriminatorColumnName(discriminatorMetaData));
+
+			if (descriminatorColumn != null) {
+
+				String descriminatorValue = getString(descriminatorColumn
+						.getValue());
+
+				String className = org.datanucleus.metadata.MetaDataUtils
+						.getClassNameFromDiscriminatorValue(descriminatorValue,
+								discriminatorMetaData, this.context);
+				
+//				context.newObjectProvider(id, obj)
+				
+				//TODO something useful with this info.  Waiting on response to thread
+				//http://www.datanucleus.org/servlet/forum/viewthread_thread,6265_offset,0#32893
+				
+				System.out.println("AAAHHHH, I'm a half baked impl!");
+				
+			}
+		}
+
 	}
 
-
-	
 	@Override
 	public boolean fetchBooleanField(int fieldNumber) {
 
@@ -263,7 +291,8 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 				Object key = getObject(column.getValue());
 
-				Object object = context.findObject(key, false, false,fieldMetaData.getTypeName());
+				Object object = context.findObject(key, false, false,
+						fieldMetaData.getTypeName());
 
 				return objectProvider.wrapSCOField(fieldNumber, object, false,
 						false, true);
@@ -295,12 +324,13 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 					for (Object key : serializedIdList) {
 
-						Object element = context.findObject(key, false, false,fieldMetaData.getTypeName());
+						Object element = context.findObject(key, false, false,
+								fieldMetaData.getTypeName());
 						coll.add(element);
 					}
 
-					return objectProvider.wrapSCOField(fieldNumber, coll, false,
-							false, true);
+					return objectProvider.wrapSCOField(fieldNumber, coll,
+							false, false, true);
 				} else if (Map.class.isAssignableFrom(fieldMetaData.getType())) {
 
 					Map<Object, Object> map;
@@ -315,7 +345,8 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 						throw new NucleusDataStoreException(e.getMessage(), e);
 					}
 
-					ApiAdapter adapter = objectProvider.getExecutionContext().getApiAdapter();
+					ApiAdapter adapter = objectProvider.getExecutionContext()
+							.getApiAdapter();
 
 					Map<Object, Object> serializedMap = getObject(columns.get(
 							columnName).getValue());
@@ -325,13 +356,13 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 					Class valueClass = clr.classForName(fieldMetaData.getMap()
 							.getValueType());
 
-				
 					for (Object mapKey : serializedMap.keySet()) {
 
 						Object key = null;
 
 						if (adapter.isPersistable(keyClass)) {
-							key = context.findObject(mapKey, false, false,fieldMetaData.getTypeName());
+							key = context.findObject(mapKey, false, false,
+									fieldMetaData.getTypeName());
 						} else {
 							key = mapKey;
 						}
@@ -340,7 +371,8 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 						Object value = null;
 
 						if (adapter.isPersistable(valueClass)) {
-							value = context.findObject(mapValue, false, false,fieldMetaData.getTypeName());
+							value = context.findObject(mapValue, false, false,
+									fieldMetaData.getTypeName());
 						} else {
 							value = mapValue;
 						}
@@ -361,13 +393,14 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 					for (int i = 0; i < keys.size(); i++) {
 
-						Object element = context.findObject(keys.get(i), false, false,fieldMetaData.getTypeName());
-				
+						Object element = context.findObject(keys.get(i), false,
+								false, fieldMetaData.getTypeName());
+
 						Array.set(array, Integer.valueOf(i), element);
 					}
 
-					return objectProvider.wrapSCOField(fieldNumber, array, false,
-							false, true);
+					return objectProvider.wrapSCOField(fieldNumber, array,
+							false, false, true);
 				}
 
 			}
@@ -421,7 +454,6 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 				return null;
 			}
 
-		
 			String value = getString(column.value);
 
 			return value;
@@ -430,7 +462,5 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 			throw new NucleusException(e.getMessage(), e);
 		}
 	}
-
-	
 
 }

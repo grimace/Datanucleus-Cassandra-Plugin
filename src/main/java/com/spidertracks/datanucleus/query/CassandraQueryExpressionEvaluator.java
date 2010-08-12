@@ -20,7 +20,6 @@ package com.spidertracks.datanucleus.query;
 import static com.spidertracks.datanucleus.utils.ByteConverter.getString;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.*;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1003,26 +1002,26 @@ public class CassandraQueryExpressionEvaluator extends
 		return null;
 	}
 
-	/**
-	 * Internal comparator to only compare columns by their name
-	 * 
-	 * @author Todd Nine
-	 * 
-	 */
-	private class ColumnNameCompartor implements Comparator<Column> {
-
-		@Override
-		public int compare(Column left, Column right) {
-			if (left == right) {
-				return 0;
-			}
-
-			String leftName = getString(left.getName());
-			String rightName = getString(right.getName());
-
-			return leftName.compareTo(rightName);
-		}
-
-	}
+//	/**
+//	 * Internal comparator to only compare columns by their name
+//	 * 
+//	 * @author Todd Nine
+//	 * 
+//	 */
+//	private class ColumnNameCompartor implements Comparator<Column> {
+//
+//		@Override
+//		public int compare(Column left, Column right) {
+//			if (left == right) {
+//				return 0;
+//			}
+//
+//			String leftName = getString(left.getName());
+//			String rightName = getString(right.getName());
+//
+//			return leftName.compareTo(rightName);
+//		}
+//
+//	}
 
 }

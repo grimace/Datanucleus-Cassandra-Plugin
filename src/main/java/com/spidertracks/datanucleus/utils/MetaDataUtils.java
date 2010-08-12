@@ -17,6 +17,7 @@ Contributors : Todd Nine
  ***********************************************************************/
 package com.spidertracks.datanucleus.utils;
 
+import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.identity.ObjectIdentity;
 import javax.jdo.identity.SingleFieldIdentity;
 
@@ -25,11 +26,12 @@ import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.datanucleus.ClassLoaderResolver;
-import org.datanucleus.api.ApiAdapter;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.ColumnMetaData;
+import org.datanucleus.metadata.DiscriminatorMetaData;
 import org.datanucleus.metadata.IndexMetaData;
+import org.datanucleus.metadata.InheritanceMetaData;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.mapped.exceptions.DatastoreFieldDefinitionException;
@@ -38,6 +40,8 @@ import org.wyki.cassandra.pelops.Selector;
 
 /**
  * Utility class to convert instance data to Cassandra columns and data types
+ * 
+ * TODO Cache the data returned here for better performance
  * 
  * @author Todd Nine
  * 
@@ -161,46 +165,47 @@ public class MetaDataUtils {
 
 	}
 
-//	/**
-//	 * Object for the identity in the AbstractClassMetaData's class. Try and
-//	 * build it from the string
-//	 * 
-//	 * @param op
-//	 * @param cmd
-//	 * @param value
-//	 * @return
-//	 */
-//	public static Object getKeyValue(ObjectProvider op,
-//			AbstractClassMetaData cmd, String value) {
-//
-//		ExecutionContext ec = op.getExecutionContext();
-//
-//		ApiAdapter adapter = ec.getApiAdapter();
-//
-//		Class<?> persistentClass = ec.getClassLoaderResolver().classForName(
-//				cmd.getFullClassName());
-//
-//		Object identity = null;
-//
-//		if (adapter.isSingleFieldIdentityClass(cmd.getObjectidClass())) {
-//
-//			int[] identityFields = cmd.getPKMemberPositions();
-//			
-//			//assume only one identity field
-//			
-//			AbstractMemberMetaData member = cmd.getMetaDataForManagedMemberAtAbsolutePosition(identityFields[0]);
-//			
-//			identity = ec.newObjectId(persistentClass, member.getTypeName()
-//					+ ":" + value);
-//
-//		} else {
-//			throw new DatastoreFieldDefinitionException(
-//					"multiple field identity creation is currently unsupported");
-//		}
-//
-//		return identity;
-//
-//	}
+	// /**
+	// * Object for the identity in the AbstractClassMetaData's class. Try and
+	// * build it from the string
+	// *
+	// * @param op
+	// * @param cmd
+	// * @param value
+	// * @return
+	// */
+	// public static Object getKeyValue(ObjectProvider op,
+	// AbstractClassMetaData cmd, String value) {
+	//
+	// ExecutionContext ec = op.getExecutionContext();
+	//
+	// ApiAdapter adapter = ec.getApiAdapter();
+	//
+	// Class<?> persistentClass = ec.getClassLoaderResolver().classForName(
+	// cmd.getFullClassName());
+	//
+	// Object identity = null;
+	//
+	// if (adapter.isSingleFieldIdentityClass(cmd.getObjectidClass())) {
+	//
+	// int[] identityFields = cmd.getPKMemberPositions();
+	//			
+	// //assume only one identity field
+	//			
+	// AbstractMemberMetaData member =
+	// cmd.getMetaDataForManagedMemberAtAbsolutePosition(identityFields[0]);
+	//			
+	// identity = ec.newObjectId(persistentClass, member.getTypeName()
+	// + ":" + value);
+	//
+	// } else {
+	// throw new DatastoreFieldDefinitionException(
+	// "multiple field identity creation is currently unsupported");
+	// }
+	//
+	// return identity;
+	//
+	// }
 
 	/**
 	 * Get the column metadata for the class and fieldname
@@ -228,6 +233,24 @@ public class MetaDataUtils {
 		// "You must specify a column name for property %s",
 		// memberMetaData.getName()));
 
+	}
+
+	/**
+	 * Get the column name from the meta data, if it's not specified the default
+	 * name of "classtype" is returned
+	 * 
+	 * @param metaData
+	 * @return
+	 */
+	public static String getDiscriminatorColumnName(
+			DiscriminatorMetaData metaData) {
+		String name = metaData.getColumnName();
+
+		if (name == null) {
+			name = "classtype";
+		}
+
+		return name;
 	}
 
 	/**
@@ -305,14 +328,34 @@ public class MetaDataUtils {
 	 * @return
 	 */
 	public static String getColumnFamily(AbstractClassMetaData metaData) {
-		String name = metaData.getTable();
+		AbstractClassMetaData current = metaData;
+		InheritanceMetaData inheritance = null;
+		String tableName = null;;
+		
+		while (current != null) {
+			tableName = current.getTable();
 
-		if (name == null) {
-			name = metaData.getName();
+			if (tableName != null) {
+				return tableName;
+			}
+			
+			inheritance = metaData.getInheritanceMetaData();
+			
+			if(inheritance != null){
+				if(InheritanceStrategy.NEW_TABLE.equals(inheritance.getStrategy()) || InheritanceStrategy.UNSPECIFIED.equals(inheritance.getStrategy())){
+					return metaData.getName();
+				}
+			}
+
+			current = (AbstractClassMetaData) current.getSuperAbstractClassMetaData();
+
 		}
 
-		return name;
+		//couldn't determine name via inheritance or annotations, default tl class name
+		return metaData.getName();
 	}
+
+
 
 	/**
 	 * Create a slice predicate with all mapped fetch column lists
@@ -331,6 +374,17 @@ public class MetaDataUtils {
 		}
 
 		return Selector.newColumnsPredicate(fieldNames);
+	}
+
+	/**
+	 * Create a slice predicate with all mapped fetch column lists
+	 * 
+	 * @param metaData
+	 * @param fieldNumbers
+	 * @return
+	 */
+	public static SlicePredicate getFetchAllColumnList() {
+		return Selector.newColumnsPredicateAll(false, 1000);
 	}
 
 }
