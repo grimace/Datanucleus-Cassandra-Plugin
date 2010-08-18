@@ -15,38 +15,40 @@ limitations under the License.
 Contributors :
     ...
  ***********************************************************************/
-package com.spidertracks.datanucleus.basic.inheritance.caseone;
+package com.spidertracks.datanucleus.basic.inheritance.casethree;
 
+import javax.jdo.annotations.Discriminator;
+import javax.jdo.annotations.DiscriminatorStrategy;
+import javax.jdo.annotations.Inheritance;
+import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 
-import com.spidertracks.datanucleus.model.BaseEntity;
-
 /**
- * Persists in inheriting tables
+ * Should persist in it's own table
  * 
  * @author Todd Nine
  *
  */
 @PersistenceCapable
-
-public abstract class Parent extends BaseEntity {
+@Inheritance(strategy=InheritanceStrategy.SUPERCLASS_TABLE)
+@Discriminator(strategy=DiscriminatorStrategy.VALUE_MAP, value="GrandChildThreeOne")
+public class GrandChildThreeOne extends ChildThree {
 
 	@Persistent
-	private String parentField;
+	private String grandChildOneField;
 
 	/**
-	 * @return the parentField
+	 * @return the grandChildOneField
 	 */
-	public String getParentField() {
-		return parentField;
+	public String getGrandChildOneField() {
+		return grandChildOneField;
 	}
 
 	/**
-	 * @param parentField the parentField to set
+	 * @param grandChildOneField the grandChildOneField to set
 	 */
-	public void setParentField(String parentField) {
-		this.parentField = parentField;
+	public void setGrandChildOneField(String grandChildOneField) {
+		this.grandChildOneField = grandChildOneField;
 	}
-	
 }

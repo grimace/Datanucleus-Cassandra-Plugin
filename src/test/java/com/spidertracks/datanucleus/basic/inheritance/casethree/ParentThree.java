@@ -15,8 +15,12 @@ limitations under the License.
 Contributors :
     ...
  ***********************************************************************/
-package com.spidertracks.datanucleus.basic.inheritance.caseone;
+package com.spidertracks.datanucleus.basic.inheritance.casethree;
 
+import javax.jdo.annotations.Discriminator;
+import javax.jdo.annotations.DiscriminatorStrategy;
+import javax.jdo.annotations.Inheritance;
+import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 
@@ -28,9 +32,10 @@ import com.spidertracks.datanucleus.model.BaseEntity;
  * @author Todd Nine
  *
  */
-@PersistenceCapable
-
-public abstract class Parent extends BaseEntity {
+@PersistenceCapable(table="ParentThree")
+@Inheritance(strategy=InheritanceStrategy.NEW_TABLE)
+@Discriminator(strategy=DiscriminatorStrategy.VALUE_MAP, value="ParentThree")
+public abstract class ParentThree extends BaseEntity {
 
 	@Persistent
 	private String parentField;

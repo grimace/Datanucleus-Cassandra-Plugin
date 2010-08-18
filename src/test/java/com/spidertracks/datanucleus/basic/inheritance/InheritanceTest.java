@@ -27,6 +27,9 @@ import com.spidertracks.datanucleus.CassandraTest;
 import com.spidertracks.datanucleus.basic.inheritance.caseone.Child;
 import com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildOne;
 import com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildTwo;
+import com.spidertracks.datanucleus.basic.inheritance.casethree.ChildThree;
+import com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeOne;
+import com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeTwo;
 import com.spidertracks.datanucleus.basic.inheritance.casetwo.ChildTwo;
 import com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoOne;
 import com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoTwo;
@@ -41,12 +44,11 @@ import com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoTwo;
 public class InheritanceTest extends CassandraTest {
 
 	/**
-	 * We should never hit 30 seconds unless we're stuck in endless recursion
+	 * Test retrieval works with subclass and superclass mix
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	// @Ignore("Should be retreiving subclass.  See CassandraPersistenceHandler.fetchObject and FetchFieldManager for comments ")
 	public void testQueryChildReturnsSubclass() throws Exception {
 
 		GrandChildOne first = new GrandChildOne();
@@ -85,12 +87,11 @@ public class InheritanceTest extends CassandraTest {
 	}
 
 	/**
-	 * We should never hit 30 seconds unless we're stuck in endless recursion
+	 * Test retrieval works when each class has it's own CF
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	// @Ignore("Should be retreiving subclass.  See CassandraPersistenceHandler.fetchObject and FetchFieldManager for comments ")
 	public void testQueryChildReturnsSubclassOwnCF() throws Exception {
 
 		GrandChildTwoOne first = new GrandChildTwoOne();
@@ -127,5 +128,49 @@ public class InheritanceTest extends CassandraTest {
 		assertEquals(third, savedThird);
 
 	}
+	
+	/**
+	 * Test retrieval works when everything is stored in abstract parent class cf
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testQueryChildReturnsSuperclassCF() throws Exception {
+
+		GrandChildThreeOne first = new GrandChildThreeOne();
+		first.setChildField("cf-gc1");
+		first.setGrandChildOneField("gcf-gc1");
+		first.setParentField("pf-gc1");
+
+		GrandChildThreeTwo second = new GrandChildThreeTwo();
+		second.setChildField("cf-gc2");
+		second.setGrandChildOneField("gcf-gc2");
+		second.setParentField("pf-gc2");
+
+		ChildThree third = new ChildThree();
+		third.setChildField("cf-c1");
+		third.setParentField("pf-c1");
+
+		PersistenceManager pm = pmf.getPersistenceManager();
+		pm.makePersistent(first);
+		pm.makePersistent(second);
+		pm.makePersistent(third);
+
+		// now retrieve to instances of "child" should return 2 subclasses
+
+		ChildThree savedFirst = pm.getObjectById(ChildThree.class, first.getId());
+
+		assertEquals(first, savedFirst);
+
+		ChildThree savedSecond = pm.getObjectById(ChildThree.class, second.getId());
+
+		assertEquals(second, savedSecond);
+
+		ChildThree savedThird = pm.getObjectById(ChildThree.class, third.getId());
+
+		assertEquals(third, savedThird);
+
+	}
+
 
 }

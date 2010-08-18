@@ -154,6 +154,8 @@
 		<ColumnFamily CompareWith="UTF8Type" Name="GrandchildTwoOne" />
 		<ColumnFamily CompareWith="UTF8Type" Name="GrandchildTwoTwo" />
  
+ 
+		<ColumnFamily CompareWith="UTF8Type" Name="ParentThree" />
       <!--
        ~ Strategy: Setting this to the class that implements
        ~ IReplicaPlacementStrategy will change the way the node picker works.
