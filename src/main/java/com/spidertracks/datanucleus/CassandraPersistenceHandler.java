@@ -283,7 +283,14 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 		String key = getRowKeyForId(ec, id);
 
-		return findObject(key, metaData, clr, ec, id);
+		Object pc =  findObject(key, metaData, clr, ec, id);
+		
+		if(pc == null){
+			//if we get to here, we couldn't find anything.  throw a not found exception
+			throw new NucleusObjectNotFoundException(String.format("Could not find instance for key %s", id));
+		}
+		
+		return pc;
 	}
 
 	private Object findObject(String key, AbstractClassMetaData metaData, ClassLoaderResolver clr, ExecutionContext ec, Object id) {
@@ -337,6 +344,10 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 					}
 				}
 			}
+			
+			//nothing found in this class or it's children return null
+			return null;
+
 		}
 
 		String descriminatorValue = getString(columns.get(0).getValue());
