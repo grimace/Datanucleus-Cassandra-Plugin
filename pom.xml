@@ -7,7 +7,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.spidertracks.datanucleus</groupId>
 	<artifactId>cassandra</artifactId>
-	<version>0.0.4.9</version>
+	<version>0.0.4.10-SNAPSHOT</version>
 
 	<repositories>
 
@@ -132,9 +132,9 @@
 	</dependencies>
 
 	<scm>
-		<connection>scm:svn:https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/tags/cassandra-0.0.4.9</connection>
-		<url>https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/tags/cassandra-0.0.4.9</url>
-		<developerConnection>scm:svn:https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/tags/cassandra-0.0.4.9</developerConnection>
+		<connection>scm:svn:https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/</connection>
+		<url>https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/</url>
+		<developerConnection>scm:svn:https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/</developerConnection>
 	</scm>
 	<build>
 
