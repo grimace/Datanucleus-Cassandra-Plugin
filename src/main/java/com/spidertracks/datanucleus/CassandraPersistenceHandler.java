@@ -17,6 +17,7 @@ Contributors : Pedro Gomes and Universidade do Minho.
  ***********************************************************************/
 package com.spidertracks.datanucleus;
 
+import static com.spidertracks.datanucleus.utils.ByteConverter.getString;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.*;
 
 import java.lang.reflect.Array;
@@ -34,6 +35,7 @@ import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.DiscriminatorMetaData;
 import org.datanucleus.metadata.Relation;
+import org.datanucleus.state.ObjectProviderFactory;
 import org.datanucleus.store.AbstractPersistenceHandler;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
@@ -209,20 +211,9 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 			Selector selector = Pelops.createSelector(manager.getPoolName(),
 					manager.getKeyspace());
 
-			
-			SlicePredicate predicate = null;
-
-		
-			// if we have a discriminator, get all columns because we don't know what data we need to load yet
-			if (metaData.hasDiscriminatorStrategy()) {
-				predicate = getFetchAllColumnList();
-			}else{
-				//no descriminator, only load the columns we need
-				predicate = getFetchColumnList(metaData, fieldNumbers);
-			}
-
 			List<Column> columns = selector.getColumnsFromRow(key,
-					getColumnFamily(metaData), predicate, DEFAULT);
+					getColumnFamily(metaData), getFetchColumnList(metaData,
+							fieldNumbers), DEFAULT);
 
 			// nothing to do
 			if (columns == null || columns.size() == 0) {
@@ -268,9 +259,112 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 	}
 
 	@Override
-	public Object findObject(ExecutionContext ectx, Object id) {
-		// do nothing, we use locate instead
-		return null;
+	public Object findObject(ExecutionContext ec, Object id) {
+
+		Object pc = null;
+
+		ClassLoaderResolver clr = ec.getClassLoaderResolver();
+
+		String pcClassName = manager.getClassNameForObjectID(id, clr, ec);
+
+		if (pcClassName == null) {
+			throw new NucleusDataStoreException(
+					"Object identity have an associated class");
+		}
+
+		AbstractClassMetaData metaData = ec.getMetaDataManager()
+				.getMetaDataForClass(pcClassName, clr);
+
+		String key = getRowKeyForId(ec, id);
+
+		Selector selector = Pelops.createSelector(manager.getPoolName(),
+				manager.getKeyspace());
+
+		SlicePredicate descriminator = getDescriminatorColumn(metaData);
+
+		// let the core code decide what the instance should be
+		if (descriminator == null) {
+			return null;
+		}
+
+		// if we have a discriminator, fetch the discriminator column only
+		// and see if it's equal
+		// to the class provided by the op
+
+		List<Column> columns = null;
+		
+		try {
+
+			columns = selector.getColumnsFromRow(key,
+					getColumnFamily(metaData), descriminator, DEFAULT);
+
+		} catch (Exception e) {
+			throw new NucleusDataStoreException(e.getMessage(), e);
+		}
+
+		// what do we do if no descriminator is found and one should be
+		// present?
+		if (columns != null && columns.size() == 1) {
+
+			String descriminatorValue = getString(columns.get(0).getValue());
+
+			String className = org.datanucleus.metadata.MetaDataUtils
+					.getClassNameFromDiscriminatorValue(descriminatorValue,
+							metaData.getDiscriminatorMetaData(), ec);
+
+			// now recursively load the search for our class
+
+			Class<?> newObjectClass = ec.getClassLoaderResolver().classForName(
+					className);
+
+			// Object idValue = null;
+			//
+			// if (id instanceof SingleFieldIdentity) {
+			// idValue = ((SingleFieldIdentity) id).getKeyAsObject();
+			// }
+			//
+			// Object subClassKey = ec.newObjectId(newObjectClass, idValue);
+			//
+			// ObjectProvider subClassOp =
+			// ObjectProviderFactory.newForHollow(ec,
+			// newObjectClass, subClassKey);
+			//
+			// // ec.n
+			//
+			// // Generate a template object with these PK field values
+			//
+			// metaData = ec.getMetaDataManager().getMetaDataForClass(className,
+			// clr);
+			//
+			// ObjectProvider pcStateManager =
+			// ec.findObjectProvider(subClassOp);
+			//
+			// // op.provideFields(new int[]{0}, new
+			// // CassandraFetchFieldManager(columns, op));
+			//
+			// if (pcStateManager == null) {
+			// // DB4O returned object has no StateManager so swap
+			// // the generated SM to manage its object
+			// op.replaceManagedPC(subClassOp.getReferencedPC());
+			// }
+
+			// Class pcClass = clr.classForName(className, (id instanceof OID) ?
+			// null : id.getClass().getClassLoader());
+
+			ObjectProvider sm = ObjectProviderFactory.newForHollow(ec,
+					newObjectClass, id);
+			pc = sm.getObject();
+
+			ObjectProvider pcSM = ec.findObjectProvider(pc);
+			if (pcSM == null) {
+				// DB4O returned object has no StateManager so swap the
+				// generated SM to manage its object
+				sm.replaceManagedPC(pc);
+			}
+		}
+		//
+
+		return pc;
 	}
 
 	@Override
@@ -307,13 +401,13 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 		op.provideFields(metaData.getAllMemberPositions(), manager);
 
-		
 		// if we have a discriminator, write the value
 		if (metaData.hasDiscriminatorStrategy()) {
-			DiscriminatorMetaData discriminator = metaData.getDiscriminatorMetaData();
-			
+			DiscriminatorMetaData discriminator = metaData
+					.getDiscriminatorMetaData();
+
 			String colName = getDiscriminatorColumnName(discriminator);
-			
+
 			String value = discriminator.getValue();
 
 			mutator.writeColumn(key, columnFamily, mutator.newColumn(colName,

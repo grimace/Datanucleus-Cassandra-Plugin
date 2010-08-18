@@ -42,7 +42,7 @@ public class InheritanceTest extends CassandraTest {
 	 * @throws Exception
 	 */
 	@Test
-	@Ignore("Should be retreiving subclass.  See CassandraPersistenceHandler.fetchObject and FetchFieldManager for comments ")
+//	@Ignore("Should be retreiving subclass.  See CassandraPersistenceHandler.fetchObject and FetchFieldManager for comments ")
 	public void testQueryChildReturnsSubclass() throws Exception {
 		
 		GrandChildOne first = new GrandChildOne();

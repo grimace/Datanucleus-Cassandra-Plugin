@@ -86,31 +86,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 			this.columns.put(getString(column.getName()), column);
 		}
 
-		if (metaData.hasDiscriminatorStrategy()) {
-
-			DiscriminatorMetaData discriminatorMetaData = metaData
-					.getDiscriminatorMetaData();
-			Column descriminatorColumn = this.columns.get(MetaDataUtils
-					.getDiscriminatorColumnName(discriminatorMetaData));
-
-			if (descriminatorColumn != null) {
-
-				String descriminatorValue = getString(descriminatorColumn
-						.getValue());
-
-				String className = org.datanucleus.metadata.MetaDataUtils
-						.getClassNameFromDiscriminatorValue(descriminatorValue,
-								discriminatorMetaData, this.context);
-				
-//				context.newObjectProvider(id, obj)
-				
-				//TODO something useful with this info.  Waiting on response to thread
-				//http://www.datanucleus.org/servlet/forum/viewthread_thread,6265_offset,0#32893
-				
-				System.out.println("AAAHHHH, I'm a half baked impl!");
-				
-			}
-		}
+		
 
 	}
 

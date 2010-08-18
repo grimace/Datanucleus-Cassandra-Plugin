@@ -17,6 +17,8 @@ Contributors : Todd Nine
  ***********************************************************************/
 package com.spidertracks.datanucleus.utils;
 
+import static com.spidertracks.datanucleus.utils.ByteConverter.getString;
+
 import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.identity.ObjectIdentity;
 import javax.jdo.identity.SingleFieldIdentity;
@@ -77,6 +79,16 @@ public class MetaDataUtils {
 	public static String getRowKey(ExecutionContext ec, Object object) {
 		Object id = ec.getApiAdapter().getIdForObject(object);
 
+		return getRowKeyForId(ec, id);
+	}
+
+	/**
+	 * Get the row key for the given id
+	 * @param ec
+	 * @param id
+	 * @return
+	 */
+	public static String getRowKeyForId(ExecutionContext ec, Object id){
 		if (id instanceof ObjectIdentity) {
 			ObjectIdentity identity = (ObjectIdentity) id;
 
@@ -106,7 +118,6 @@ public class MetaDataUtils {
 		// else just call the default tostring since it's a user defined key
 		return id.toString();
 	}
-
 	/**
 	 * Convert from the given object to a string.
 	 * 
@@ -377,14 +388,25 @@ public class MetaDataUtils {
 	}
 
 	/**
-	 * Create a slice predicate with all mapped fetch column lists
+	 * Create a slice predicate that will retreive the discriminator column
+	 * if one doesn't exist, null is returned
 	 * 
 	 * @param metaData
 	 * @param fieldNumbers
 	 * @return
 	 */
-	public static SlicePredicate getFetchAllColumnList() {
-		return Selector.newColumnsPredicateAll(false, 1000);
+	public static SlicePredicate getDescriminatorColumn(AbstractClassMetaData metaData) {
+
+		DiscriminatorMetaData discriminatorMetaData = metaData.getDiscriminatorMetaData();
+		
+		if(discriminatorMetaData == null){
+			return null;
+		}
+		
+		String columnName = getDiscriminatorColumnName(discriminatorMetaData);
+			
+		
+		return Selector.newColumnsPredicate(columnName);
 	}
 
 }
