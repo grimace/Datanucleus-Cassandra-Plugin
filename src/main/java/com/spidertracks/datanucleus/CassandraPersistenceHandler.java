@@ -261,8 +261,6 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 	@Override
 	public Object findObject(ExecutionContext ec, Object id) {
 
-		Object pc = null;
-
 		ClassLoaderResolver clr = ec.getClassLoaderResolver();
 
 		String pcClassName = manager.getClassNameForObjectID(id, clr, ec);
@@ -275,11 +273,6 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		AbstractClassMetaData metaData = ec.getMetaDataManager()
 				.getMetaDataForClass(pcClassName, clr);
 
-		String key = getRowKeyForId(ec, id);
-
-		Selector selector = Pelops.createSelector(manager.getPoolName(),
-				manager.getKeyspace());
-
 		SlicePredicate descriminator = getDescriminatorColumn(metaData);
 
 		// let the core code decide what the instance should be
@@ -287,12 +280,17 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 			return null;
 		}
 
+		String key = getRowKeyForId(ec, id);
+
+		Selector selector = Pelops.createSelector(manager.getPoolName(),
+				manager.getKeyspace());
+
 		// if we have a discriminator, fetch the discriminator column only
 		// and see if it's equal
 		// to the class provided by the op
 
 		List<Column> columns = null;
-		
+
 		try {
 
 			columns = selector.getColumnsFromRow(key,
@@ -304,65 +302,29 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 		// what do we do if no descriminator is found and one should be
 		// present?
-		if (columns != null && columns.size() == 1) {
-
-			String descriminatorValue = getString(columns.get(0).getValue());
-
-			String className = org.datanucleus.metadata.MetaDataUtils
-					.getClassNameFromDiscriminatorValue(descriminatorValue,
-							metaData.getDiscriminatorMetaData(), ec);
-
-			// now recursively load the search for our class
-
-			Class<?> newObjectClass = ec.getClassLoaderResolver().classForName(
-					className);
-
-			// Object idValue = null;
-			//
-			// if (id instanceof SingleFieldIdentity) {
-			// idValue = ((SingleFieldIdentity) id).getKeyAsObject();
-			// }
-			//
-			// Object subClassKey = ec.newObjectId(newObjectClass, idValue);
-			//
-			// ObjectProvider subClassOp =
-			// ObjectProviderFactory.newForHollow(ec,
-			// newObjectClass, subClassKey);
-			//
-			// // ec.n
-			//
-			// // Generate a template object with these PK field values
-			//
-			// metaData = ec.getMetaDataManager().getMetaDataForClass(className,
-			// clr);
-			//
-			// ObjectProvider pcStateManager =
-			// ec.findObjectProvider(subClassOp);
-			//
-			// // op.provideFields(new int[]{0}, new
-			// // CassandraFetchFieldManager(columns, op));
-			//
-			// if (pcStateManager == null) {
-			// // DB4O returned object has no StateManager so swap
-			// // the generated SM to manage its object
-			// op.replaceManagedPC(subClassOp.getReferencedPC());
-			// }
-
-			// Class pcClass = clr.classForName(className, (id instanceof OID) ?
-			// null : id.getClass().getClassLoader());
-
-			ObjectProvider sm = ObjectProviderFactory.newForHollow(ec,
-					newObjectClass, id);
-			pc = sm.getObject();
-
-			ObjectProvider pcSM = ec.findObjectProvider(pc);
-			if (pcSM == null) {
-				// DB4O returned object has no StateManager so swap the
-				// generated SM to manage its object
-				sm.replaceManagedPC(pc);
-			}
+		if (columns == null || columns.size() != 1) {
+			return null;
 		}
-		//
+
+		String descriminatorValue = getString(columns.get(0).getValue());
+
+		String className = org.datanucleus.metadata.MetaDataUtils
+				.getClassNameFromDiscriminatorValue(descriminatorValue,
+						metaData.getDiscriminatorMetaData(), ec);
+
+		// now recursively load the search for our class
+
+		Class<?> newObjectClass = ec.getClassLoaderResolver().classForName(
+				className);
+
+		ObjectProvider sm = ObjectProviderFactory.newForHollow(ec,
+				newObjectClass, id);
+		Object pc = sm.getObject();
+
+		ObjectProvider pcSM = ec.findObjectProvider(pc);
+		if (pcSM == null) {
+			sm.replaceManagedPC(pc);
+		}
 
 		return pc;
 	}

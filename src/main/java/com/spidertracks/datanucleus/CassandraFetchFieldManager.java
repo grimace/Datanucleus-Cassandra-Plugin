@@ -17,15 +17,7 @@ Contributors : Pedro Gomes and Universidade do Minho.
  ***********************************************************************/
 package com.spidertracks.datanucleus;
 
-import static com.spidertracks.datanucleus.utils.ByteConverter.getBoolean;
-import static com.spidertracks.datanucleus.utils.ByteConverter.getChar;
-import static com.spidertracks.datanucleus.utils.ByteConverter.getDouble;
-import static com.spidertracks.datanucleus.utils.ByteConverter.getFloat;
-import static com.spidertracks.datanucleus.utils.ByteConverter.getInt;
-import static com.spidertracks.datanucleus.utils.ByteConverter.getLong;
-import static com.spidertracks.datanucleus.utils.ByteConverter.getObject;
-import static com.spidertracks.datanucleus.utils.ByteConverter.getShort;
-import static com.spidertracks.datanucleus.utils.ByteConverter.getString;
+import static com.spidertracks.datanucleus.utils.ByteConverter.*;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnName;
 
 import java.lang.reflect.Array;
@@ -41,15 +33,12 @@ import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
-import org.datanucleus.metadata.DiscriminatorMetaData;
 import org.datanucleus.metadata.Relation;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
 import org.datanucleus.store.types.ObjectStringConverter;
 import org.datanucleus.store.types.sco.SCOUtils;
-
-import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 /**
  * @author Todd Nine
