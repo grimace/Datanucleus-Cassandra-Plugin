@@ -15,7 +15,7 @@ limitations under the License.
 Contributors :
     ...
  ***********************************************************************/
-package com.spidertracks.datanucleus.basic.inheritance;
+package com.spidertracks.datanucleus.basic.inheritance.casetwo;
 
 import javax.jdo.annotations.Discriminator;
 import javax.jdo.annotations.DiscriminatorStrategy;
@@ -24,15 +24,18 @@ import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 
+import com.spidertracks.datanucleus.basic.inheritance.caseone.Child;
+
 /**
- * Should persist in the "Child" class's table
+ * Should persist in it's own table
+ * 
  * @author Todd Nine
  *
  */
-@PersistenceCapable
-@Inheritance(strategy=InheritanceStrategy.SUPERCLASS_TABLE)
-@Discriminator(strategy=DiscriminatorStrategy.VALUE_MAP, value="GrandChildOne")
-public class GrandChildOne extends Child {
+@PersistenceCapable(table="GrandchildTwoTwo")
+@Inheritance(strategy=InheritanceStrategy.NEW_TABLE)
+@Discriminator(strategy=DiscriminatorStrategy.VALUE_MAP, value="GrandchildTwoTwo")
+public class GrandChildTwoTwo extends ChildTwo {
 
 	@Persistent
 	private String grandChildOneField;

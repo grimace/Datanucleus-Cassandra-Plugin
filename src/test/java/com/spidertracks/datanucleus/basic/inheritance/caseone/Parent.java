@@ -15,40 +15,37 @@ limitations under the License.
 Contributors :
     ...
  ***********************************************************************/
-package com.spidertracks.datanucleus.basic.inheritance;
+package com.spidertracks.datanucleus.basic.inheritance.caseone;
 
-import javax.jdo.annotations.Discriminator;
-import javax.jdo.annotations.DiscriminatorStrategy;
-import javax.jdo.annotations.Inheritance;
-import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 
+import com.spidertracks.datanucleus.model.BaseEntity;
+
 /**
- * Persists in it's own table
+ * Persists in inheriting tables
  * 
  * @author Todd Nine
  *
  */
-@PersistenceCapable(table="Child")
-@Inheritance(strategy=InheritanceStrategy.NEW_TABLE)
-@Discriminator(strategy=DiscriminatorStrategy.VALUE_MAP, value="Child")
-public class Child extends Parent {
+@PersistenceCapable
+public abstract class Parent extends BaseEntity {
 
 	@Persistent
-	private String childField;
+	private String parentField;
 
 	/**
-	 * @return the childField
+	 * @return the parentField
 	 */
-	public String getChildField() {
-		return childField;
+	public String getParentField() {
+		return parentField;
 	}
 
 	/**
-	 * @param childField the childField to set
+	 * @param parentField the parentField to set
 	 */
-	public void setChildField(String childField) {
-		this.childField = childField;
+	public void setParentField(String parentField) {
+		this.parentField = parentField;
 	}
+	
 }

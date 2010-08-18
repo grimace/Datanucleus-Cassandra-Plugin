@@ -34,6 +34,7 @@ import org.datanucleus.exceptions.NucleusObjectNotFoundException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.DiscriminatorMetaData;
+import org.datanucleus.metadata.InheritanceStrategy;
 import org.datanucleus.metadata.Relation;
 import org.datanucleus.state.ObjectProviderFactory;
 import org.datanucleus.store.AbstractPersistenceHandler;
@@ -282,6 +283,11 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 		String key = getRowKeyForId(ec, id);
 
+		return findObject(key, metaData, clr, ec, id);
+	}
+
+	private Object findObject(String key, AbstractClassMetaData metaData, ClassLoaderResolver clr, ExecutionContext ec, Object id) {
+
 		Selector selector = Pelops.createSelector(manager.getPoolName(),
 				manager.getKeyspace());
 
@@ -293,8 +299,8 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 		try {
 
-			columns = selector.getColumnsFromRow(key,
-					getColumnFamily(metaData), descriminator, DEFAULT);
+			columns = selector.getColumnsFromRow(key, getColumnFamily(metaData),
+					getDescriminatorColumn(metaData), DEFAULT);
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -303,7 +309,34 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		// what do we do if no descriminator is found and one should be
 		// present?
 		if (columns == null || columns.size() != 1) {
-			return null;
+
+			// now check if we have subclasses from the given metaData, if we do
+			// recurse to a child class and search for the object
+			String[] decendents = ec.getMetaDataManager().getSubclassesForClass(metaData.getFullClassName(), true);
+
+			//it has decendents, only recurse to them if their inheritance strategy is a new table
+			if (decendents == null || decendents.length == 0) {
+				return null;
+			}
+			
+			
+			AbstractClassMetaData decendentMetaData = null;
+			
+			for(String decendent: decendents){
+				decendentMetaData = ec.getMetaDataManager().getMetaDataForClass(decendent, clr);
+				
+				InheritanceStrategy strategy = decendentMetaData.getInheritanceMetaData().getStrategy();
+				
+				//either the subclass has it's own table, or one if it's children may, recurse to find the object
+				if(InheritanceStrategy.NEW_TABLE.equals(strategy) || InheritanceStrategy.SUBCLASS_TABLE.equals(strategy)){
+					Object result = findObject(key, decendentMetaData, clr, ec, id);
+					
+					// we found a subclass with the descriminator stored, return it
+					if(result != null){
+						return result;
+					}
+				}
+			}
 		}
 
 		String descriminatorValue = getString(columns.get(0).getValue());
@@ -319,6 +352,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 		ObjectProvider sm = ObjectProviderFactory.newForHollow(ec,
 				newObjectClass, id);
+
 		Object pc = sm.getObject();
 
 		ObjectProvider pcSM = ec.findObjectProvider(pc);

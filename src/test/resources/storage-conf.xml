@@ -149,6 +149,10 @@
 		<ColumnFamily CompareWith="UTF8Type" Name="InvitedPerson" />
 		
 		<ColumnFamily CompareWith="UTF8Type" Name="Child" />
+		
+		<ColumnFamily CompareWith="UTF8Type" Name="ChildTwo" />
+		<ColumnFamily CompareWith="UTF8Type" Name="GrandchildTwoOne" />
+		<ColumnFamily CompareWith="UTF8Type" Name="GrandchildTwoTwo" />
  
       <!--
        ~ Strategy: Setting this to the class that implements

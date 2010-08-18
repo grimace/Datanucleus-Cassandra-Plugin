@@ -15,7 +15,7 @@ limitations under the License.
 Contributors :
     ...
  ***********************************************************************/
-package com.spidertracks.datanucleus.basic.inheritance;
+package com.spidertracks.datanucleus.basic.inheritance.casetwo;
 
 import javax.jdo.annotations.Discriminator;
 import javax.jdo.annotations.DiscriminatorStrategy;
@@ -25,29 +25,30 @@ import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 
 /**
- * Should persist in the "Child" class's table
+ * Persists in it's own table
+ * 
  * @author Todd Nine
  *
  */
-@PersistenceCapable
-@Inheritance(strategy=InheritanceStrategy.SUPERCLASS_TABLE)
-@Discriminator(strategy=DiscriminatorStrategy.VALUE_MAP, value="GrandChildTwo")
-public class GrandChildTwo extends Child {
+@PersistenceCapable(table="Child")
+@Inheritance(strategy=InheritanceStrategy.NEW_TABLE)
+@Discriminator(strategy=DiscriminatorStrategy.VALUE_MAP, value="Child")
+public class Child extends Parent {
 
 	@Persistent
-	private String grandChildTwoField;
+	private String childField;
 
 	/**
-	 * @return the grandChildTwoField
+	 * @return the childField
 	 */
-	public String getGrandChildTwoField() {
-		return grandChildTwoField;
+	public String getChildField() {
+		return childField;
 	}
 
 	/**
-	 * @param grandChildTwoField the grandChildTwoField to set
+	 * @param childField the childField to set
 	 */
-	public void setGrandChildTwoField(String grandChildTwoField) {
-		this.grandChildTwoField = grandChildTwoField;
+	public void setChildField(String childField) {
+		this.childField = childField;
 	}
 }
