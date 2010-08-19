@@ -138,17 +138,11 @@ public class MetaDataUtils {
 	 */
 	public static byte[] getIndexLong(ExecutionContext ec, Object o) {
 		try {
-			if (o instanceof Long) {
-				return getBytes((Long) o);
-			} else if (o instanceof Integer) {
-				return getBytes((Long) o);
-			} else if (o instanceof Short) {
-				return getBytes((Long) o);
-			} else if (o instanceof Float) {
-				return getBytes((Double) o);
-			} else if (o instanceof Double) {
-				return getBytes((Double) o);
-			}
+			if (o instanceof Long || o instanceof Integer || o instanceof Short ) {
+				return getBytes(((Long)o).longValue());
+			} else if (o instanceof Float || o instanceof Double) {
+				return getBytes(((Double) o).doubleValue());
+			} 
 
 			ObjectLongConverter converter = ec.getTypeManager()
 					.getLongConverter(o.getClass());
@@ -157,7 +151,7 @@ public class MetaDataUtils {
 				return null;
 			}
 
-			return getBytes(converter.toLong(o));
+			return getBytes((long)converter.toLong(o));
 		} catch (IOException e) {
 			throw new NucleusDataStoreException("Unable to convert value to long", e);
 		}

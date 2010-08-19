@@ -246,7 +246,7 @@ public class IndexTest extends CassandraTest {
 		assertEquals(2, keys.size());
 
 		
-		resultPoints = new Person[] {  p3, p4 };
+		resultPoints = new Person[] {  p4, p5 };
 
 		count = 0;
 
@@ -263,6 +263,49 @@ public class IndexTest extends CassandraTest {
 
 		// test we have all 3 ids as columns
 		assertEquals(2, count);
+		
+		
+		
+		
+		
+
+	}
+	
+	
+
+	@Test
+	public void testIndexDeletionLong() throws Exception {
+
+		
+		pm.deletePersistent(p1);
+		pm.deletePersistent(p2);
+		pm.deletePersistent(p3);
+		
+		
+		// now test our secondary indexes are correct
+		Selector selector = Pelops.createSelector("TestPool", "Keyspace1");
+
+		// p1, p2 and p3 all have the same login date
+		List<Column> keys = selector.getSubColumnsFromRow("Person_LastLogin", MetaDataUtils.INDEX_LONG, ByteConverter.getBytes(1282197146L), Selector.newColumnsPredicateAll(false, 100),
+				ConsistencyLevel.ONE);
+		
+		
+
+		assertEquals(0, keys.size());
+
+		
+		
+		pm.deletePersistent(p4);
+		pm.deletePersistent(p5);
+		
+		//results for lastname
+		// p3 an p4 all have "secondName2"
+		keys = selector.getSubColumnsFromRow("Person_LastLogin", MetaDataUtils.INDEX_LONG, ByteConverter.getBytes(1282197946L), Selector.newColumnsPredicateAll(false, 100),
+				ConsistencyLevel.ONE);
+	
+		assertEquals(0, keys.size());
+
+		
 		
 		
 		
@@ -287,9 +330,7 @@ public class IndexTest extends CassandraTest {
 		Selector selector = Pelops.createSelector("TestPool", "Keyspace1");
 
 		// p1, p2 and p3 all have "firstName1"
-		List<Column> keys = selector.getColumnsFromRow("firstName1",
-				"Person_FirstName",
-				Selector.newColumnsPredicateAll(false, 100),
+		List<Column> keys =  selector.getSubColumnsFromRow("Person_FirstName", MetaDataUtils.INDEX_STRING, "firstName1", Selector.newColumnsPredicateAll(false, 100),
 				ConsistencyLevel.ONE);
 
 		assertEquals(0, keys.size());
@@ -299,8 +340,7 @@ public class IndexTest extends CassandraTest {
 		
 		//results for lastname
 		// p3 an p4 all have "secondName2"
-		keys = selector.getColumnsFromRow("secondName2",
-				"Person_LastName",
+		keys = selector.getSubColumnsFromRow("Person_LastName", MetaDataUtils.INDEX_STRING, "secondName2",
 				Selector.newColumnsPredicateAll(false, 100),
 				ConsistencyLevel.ONE);
 	
@@ -308,10 +348,11 @@ public class IndexTest extends CassandraTest {
 
 		pm.deletePersistent(p5);
 		
-		keys = selector.getColumnsFromRow("p5@test.com",
-				"Person_email",
+		keys = selector.getSubColumnsFromRow("Person_email", MetaDataUtils.INDEX_STRING, "p5@test.com",
 				Selector.newColumnsPredicateAll(false, 100),
 				ConsistencyLevel.ONE);
+		
+	
 	
 		assertEquals(0, keys.size());
 
@@ -334,9 +375,7 @@ public class IndexTest extends CassandraTest {
 		Selector selector = Pelops.createSelector("TestPool", "Keyspace1");
 
 		// p1, p2 and p3 all have "firstName1"
-		List<Column> keys = selector.getColumnsFromRow("firstName1",
-				"Person_FirstName",
-				Selector.newColumnsPredicateAll(false, 100),
+		List<Column> keys = selector.getSubColumnsFromRow("Person_FirstName", MetaDataUtils.INDEX_STRING, "firstName1", Selector.newColumnsPredicateAll(false, 100),
 				ConsistencyLevel.ONE);
 
 		assertEquals(2, keys.size());
@@ -348,8 +387,8 @@ public class IndexTest extends CassandraTest {
 		for (Person current : resultPoints) {
 			// now check our keys
 			for (Column col : keys) {
-				String name = ByteConverter.getString(col.getName());
-				if (current.getId().toString().equals(name)) {
+				ObjectIdentity id = ByteConverter.getObject(col.getName());
+				if (current.getId().equals(id.getKey())) {
 					count++;
 					break;
 				}
