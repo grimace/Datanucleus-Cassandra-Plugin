@@ -19,13 +19,16 @@ package com.spidertracks.datanucleus.basic;
 
 import static org.junit.Assert.*;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Transaction;
+import javax.jdo.identity.ObjectIdentity;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.SuperColumn;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +38,7 @@ import org.wyki.cassandra.pelops.Selector;
 import com.spidertracks.datanucleus.CassandraTest;
 import com.spidertracks.datanucleus.basic.model.Person;
 import com.spidertracks.datanucleus.utils.ByteConverter;
+import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 /**
  * @author Todd Nine
@@ -55,26 +59,31 @@ public class IndexTest extends CassandraTest {
 		p1.setEmail("p1@test.com");
 		p1.setFirstName("firstName1");
 		p1.setLastName("lastName1");
+		p1.setLastLogin(new Date(1282197146L));
 
 		p2 = new Person();
 		p2.setEmail("p2@test.com");
 		p2.setFirstName("firstName1");
 		p2.setLastName("secondName1");
+		p2.setLastLogin(new Date(1282197146L));
 
 		p3 = new Person();
 		p3.setEmail("p3@test.com");
 		p3.setFirstName("firstName1");
 		p3.setLastName("secondName2");
+		p3.setLastLogin(new Date(1282197146L));
 
 		p4 = new Person();
 		p4.setEmail("p4@test.com");
 		p4.setFirstName("firstName2");
 		p4.setLastName("secondName2");
+		p4.setLastLogin(new Date(1282197946L));
 
 		p5 = new Person();
 		p5.setEmail("p5@test.com");
 		p5.setFirstName("firstName3");
 		p5.setLastName("secondName3");
+		p5.setLastLogin(new Date(1282197946L));
 
 		// now persist everything
 
@@ -108,16 +117,16 @@ public class IndexTest extends CassandraTest {
 
 
 	@Test
-	public void testIndexCreation() throws Exception {
+	public void testIndexCreationString() throws Exception {
 
 		// now test our secondary indexes are correct
 		Selector selector = Pelops.createSelector("TestPool", "Keyspace1");
 
 		// p1, p2 and p3 all have "firstName1"
-		List<Column> keys = selector.getColumnsFromRow("firstName1",
-				"Person_FirstName",
-				Selector.newColumnsPredicateAll(false, 100),
+		List<Column> keys = selector.getSubColumnsFromRow("Person_FirstName", MetaDataUtils.INDEX_STRING, "firstName1", Selector.newColumnsPredicateAll(false, 100),
 				ConsistencyLevel.ONE);
+		
+		
 
 		assertEquals(3, keys.size());
 
@@ -128,8 +137,8 @@ public class IndexTest extends CassandraTest {
 		for (Person current : resultPoints) {
 			// now check our keys
 			for (Column col : keys) {
-				String name = ByteConverter.getString(col.getName());
-				if (current.getId().toString().equals(name)) {
+				ObjectIdentity id = ByteConverter.getObject(col.getName());
+				if (current.getId().equals(id.getKey())) {
 					count++;
 					break;
 				}
@@ -141,8 +150,7 @@ public class IndexTest extends CassandraTest {
 		
 		//results for lastname
 		// p3 an p4 all have "secondName2"
-		keys = selector.getColumnsFromRow("secondName2",
-				"Person_LastName",
+		keys = selector.getSubColumnsFromRow("Person_LastName", MetaDataUtils.INDEX_STRING, "secondName2",
 				Selector.newColumnsPredicateAll(false, 100),
 				ConsistencyLevel.ONE);
 	
@@ -156,8 +164,8 @@ public class IndexTest extends CassandraTest {
 		for (Person current : resultPoints) {
 			// now check our keys
 			for (Column col : keys) {
-				String name = ByteConverter.getString(col.getName());
-				if (current.getId().toString().equals(name)) {
+				ObjectIdentity id = ByteConverter.getObject(col.getName());
+				if (current.getId().equals(id.getKey())) {
 					count++;
 					break;
 				}
@@ -168,8 +176,7 @@ public class IndexTest extends CassandraTest {
 		assertEquals(2, count);
 		
 		
-		keys = selector.getColumnsFromRow("p5@test.com",
-				"Person_email",
+		keys = selector.getSubColumnsFromRow("Person_LastName", MetaDataUtils.INDEX_STRING, "secondName3",
 				Selector.newColumnsPredicateAll(false, 100),
 				ConsistencyLevel.ONE);
 	
@@ -183,8 +190,8 @@ public class IndexTest extends CassandraTest {
 		for (Person current : resultPoints) {
 			// now check our keys
 			for (Column col : keys) {
-				String name = ByteConverter.getString(col.getName());
-				if (current.getId().toString().equals(name)) {
+				ObjectIdentity id = ByteConverter.getObject(col.getName());
+				if (current.getId().equals(id.getKey())) {
 					count++;
 					break;
 				}
@@ -193,6 +200,72 @@ public class IndexTest extends CassandraTest {
 
 		// test we have all 3 ids as columns
 		assertEquals(1, count);
+		
+		
+
+	}
+	
+
+	@Test
+	public void testIndexCreationLong() throws Exception {
+
+		// now test our secondary indexes are correct
+		Selector selector = Pelops.createSelector("TestPool", "Keyspace1");
+
+		// p1, p2 and p3 all have the same login date
+		List<Column> keys = selector.getSubColumnsFromRow("Person_LastLogin", MetaDataUtils.INDEX_LONG, ByteConverter.getBytes(1282197146L), Selector.newColumnsPredicateAll(false, 100),
+				ConsistencyLevel.ONE);
+		
+		
+
+		assertEquals(3, keys.size());
+
+		Person[] resultPoints = new Person[] { p1, p2, p3 };
+
+		int count = 0;
+
+		for (Person current : resultPoints) {
+			// now check our keys
+			for (Column col : keys) {
+				ObjectIdentity id = ByteConverter.getObject(col.getName());
+				if (current.getId().equals(id.getKey())) {
+					count++;
+					break;
+				}
+			}
+		}
+
+		// test we have all 3 ids as columns
+		assertEquals(3, count);
+		
+		//results for lastname
+		// p3 an p4 all have "secondName2"
+		keys = selector.getSubColumnsFromRow("Person_LastLogin", MetaDataUtils.INDEX_LONG, ByteConverter.getBytes(1282197946L), Selector.newColumnsPredicateAll(false, 100),
+				ConsistencyLevel.ONE);
+	
+		assertEquals(2, keys.size());
+
+		
+		resultPoints = new Person[] {  p3, p4 };
+
+		count = 0;
+
+		for (Person current : resultPoints) {
+			// now check our keys
+			for (Column col : keys) {
+				ObjectIdentity id = ByteConverter.getObject(col.getName());
+				if (current.getId().equals(id.getKey())) {
+					count++;
+					break;
+				}
+			}
+		}
+
+		// test we have all 3 ids as columns
+		assertEquals(2, count);
+		
+		
+		
 		
 		
 

@@ -17,6 +17,7 @@ Contributors : Pedro Gomes and Universidade do Minho.
  ***********************************************************************/
 package com.spidertracks.datanucleus;
 
+import static com.spidertracks.datanucleus.IndexPersistenceHandler.*;
 import static com.spidertracks.datanucleus.utils.ByteConverter.getBytes;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnName;
 
@@ -31,7 +32,6 @@ import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.StateManager;
 import org.datanucleus.api.ApiAdapter;
 import org.datanucleus.exceptions.NucleusDataStoreException;
-import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.Relation;
@@ -41,15 +41,12 @@ import org.datanucleus.store.fieldmanager.AbstractFieldManager;
 import org.datanucleus.store.types.ObjectStringConverter;
 import org.wyki.cassandra.pelops.Mutator;
 
-import com.spidertracks.datanucleus.utils.MetaDataUtils;
-
 /**
  * @author Todd Nine
  * 
  */
 public class CassandraInsertFieldManager extends AbstractFieldManager {
 
-	
 	private ExecutionContext context;
 	private Mutator mutator;
 	private AbstractClassMetaData metaData;
@@ -80,10 +77,10 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 		try {
 			mutator.writeColumn(key, columnFamily, mutator.newColumn(
 					getColumnName(metaData, fieldNumber), getBytes(value)));
-			indexField(fieldNumber, value);
+			indexField(fieldNumber, value, objectProvider, mutator);
 
 		} catch (Exception e) {
-			throw new NucleusException(e.getMessage(), e);
+			throw new NucleusDataStoreException(e.getMessage(), e);
 		}
 	}
 
@@ -96,10 +93,10 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 					.writeColumn(key, columnFamily, mutator.newColumn(
 							getColumnName(metaData, fieldNumber),
 							new byte[] { value }));
-			indexField(fieldNumber, value);
+			indexField(fieldNumber, value, objectProvider, mutator);
 
 		} catch (Exception e) {
-			throw new NucleusException(e.getMessage(), e);
+			throw new NucleusDataStoreException(e.getMessage(), e);
 		}
 	}
 
@@ -109,9 +106,9 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 		try {
 			mutator.writeColumn(key, columnFamily, mutator.newColumn(
 					getColumnName(metaData, fieldNumber), getBytes(value)));
-			indexField(fieldNumber, value);
+			indexField(fieldNumber, value, objectProvider, mutator);
 		} catch (Exception e) {
-			throw new NucleusException(e.getMessage(), e);
+			throw new NucleusDataStoreException(e.getMessage(), e);
 		}
 	}
 
@@ -121,9 +118,9 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 		try {
 			mutator.writeColumn(key, columnFamily, mutator.newColumn(
 					getColumnName(metaData, fieldNumber), getBytes(value)));
-			indexField(fieldNumber, value);
+			indexField(fieldNumber, value, objectProvider, mutator);
 		} catch (Exception e) {
-			throw new NucleusException(e.getMessage(), e);
+			throw new NucleusDataStoreException(e.getMessage(), e);
 		}
 	}
 
@@ -133,9 +130,9 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 		try {
 			mutator.writeColumn(key, columnFamily, mutator.newColumn(
 					getColumnName(metaData, fieldNumber), getBytes(value)));
-			indexField(fieldNumber, value);
+			indexField(fieldNumber, value, objectProvider, mutator);
 		} catch (Exception e) {
-			throw new NucleusException(e.getMessage(), e);
+			throw new NucleusDataStoreException(e.getMessage(), e);
 		}
 	}
 
@@ -145,10 +142,10 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 		try {
 			mutator.writeColumn(key, columnFamily, mutator.newColumn(
 					getColumnName(metaData, fieldNumber), getBytes(value)));
-			indexField(fieldNumber, value);
+			indexField(fieldNumber, value, objectProvider, mutator);
 
 		} catch (Exception e) {
-			throw new NucleusException(e.getMessage(), e);
+			throw new NucleusDataStoreException(e.getMessage(), e);
 		}
 	}
 
@@ -158,9 +155,9 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 		try {
 			mutator.writeColumn(key, columnFamily, mutator.newColumn(
 					getColumnName(metaData, fieldNumber), getBytes(value)));
-			indexField(fieldNumber, value);
+			indexField(fieldNumber, value, objectProvider, mutator);
 		} catch (Exception e) {
-			throw new NucleusException(e.getMessage(), e);
+			throw new NucleusDataStoreException(e.getMessage(), e);
 		}
 	}
 
@@ -169,9 +166,9 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 		try {
 			mutator.writeColumn(key, columnFamily, mutator.newColumn(
 					getColumnName(metaData, fieldNumber), getBytes(value)));
-			indexField(fieldNumber, value);
+			indexField(fieldNumber, value, objectProvider, mutator);
 		} catch (Exception e) {
-			throw new NucleusException(e.getMessage(), e);
+			throw new NucleusDataStoreException(e.getMessage(), e);
 		}
 	}
 
@@ -190,7 +187,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 				// then removing will work
 				this.mutator.deleteColumn(key, columnFamily, columnName);
 
-				removeIndex(fieldNumber);
+				removeIndex(fieldNumber, value, objectProvider, mutator);
 
 				return;
 
@@ -222,8 +219,9 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 				// TODO add this data to the supercolumn info
 
-				Object objectPk = context.getApiAdapter().getIdForObject(persisted);
-				
+				Object objectPk = context.getApiAdapter().getIdForObject(
+						persisted);
+
 				mutator.writeColumn(key, columnFamily, mutator.newColumn(
 						columnName, getBytes(objectPk)));
 
@@ -248,8 +246,9 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 						persisted = context.persistObjectInternal(element,
 								objectProvider, fieldNumber, StateManager.PC);
 
-						objectPk = context.getApiAdapter().getIdForObject(persisted);
-						
+						objectPk = context.getApiAdapter().getIdForObject(
+								persisted);
+
 						serializedKeys.add(objectPk);
 
 					}
@@ -288,9 +287,11 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 						if (adapter.isPersistable(mapKey)) {
 
 							persisted = context.persistObjectInternal(mapKey,
-									objectProvider, fieldNumber, StateManager.PC);
+									objectProvider, fieldNumber,
+									StateManager.PC);
 
-							serializedKey = context.getApiAdapter().getIdForObject(persisted);
+							serializedKey = context.getApiAdapter()
+									.getIdForObject(persisted);
 						} else {
 							serializedKey = mapKey;
 						}
@@ -299,9 +300,12 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 						if (adapter.isPersistable(mapValue)) {
 
 							persisted = context.persistObjectInternal(mapValue,
-									objectProvider, fieldNumber, StateManager.PC);
+									objectProvider, fieldNumber,
+									StateManager.PC);
 
-							serializedValue = context.getApiAdapter().getIdForObject(persisted);;
+							serializedValue = context.getApiAdapter()
+									.getIdForObject(persisted);
+							;
 						} else {
 							serializedKey = mapValue;
 						}
@@ -322,13 +326,15 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 					Object persisted = null;
 					Object objectPk = null;
-					
+
 					for (int i = 0; i < Array.getLength(value); i++) {
 						// persist the object
 						persisted = context.persistObjectInternal(Array.get(
-								value, i), objectProvider, fieldNumber, StateManager.PC);
-						
-						objectPk = context.getApiAdapter().getIdForObject(persisted);
+								value, i), objectProvider, fieldNumber,
+								StateManager.PC);
+
+						objectPk = context.getApiAdapter().getIdForObject(
+								persisted);
 
 						serializedKeys.add(objectPk);
 					}
@@ -357,10 +363,10 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 			}
 
-			indexField(fieldNumber, value);
+			indexField(fieldNumber, value, objectProvider, mutator);
 
 		} catch (Exception e) {
-			throw new NucleusException(e.getMessage(), e);
+			throw new NucleusDataStoreException(e.getMessage(), e);
 		}
 	}
 
@@ -372,93 +378,19 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 			if (value == null) {
 				mutator.deleteColumn(key, columnFamily, columnName);
-				removeIndex(fieldNumber);
+				removeIndex(fieldNumber, value, objectProvider, mutator);
 				return;
 			}
 			mutator.writeColumn(key, columnFamily, mutator.newColumn(
 					columnName, getBytes(value)));
 
-			indexField(fieldNumber, value);
+			indexField(fieldNumber, value, objectProvider, mutator);
 
 		} catch (Exception e) {
-			throw new NucleusException(e.getMessage(), e);
+			throw new NucleusDataStoreException(e.getMessage(), e);
 		}
 	}
 
-	/**
-	 * Index the field if required
-	 * 
-	 * @param fieldNumber
-	 * @param value
-	 */
-	protected void indexField(int fieldNumber, Object value) {
-		// convert it to a string so we can key it
-
-		AbstractMemberMetaData fieldMetaData = metaData
-				.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
-
-		String secondaryCfName = MetaDataUtils.getIndexName(metaData,
-				fieldMetaData);
-
-		// nothing to index
-		if (secondaryCfName == null) {
-			return;
-		}
-
-		String indexKey = MetaDataUtils.convertToRowKey(this.objectProvider
-				.getExecutionContext(), value);
-		
-		//no value, can't index it
-		if(indexKey == null || indexKey.length() == 0){
-			return;
-		}
-
-		// now write it with our reverse index column family
-		mutator.writeColumn(indexKey, secondaryCfName, mutator.newColumn(key,
-				new byte[] { 0x00 }));
-
-	}
-
-	/**
-	 * Should only be invoked when the inserted object is null
-	 * 
-	 * @param fieldNumber
-	 */
-	protected void removeIndex(int fieldNumber) {
-
-		AbstractMemberMetaData fieldMetaData = metaData
-				.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
-
-		String secondaryCfName = MetaDataUtils.getIndexName(metaData,
-				fieldMetaData);
-
-		// nothing to index
-		if (secondaryCfName == null) {
-			return;
-		}
-
-		// load the original value from the DS to un-index it
-
-		try {
-			objectProvider.loadFieldFromDatastore(fieldNumber);
-		} catch (NucleusDataStoreException ne) {
-			// our field didn't exist previously, ignore the error
-			return;
-		}
-
-		Object oldValue = objectProvider.provideField(fieldNumber);
-		
-		//no old value, nothing to do
-		if(oldValue == null){
-			return;
-		}
-
-		String indexKey = MetaDataUtils.convertToRowKey(this.objectProvider
-				.getExecutionContext(), oldValue);
-
-		// blitz the column
-		mutator.deleteColumn(indexKey, secondaryCfName, key);
-
-	}
+	
 
 }

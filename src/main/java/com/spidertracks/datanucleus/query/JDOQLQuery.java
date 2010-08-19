@@ -101,8 +101,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 			CassandraQueryExpressionEvaluator evaluator = new CassandraQueryExpressionEvaluator(
 					ec, parameters, ec.getClassLoaderResolver(), candidateClass);
 
-			Set<String> candidateKeys = (Set<String>) filter
-					.evaluate(evaluator);
+			Set<String> candidateKeys = (Set<String>) filter.evaluate(evaluator);
 
 			evaluteInMemory = evaluator.isInMemoryRequired();
 
@@ -114,8 +113,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 						candidateClass, subclasses, ignoreCache, 1000, null);
 			} else {
 				results = CassandraQuery.getObjectsOfCandidateType(ec,
-						candidateClass, candidateKeys, subclasses, ignoreCache,
-						1000, null);
+						candidateClass, candidateKeys, subclasses, ignoreCache);
 			}
 
 		}

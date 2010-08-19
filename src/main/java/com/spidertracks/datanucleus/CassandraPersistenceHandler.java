@@ -17,6 +17,7 @@ Contributors : Pedro Gomes and Universidade do Minho.
  ***********************************************************************/
 package com.spidertracks.datanucleus;
 
+import static com.spidertracks.datanucleus.IndexPersistenceHandler.removeIndex;
 import static com.spidertracks.datanucleus.utils.ByteConverter.getString;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.*;
 
@@ -172,25 +173,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 				}
 
-				// delete secondary indexes
-				String secondaryCfName = getIndexName(metaData, fieldMetaData);
-
-				// nothing to index
-				if (secondaryCfName == null) {
-					continue;
-				}
-
-				// convert it to a string so we can key it
-				String keyValue = convertToRowKey(op.getExecutionContext(),
-						value);
-
-				// no value to remove
-				if (keyValue == null || keyValue.length() == 0) {
-					continue;
-				}
-
-				// blitz the reverse index
-				mutator.deleteColumn(keyValue, secondaryCfName, key);
+				IndexPersistenceHandler.removeIndex(current, value, op, mutator);
 
 			}
 

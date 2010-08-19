@@ -17,7 +17,9 @@ Contributors : Todd Nine
  ***********************************************************************/
 package com.spidertracks.datanucleus.utils;
 
-import static com.spidertracks.datanucleus.utils.ByteConverter.getString;
+import static com.spidertracks.datanucleus.utils.ByteConverter.getBytes;
+
+import java.io.IOException;
 
 import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.identity.ObjectIdentity;
@@ -28,6 +30,8 @@ import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.datanucleus.ClassLoaderResolver;
+import org.datanucleus.api.ApiAdapter;
+import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.ColumnMetaData;
@@ -37,6 +41,7 @@ import org.datanucleus.metadata.InheritanceMetaData;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.mapped.exceptions.DatastoreFieldDefinitionException;
+import org.datanucleus.store.types.ObjectLongConverter;
 import org.datanucleus.store.types.ObjectStringConverter;
 import org.wyki.cassandra.pelops.Selector;
 
@@ -51,6 +56,9 @@ import org.wyki.cassandra.pelops.Selector;
 public class MetaDataUtils {
 
 	public static final ConsistencyLevel DEFAULT = ConsistencyLevel.DCQUORUM;
+	
+	public static final String INDEX_LONG = "LongIndex";
+	public static final String INDEX_STRING = "StringIndex";
 
 	//		
 	/**
@@ -84,11 +92,12 @@ public class MetaDataUtils {
 
 	/**
 	 * Get the row key for the given id
+	 * 
 	 * @param ec
 	 * @param id
 	 * @return
 	 */
-	public static String getRowKeyForId(ExecutionContext ec, Object id){
+	public static String getRowKeyForId(ExecutionContext ec, Object id) {
 		if (id instanceof ObjectIdentity) {
 			ObjectIdentity identity = (ObjectIdentity) id;
 
@@ -118,29 +127,64 @@ public class MetaDataUtils {
 		// else just call the default tostring since it's a user defined key
 		return id.toString();
 	}
+
 	/**
-	 * Convert from the given object to a string.
+	 * Convert from the given object to long bytes. If it can't be converted
+	 * null is returned
 	 * 
 	 * @param ec
 	 * @param o
 	 * @return
 	 */
-	public static String convertToRowKey(ExecutionContext ec, Object o) {
+	public static byte[] getIndexLong(ExecutionContext ec, Object o) {
+		try {
+			if (o instanceof Long) {
+				return getBytes((Long) o);
+			} else if (o instanceof Integer) {
+				return getBytes((Long) o);
+			} else if (o instanceof Short) {
+				return getBytes((Long) o);
+			} else if (o instanceof Float) {
+				return getBytes((Double) o);
+			} else if (o instanceof Double) {
+				return getBytes((Double) o);
+			}
+
+			ObjectLongConverter converter = ec.getTypeManager()
+					.getLongConverter(o.getClass());
+
+			if (converter == null) {
+				return null;
+			}
+
+			return getBytes(converter.toLong(o));
+		} catch (IOException e) {
+			throw new NucleusDataStoreException("Unable to convert value to long", e);
+		}
+	}
+
+	/**
+	 * Convert from the given object to a string. Null is returned if it cannot
+	 * be convered
+	 * 
+	 * @param ec
+	 * @param o
+	 * @return
+	 */
+	public static byte[] getIndexString(ExecutionContext ec, Object o) {
 
 		if (o instanceof String) {
-			return (String) o;
+			return getBytes((String) o);
 		}
 
 		ObjectStringConverter converter = ec.getTypeManager()
 				.getStringConverter(o.getClass());
 
 		if (converter == null) {
-			throw new DatastoreFieldDefinitionException(String.format(
-					"You must define an ObjectStringConverter for type %s", o
-							.getClass()));
+			return null;
 		}
 
-		return converter.toString(o);
+		return getBytes(converter.toString(o));
 	}
 
 	/**
@@ -176,47 +220,57 @@ public class MetaDataUtils {
 
 	}
 
-	// /**
-	// * Object for the identity in the AbstractClassMetaData's class. Try and
-	// * build it from the string
-	// *
-	// * @param op
-	// * @param cmd
-	// * @param value
-	// * @return
-	// */
-	// public static Object getKeyValue(ObjectProvider op,
-	// AbstractClassMetaData cmd, String value) {
-	//
-	// ExecutionContext ec = op.getExecutionContext();
-	//
-	// ApiAdapter adapter = ec.getApiAdapter();
-	//
-	// Class<?> persistentClass = ec.getClassLoaderResolver().classForName(
-	// cmd.getFullClassName());
-	//
-	// Object identity = null;
-	//
-	// if (adapter.isSingleFieldIdentityClass(cmd.getObjectidClass())) {
-	//
-	// int[] identityFields = cmd.getPKMemberPositions();
-	//			
-	// //assume only one identity field
-	//			
-	// AbstractMemberMetaData member =
-	// cmd.getMetaDataForManagedMemberAtAbsolutePosition(identityFields[0]);
-	//			
-	// identity = ec.newObjectId(persistentClass, member.getTypeName()
-	// + ":" + value);
-	//
-	// } else {
-	// throw new DatastoreFieldDefinitionException(
-	// "multiple field identity creation is currently unsupported");
-	// }
-	//
-	// return identity;
-	//
-	// }
+	/**
+	 * Object for the identity in the AbstractClassMetaData's class. Try and
+	 * build it from the string
+	 * 
+	 * @param op
+	 * @param cmd
+	 * @param value
+	 * @return
+	 */
+	public static Object getKeyValue(ExecutionContext ec, Class candidateClass,
+			String value) {
+
+		ApiAdapter adapter = ec.getApiAdapter();
+
+		AbstractClassMetaData cmd = ec.getMetaDataManager()
+				.getMetaDataForClass(candidateClass,
+						ec.getClassLoaderResolver());
+
+		Object identity = null;
+
+		if (!adapter.isSingleFieldIdentityClass(cmd.getObjectidClass())) {
+			throw new DatastoreFieldDefinitionException(
+					"multiple field identity creation is currently unsupported in indexing");
+		}
+
+		int[] identityFields = cmd.getPKMemberPositions();
+
+		// assume only one identity field
+
+		AbstractMemberMetaData member = cmd
+				.getMetaDataForManagedMemberAtAbsolutePosition(identityFields[0]);
+
+		ObjectStringConverter converter = ec.getTypeManager()
+				.getStringConverter(member.getType());
+
+		// use the converter if it's present
+		if (converter != null) {
+			identity = converter.toObject(value);
+		}
+		// use the user defined key class which takes the form classname:value
+		// in the constructor as a string
+		else {
+
+			identity = ec.newObjectId(candidateClass.getName(), member
+					.getTypeName()
+					+ ":" + value);
+		}
+
+		return identity;
+
+	}
 
 	/**
 	 * Get the column metadata for the class and fieldname
@@ -281,10 +335,12 @@ public class MetaDataUtils {
 			return null;
 		}
 
+		StringBuffer nameBuffer = new StringBuffer();
+		
 		String assignedName = metaData.getName();
 
 		if (assignedName == null) {
-			StringBuffer nameBuffer = new StringBuffer();
+			
 			nameBuffer.append(getColumnFamily(classMetaData)).append("_")
 					.append(fieldMetaData.getName());
 			assignedName = nameBuffer.toString();
@@ -341,32 +397,36 @@ public class MetaDataUtils {
 	public static String getColumnFamily(AbstractClassMetaData metaData) {
 		AbstractClassMetaData current = metaData;
 		InheritanceMetaData inheritance = null;
-		String tableName = null;;
+		String tableName = null;
 		
+
 		while (current != null) {
 			tableName = current.getTable();
 
 			if (tableName != null) {
 				return tableName;
 			}
-			
+
 			inheritance = metaData.getInheritanceMetaData();
-			
-			if(inheritance != null){
-				if(InheritanceStrategy.NEW_TABLE.equals(inheritance.getStrategy()) || InheritanceStrategy.UNSPECIFIED.equals(inheritance.getStrategy())){
+
+			if (inheritance != null) {
+				if (InheritanceStrategy.NEW_TABLE.equals(inheritance
+						.getStrategy())
+						|| InheritanceStrategy.UNSPECIFIED.equals(inheritance
+								.getStrategy())) {
 					return metaData.getName();
 				}
 			}
 
-			current = (AbstractClassMetaData) current.getSuperAbstractClassMetaData();
+			current = (AbstractClassMetaData) current
+					.getSuperAbstractClassMetaData();
 
 		}
 
-		//couldn't determine name via inheritance or annotations, default tl class name
+		// couldn't determine name via inheritance or annotations, default tl
+		// class name
 		return metaData.getName();
 	}
-
-
 
 	/**
 	 * Create a slice predicate with all mapped fetch column lists
@@ -388,24 +448,25 @@ public class MetaDataUtils {
 	}
 
 	/**
-	 * Create a slice predicate that will retreive the discriminator column
-	 * if one doesn't exist, null is returned
+	 * Create a slice predicate that will retreive the discriminator column if
+	 * one doesn't exist, null is returned
 	 * 
 	 * @param metaData
 	 * @param fieldNumbers
 	 * @return
 	 */
-	public static SlicePredicate getDescriminatorColumn(AbstractClassMetaData metaData) {
+	public static SlicePredicate getDescriminatorColumn(
+			AbstractClassMetaData metaData) {
 
-		DiscriminatorMetaData discriminatorMetaData = metaData.getDiscriminatorMetaData();
-		
-		if(discriminatorMetaData == null){
+		DiscriminatorMetaData discriminatorMetaData = metaData
+				.getDiscriminatorMetaData();
+
+		if (discriminatorMetaData == null) {
 			return null;
 		}
-		
+
 		String columnName = getDiscriminatorColumnName(discriminatorMetaData);
-			
-		
+
 		return Selector.newColumnsPredicate(columnName);
 	}
 

@@ -17,9 +17,13 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.basic.inheritance;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
+
 import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
 
 import org.junit.Test;
 
@@ -30,6 +34,7 @@ import com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildTwo;
 import com.spidertracks.datanucleus.basic.inheritance.casethree.ChildThree;
 import com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeOne;
 import com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeTwo;
+import com.spidertracks.datanucleus.basic.inheritance.casethree.ParentThree;
 import com.spidertracks.datanucleus.basic.inheritance.casetwo.ChildTwo;
 import com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoOne;
 import com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoTwo;
@@ -169,6 +174,56 @@ public class InheritanceTest extends CassandraTest {
 		ChildThree savedThird = pm.getObjectById(ChildThree.class, third.getId());
 
 		assertEquals(third, savedThird);
+
+	}
+	
+	/**
+	 * Test retrieval works when everything is stored in abstract parent class cf
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testQueryChildReturnsSuperQuery() throws Exception {
+
+		GrandChildThreeOne first = new GrandChildThreeOne();
+		first.setChildField("cf-gc1");
+		first.setGrandChildOneField("gcf-gc1");
+		first.setParentField("pf-gc1");
+
+		GrandChildThreeTwo second = new GrandChildThreeTwo();
+		second.setChildField("cf-gc2");
+		second.setGrandChildOneField("gcf-gc2");
+		second.setParentField("pf-gc2");
+
+		ChildThree third = new ChildThree();
+		third.setChildField("cf-c1");
+		third.setParentField("pf-c1-new-test");
+
+		PersistenceManager pm = pmf.getPersistenceManager();
+		pm.makePersistent(first);
+		pm.makePersistent(second);
+		pm.makePersistent(third);
+
+		// now retrieve to instances of "child" should return 2 subclasses
+		
+		Query query = pm.newQuery(ParentThree.class);
+		query.setFilter("parentField == :field");
+		
+		List<ParentThree> results = (List<ParentThree>) query.execute(third.getParentField());
+		
+		assertNotNull(results);
+		
+		assertEquals(1, results.size());
+		
+		
+
+		ParentThree savedChild = results.get(0);
+		
+		assertEquals(third, savedChild);
+
+		
+		
+		
 
 	}
 

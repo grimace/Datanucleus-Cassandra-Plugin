@@ -139,11 +139,7 @@
   
  		 <!--  Our person column family and it's secondary index CF -->
 		<ColumnFamily CompareWith="UTF8Type" Name="Person" />
-		<ColumnFamily CompareWith="UTF8Type" Name="Person_FirstName" />
-		<ColumnFamily CompareWith="UTF8Type" Name="Person_LastName" />
-		<ColumnFamily CompareWith="UTF8Type" Name="Person_email" />
-		<ColumnFamily CompareWith="UTF8Type" Name="Person_LastLogin" />
-		
+	
 		
 		<ColumnFamily CompareWith="UTF8Type" Name="InvitationToken" />
 		<ColumnFamily CompareWith="UTF8Type" Name="InvitedPerson" />
@@ -156,6 +152,14 @@
  
  
 		<ColumnFamily CompareWith="UTF8Type" Name="ParentThree" />
+		
+	  <!--  Our indexing values we have to use super columns, otherwise we can't seek properly for < or <= queries -->
+	  
+	  <ColumnFamily Name="StringIndex"  ColumnType="Super"  CompareWith="UTF8Type"  CompareSubcolumnsWith="BytesType"   Comment="Secondary index for all fields that can't be converted to a long"/>
+	  
+	  <ColumnFamily Name="LongIndex"  ColumnType="Super"  CompareWith="LongType"  CompareSubcolumnsWith="BytesType"   Comment="Secondary index for all fields that can be converted to a long"/>
+	  
+	  
       <!--
        ~ Strategy: Setting this to the class that implements
        ~ IReplicaPlacementStrategy will change the way the node picker works.
