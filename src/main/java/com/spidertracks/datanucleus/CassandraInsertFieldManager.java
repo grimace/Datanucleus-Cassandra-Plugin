@@ -17,7 +17,8 @@ Contributors : Pedro Gomes and Universidade do Minho.
  ***********************************************************************/
 package com.spidertracks.datanucleus;
 
-import static com.spidertracks.datanucleus.IndexPersistenceHandler.*;
+import static com.spidertracks.datanucleus.IndexPersistenceHandler.indexField;
+import static com.spidertracks.datanucleus.IndexPersistenceHandler.removeIndex;
 import static com.spidertracks.datanucleus.utils.ByteConverter.getBytes;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnName;
 

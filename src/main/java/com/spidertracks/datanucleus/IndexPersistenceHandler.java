@@ -64,7 +64,12 @@ public class IndexPersistenceHandler {
 			byte[] data = MetaDataUtils.getIndexLong(context, value);
 
 			// Long indexible
-			if (data != null) {
+			if (data != null ) {
+				
+				//No usable value to write
+				if(data.length == 0){
+					return;
+				}
 
 				mutator.writeSubColumn(indexName, MetaDataUtils.INDEX_LONG,
 						data, mutator.newColumn(getBytes(objectProvider
@@ -76,6 +81,13 @@ public class IndexPersistenceHandler {
 			data = MetaDataUtils.getIndexString(context, value);
 
 			if (data != null) {
+				
+				//No usable value to write
+				if(data.length == 0){
+					return;
+				}
+				
+				
 				mutator.writeSubColumn(indexName, MetaDataUtils.INDEX_STRING,
 						data, mutator.newColumn(getBytes(objectProvider
 								.getObjectId()), new byte[] { 0x00 }));
@@ -133,6 +145,11 @@ public class IndexPersistenceHandler {
 
 			// Long indexible
 			if (data != null) {
+				
+				//No usable value to write
+				if(data.length == 0){
+					return;
+				}
 
 				mutator.deleteSubColumn(indexName,  MetaDataUtils.INDEX_LONG, data, getBytes(objectProvider.getObjectId()));
 
@@ -142,6 +159,11 @@ public class IndexPersistenceHandler {
 			data = MetaDataUtils.getIndexString(context, oldValue);
 
 			if (data != null) {
+				//No usable value to write
+				if(data.length == 0){
+					return;
+				}
+				
 				mutator.deleteSubColumn(indexName,  MetaDataUtils.INDEX_STRING, data, getBytes(objectProvider.getObjectId()));
 
 			}

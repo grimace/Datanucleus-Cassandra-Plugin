@@ -17,9 +17,14 @@ Contributors : Pedro Gomes and Universidade do Minho.
  ***********************************************************************/
 package com.spidertracks.datanucleus;
 
-import static com.spidertracks.datanucleus.IndexPersistenceHandler.removeIndex;
 import static com.spidertracks.datanucleus.utils.ByteConverter.getString;
-import static com.spidertracks.datanucleus.utils.MetaDataUtils.*;
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.DEFAULT;
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnFamily;
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.getDescriminatorColumn;
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.getDiscriminatorColumnName;
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.getFetchColumnList;
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.getRowKey;
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.getRowKeyForId;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -192,8 +197,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 			String key = getRowKey(op);
 
-			Selector selector = Pelops.createSelector(manager.getPoolName(),
-					manager.getKeyspace());
+			Selector selector = Pelops.createSelector(manager.getPoolName(), manager.getKeyspace());
 
 			List<Column> columns = selector.getColumnsFromRow(key,
 					getColumnFamily(metaData), getFetchColumnList(metaData,
@@ -278,8 +282,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 	private Object findObject(String key, AbstractClassMetaData metaData, ClassLoaderResolver clr, ExecutionContext ec, Object id) {
 
-		Selector selector = Pelops.createSelector(manager.getPoolName(),
-				manager.getKeyspace());
+		Selector selector = Pelops.createSelector(manager.getPoolName(), manager.getKeyspace());
 
 		// if we have a discriminator, fetch the discriminator column only
 		// and see if it's equal

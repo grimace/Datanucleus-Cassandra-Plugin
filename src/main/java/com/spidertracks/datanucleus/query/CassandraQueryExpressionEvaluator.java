@@ -20,6 +20,7 @@ package com.spidertracks.datanucleus.query;
 import static com.spidertracks.datanucleus.utils.ByteConverter.getObject;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.*;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1067,8 +1068,22 @@ public class CassandraQueryExpressionEvaluator extends
 				return Selector
 						.bumpUpColumnName(indexValue, OrderType.UTF8Type);
 			}
+			
+			try {
+				long value = ByteConverter.getLong(indexValue);
+				
+				if(value < Long.MAX_VALUE){
+					value++;
+				}
+				
+				return ByteConverter.getBytes(value);
+				
+			} catch (IOException e) {
+				throw new NucleusException("Couldn't increase long value");
+			}
+			
+			
 
-			return Selector.bumpUpColumnName(indexValue, OrderType.LongType);
 		}
 
 		/**
@@ -1082,7 +1097,19 @@ public class CassandraQueryExpressionEvaluator extends
 						OrderType.UTF8Type);
 			}
 
-			return Selector.bumpDownColumnName(indexValue, OrderType.LongType);
+			try {
+				long value = ByteConverter.getLong(indexValue);
+				
+				if(value > Long.MIN_VALUE){
+					value--;
+				}
+				
+				return ByteConverter.getBytes(value);
+				
+			} catch (IOException e) {
+				throw new NucleusException("Couldn't increase long value");
+			}
+			
 		}
 
 	}
