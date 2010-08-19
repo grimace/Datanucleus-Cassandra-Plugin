@@ -108,7 +108,7 @@ public class IndexPersistenceHandler {
 	 * @param objectProvider
 	 * @param mutator
 	 */
-	public static void removeIndex(int fieldNumber, Object value, ObjectProvider objectProvider, Mutator mutator) {
+	public static void removeIndex(int fieldNumber, ObjectProvider objectProvider, Mutator mutator) {
 		
 		AbstractClassMetaData metaData = objectProvider.getClassMetaData();
 		ExecutionContext context = objectProvider.getExecutionContext();

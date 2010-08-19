@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.KeyRange;
@@ -33,6 +32,7 @@ import org.wyki.cassandra.pelops.Pelops;
 import org.wyki.cassandra.pelops.Selector;
 
 import com.spidertracks.datanucleus.CassandraStoreManager;
+import com.spidertracks.datanucleus.utils.ByteConverter;
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 public class CassandraQuery {
@@ -70,25 +70,32 @@ public class CassandraQuery {
 			range.setEnd_key("");
 		
 
+			String identityColumn = MetaDataUtils.getIdentityColumn(acmd);
+			
 			// This behavior is somewhat undetermined. We have no idea what
 			// we're looking for. If there are
 			// subclass tables, we need to keep loading keys until we hit our
 			// limit if there are table per subclass entities.  Using this is woefully inneficient, and generally a very bad idea.  You should have defined secondary indexes
 			// and searched those.  If you need to get everything, you probably shouldn't be using JDO to access this data unless the set size is very small
 			Map<String, List<Column>> rows = selector.getColumnsFromRows(range,
-					columnFamily, Selector.newColumnsPredicateAll(false, 1),
+					columnFamily, Selector.newColumnsPredicate(identityColumn),
 					MetaDataUtils.DEFAULT);
 
 			
-			Set<String> keys = new HashSet<String>(rows.size());
+			Set<Object> keys = new HashSet<Object>(rows.size());
 			
-			for(Entry<String, List<Column>> entry: rows.entrySet()){
+			for(List<Column> entries: rows.values()){
+				
 				//deleted row, ignore it
-				if(entry.getValue().size() == 0){
+				if(entries == null || entries.size() != 1){
 					continue;
 				}
 				
-				keys.add(entry.getKey());
+				Object identity = MetaDataUtils.getObjectIdentity(ec, candidateClass, entries.get(0).getValue());
+				
+				
+			
+				keys.add(identity);
 			}
 			
 			return getObjectsOfCandidateType(ec, candidateClass, keys, subclasses, ignoreCache );
@@ -112,7 +119,7 @@ public class CassandraQuery {
 	 * @return
 	 */
 	public static List<?> getObjectsOfCandidateType(final ExecutionContext ec,
-			Class<?> candidateClass, Set<String> keys, boolean subclasses,
+			Class<?> candidateClass, Set<Object> keys, boolean subclasses,
 			boolean ignoreCache) {
 		
 
@@ -122,9 +129,8 @@ public class CassandraQuery {
 		List results = new ArrayList(keys.size());
 		//String tempKey = null;
 
-		for (String rowKey : keys) {
-			Object idFromString = MetaDataUtils.getKeyValue(ec, candidateClass, rowKey);
-			Object id = ec.newObjectId(candidateClass, idFromString);
+		for (Object id : keys) {
+			
 			Object returned = ec.findObject(id, ignoreCache, subclasses, candidateClass.getName());
 
 			if (returned != null) {

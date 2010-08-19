@@ -56,7 +56,7 @@ import org.wyki.cassandra.pelops.Selector;
 public class MetaDataUtils {
 
 	public static final ConsistencyLevel DEFAULT = ConsistencyLevel.DCQUORUM;
-	
+
 	public static final String INDEX_LONG = "LongIndex";
 	public static final String INDEX_STRING = "StringIndex";
 
@@ -138,11 +138,11 @@ public class MetaDataUtils {
 	 */
 	public static byte[] getIndexLong(ExecutionContext ec, Object o) {
 		try {
-			if (o instanceof Long || o instanceof Integer || o instanceof Short ) {
-				return getBytes(((Long)o).longValue());
+			if (o instanceof Long || o instanceof Integer || o instanceof Short) {
+				return getBytes(((Long) o).longValue());
 			} else if (o instanceof Float || o instanceof Double) {
 				return getBytes(((Double) o).doubleValue());
-			} 
+			}
 
 			ObjectLongConverter converter = ec.getTypeManager()
 					.getLongConverter(o.getClass());
@@ -151,9 +151,10 @@ public class MetaDataUtils {
 				return null;
 			}
 
-			return getBytes((long)converter.toLong(o));
+			return getBytes((long) converter.toLong(o));
 		} catch (IOException e) {
-			throw new NucleusDataStoreException("Unable to convert value to long", e);
+			throw new NucleusDataStoreException(
+					"Unable to convert value to long", e);
 		}
 	}
 
@@ -190,7 +191,7 @@ public class MetaDataUtils {
 	 * @param value
 	 * @return
 	 */
-	public static Object convertFromRowKeyString(ExecutionContext ec,
+	public static Object getIdentityFromRowKey(ExecutionContext ec,
 			String targetClassName, String value) {
 
 		ClassLoaderResolver clr = ec.getClassLoaderResolver();
@@ -223,16 +224,14 @@ public class MetaDataUtils {
 	 * @param value
 	 * @return
 	 */
-	public static Object getKeyValue(ExecutionContext ec, Class candidateClass,
-			String value) {
+	public static Object getObjectIdentity(ExecutionContext ec, Class candidateClass,
+			byte[] value) {
 
 		ApiAdapter adapter = ec.getApiAdapter();
 
 		AbstractClassMetaData cmd = ec.getMetaDataManager()
 				.getMetaDataForClass(candidateClass,
 						ec.getClassLoaderResolver());
-
-		Object identity = null;
 
 		if (!adapter.isSingleFieldIdentityClass(cmd.getObjectidClass())) {
 			throw new DatastoreFieldDefinitionException(
@@ -245,24 +244,35 @@ public class MetaDataUtils {
 
 		AbstractMemberMetaData member = cmd
 				.getMetaDataForManagedMemberAtAbsolutePosition(identityFields[0]);
+		
+		try {
+			ObjectStringConverter converter = ec.getTypeManager()
+					.getStringConverter(member.getType());
 
-		ObjectStringConverter converter = ec.getTypeManager()
-				.getStringConverter(member.getType());
+			// use the converter if it's present
+			if (converter != null) {
+				Object id = converter.toObject(ByteConverter.getString(value));
 
-		// use the converter if it's present
-		if (converter != null) {
-			identity = converter.toObject(value);
+				return ec.newObjectId(candidateClass, id);
+			}
+
+			ObjectLongConverter longConverter = ec.getTypeManager()
+					.getLongConverter(member.getType());
+
+			if (longConverter != null) {
+				Object id = longConverter
+						.toObject(ByteConverter.getLong(value));
+
+				return ec.newObjectId(candidateClass, id);
+			}
+
+			// try and de-serialize it as an object
+
+			return ByteConverter.getObject(value);
+		} catch (Exception e) {
+			throw new NucleusDataStoreException(
+					"Unable to serialize bytes to object identity.  Please make sure it has the same SerializationId, long or string converter is was stored with. ");
 		}
-		// use the user defined key class which takes the form classname:value
-		// in the constructor as a string
-		else {
-
-			identity = ec.newObjectId(candidateClass.getName(), member
-					.getTypeName()
-					+ ":" + value);
-		}
-
-		return identity;
 
 	}
 
@@ -291,6 +301,36 @@ public class MetaDataUtils {
 		// throw new UnsupportedOperationException(String.format(
 		// "You must specify a column name for property %s",
 		// memberMetaData.getName()));
+
+	}
+
+	/**
+	 * Get the column metadata for the class and fieldname
+	 * 
+	 * @param metaData
+	 * @param absoluteFieldNumber
+	 * @return
+	 */
+	public static String getIdentityColumn(AbstractClassMetaData metaData) {
+
+		int[] pks = metaData.getPKMemberPositions();
+
+		if (pks.length != 1) {
+			throw new NucleusDataStoreException(
+					"Currently only single field identity objects are allowed");
+		}
+
+		AbstractMemberMetaData memberMetaData = metaData
+				.getMetaDataForManagedMemberAtAbsolutePosition(pks[0]);
+
+		// Try the first column if specified
+		ColumnMetaData[] colmds = memberMetaData.getColumnMetaData();
+		if (colmds != null && colmds.length > 0) {
+			return colmds[0].getName();
+		}
+
+		// TODO should we allow defaults?
+		return memberMetaData.getName();
 
 	}
 
@@ -330,11 +370,11 @@ public class MetaDataUtils {
 		}
 
 		StringBuffer nameBuffer = new StringBuffer();
-		
+
 		String assignedName = metaData.getName();
 
 		if (assignedName == null) {
-			
+
 			nameBuffer.append(getColumnFamily(classMetaData)).append("_")
 					.append(fieldMetaData.getName());
 			assignedName = nameBuffer.toString();
@@ -392,7 +432,6 @@ public class MetaDataUtils {
 		AbstractClassMetaData current = metaData;
 		InheritanceMetaData inheritance = null;
 		String tableName = null;
-		
 
 		while (current != null) {
 			tableName = current.getTable();

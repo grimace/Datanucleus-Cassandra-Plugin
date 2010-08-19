@@ -101,7 +101,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 			CassandraQueryExpressionEvaluator evaluator = new CassandraQueryExpressionEvaluator(
 					ec, parameters, ec.getClassLoaderResolver(), candidateClass);
 
-			Set<String> candidateKeys = (Set<String>) filter.evaluate(evaluator);
+			Set<Object> candidateKeys = (Set<Object>) filter.evaluate(evaluator);
 
 			evaluteInMemory = evaluator.isInMemoryRequired();
 

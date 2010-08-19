@@ -98,13 +98,18 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 				AbstractMemberMetaData fieldMetaData = metaData
 						.getMetaDataForManagedMemberAtAbsolutePosition(current);
 
+				
 				// here we have the field value
 				Object value = op.provideField(current);
+				
+				IndexPersistenceHandler.removeIndex(current, op, mutator);
 
 				if (value == null) {
 					continue;
 				}
 
+				
+				
 				// if we're a collection, delete each element
 				// recurse to delete this object if it's marked as dependent
 				if (fieldMetaData.isDependent()
@@ -178,7 +183,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 				}
 
-				IndexPersistenceHandler.removeIndex(current, value, op, mutator);
+				
 
 			}
 

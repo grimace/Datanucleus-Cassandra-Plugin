@@ -82,6 +82,8 @@ public class CassandraQueryExpressionEvaluator extends
 	private Stack<Set<Object>> columnStack = new Stack<Set<Object>>();
 
 	private AbstractClassMetaData metaData;
+	
+	private Class destinationClass;
 
 	// Flag that marks an operation we can't support has been performed. We need
 	// to then run result set
@@ -96,6 +98,8 @@ public class CassandraQueryExpressionEvaluator extends
 	private Selector selector;
 	
 	private SlicePredicate idSelector;
+	
+	
 
 	/**
 	 * Constructor for an in-memory evaluator.
@@ -117,6 +121,7 @@ public class CassandraQueryExpressionEvaluator extends
 			Map<String, Object> params, ClassLoaderResolver clr,
 			Class<?> destinationClass) {
 		this.ec = ec;
+		this.destinationClass = destinationClass;
 		metaData = ec.getMetaDataManager().getMetaDataForClass(
 				destinationClass, clr);
 		this.parameterValues = (params != null ? params
@@ -133,11 +138,10 @@ public class CassandraQueryExpressionEvaluator extends
 		inMemoryRequired = false;
 		
 		
-		int[] identityFields = metaData.getPKMemberPositions();
 
 		// assume only one identity field
 	
-		idSelector = Selector.newColumnsPredicate(getColumnName(metaData, identityFields[0]));
+		idSelector = Selector.newColumnsPredicate(getIdentityColumn(metaData));
 
 	}
 
@@ -211,12 +215,14 @@ public class CassandraQueryExpressionEvaluator extends
 		// now we'll query for our column sets
 		try {
 			
-			List<SuperColumn> greaterThan = selector.getSuperColumnsFromRow(
-					indexName, indexKey.getIndexName(), Selector
-							.newColumnsPredicate(indexKey.bumpUpValue(), indexKey.bumpUpValue() , true, MAXCOUNT),MetaDataUtils.DEFAULT);
+			SuperColumn superCol = selector.getSuperColumnFromRow(
+					indexName, indexKey.getIndexName(), indexKey.getIndexValue() ,MetaDataUtils.DEFAULT);
 			
+			Set<Object> result = new HashSet<Object>();
 			
-			this.columnStack.push(convertSuperCols(greaterThan));
+			convertSuperCol(superCol, result);
+			
+			this.columnStack.push(result);
 		
 
 			return this.columnStack.peek();
@@ -256,7 +262,7 @@ public class CassandraQueryExpressionEvaluator extends
 
 			List<SuperColumn> greaterThan = selector.getSuperColumnsFromRow(
 					indexName, indexKey.getIndexName(), Selector
-							.newColumnsPredicate(indexKey.getIndexValue(), new byte[] {} , true, MAXCOUNT),MetaDataUtils.DEFAULT);
+							.newColumnsPredicate(indexKey.getIndexValue(), new byte[] {} , false, MAXCOUNT),MetaDataUtils.DEFAULT);
 			
 			
 			this.columnStack.push(convertSuperCols(greaterThan));
@@ -299,7 +305,7 @@ public class CassandraQueryExpressionEvaluator extends
 
 			List<SuperColumn> greaterThan = selector.getSuperColumnsFromRow(
 					indexName, indexKey.getIndexName(), Selector
-							.newColumnsPredicate(indexKey.bumpUpValue(), new byte[] {} , true, MAXCOUNT),MetaDataUtils.DEFAULT);
+							.newColumnsPredicate(indexKey.bumpUpValue(), new byte[] {} , false, MAXCOUNT),MetaDataUtils.DEFAULT);
 			
 			
 			this.columnStack.push(convertSuperCols(greaterThan));
@@ -341,8 +347,7 @@ public class CassandraQueryExpressionEvaluator extends
 
 			List<SuperColumn> lessThan = selector.getSuperColumnsFromRow(
 					indexName, indexKey.getIndexName(), Selector
-							.newColumnsPredicate(new byte[] {}, indexKey
-									.getIndexValue(), true, MAXCOUNT),MetaDataUtils.DEFAULT);
+							.newColumnsPredicate(indexKey.getIndexValue(), new byte[] {}, true, MAXCOUNT),MetaDataUtils.DEFAULT);
 
 			this.columnStack.push(convertSuperCols(lessThan));
 			return this.columnStack.peek();
@@ -380,9 +385,7 @@ public class CassandraQueryExpressionEvaluator extends
 		try {
 
 			List<SuperColumn> lessThan = selector.getSuperColumnsFromRow(
-					indexName, indexKey.getIndexName(), Selector
-							.newColumnsPredicate(new byte[] {}, indexKey
-									.bumpDownValue(), true, MAXCOUNT),MetaDataUtils.DEFAULT);
+					indexName, indexKey.getIndexName(),Selector.newColumnsPredicate(indexKey.bumpDownValue(), new byte[] {}, true, MAXCOUNT),MetaDataUtils.DEFAULT);
 			
 
 			this.columnStack.push(convertSuperCols(lessThan));
@@ -424,8 +427,7 @@ public class CassandraQueryExpressionEvaluator extends
 
 			List<SuperColumn> lessThan = selector.getSuperColumnsFromRow(
 					indexName, indexKey.getIndexName(), Selector
-							.newColumnsPredicate(new byte[] {}, indexKey
-									.bumpDownValue(), true, MAXCOUNT),
+							.newColumnsPredicate(indexKey.bumpDownValue(), new byte[] {}, true, MAXCOUNT),
 					MetaDataUtils.DEFAULT);
 
 			List<SuperColumn> greaterThan = selector.getSuperColumnsFromRow(
@@ -634,6 +636,8 @@ public class CassandraQueryExpressionEvaluator extends
 
 		return merged;
 	}
+	
+	
 
 	/**
 	 * Convert the columns to strings by column name and add them to the set
@@ -646,17 +650,21 @@ public class CassandraQueryExpressionEvaluator extends
 			Set<Object> set) {
 
 		for (SuperColumn superCol : columns) {
-			for (Column col : superCol.getColumns()) {
-				try {
-					set.add(ByteConverter.getObject(col.getName()));
-				} catch (Exception e) {
-					throw new NucleusDataStoreException(
-							"Unable to load serialized object identity", e);
-				}
-			}
+			convertSuperCol(superCol, set);
 
 		}
 
+	}
+	
+	private static void convertSuperCol(SuperColumn superCol, Set<Object> set){
+		for (Column col : superCol.getColumns()) {
+			try {
+				set.add(ByteConverter.getObject(col.getName()));
+			} catch (Exception e) {
+				throw new NucleusDataStoreException(
+						"Unable to load serialized object identity", e);
+			}
+		}
 	}
 
 	/**
@@ -685,7 +693,7 @@ public class CassandraQueryExpressionEvaluator extends
 		for (Column col : columns) {
 
 			try {
-				set.add(getObject(col.getValue()));
+				set.add(getObjectIdentity(ec, destinationClass, col.getValue()));
 			} catch (Exception e) {
 				throw new NucleusDataStoreException(
 						"Unable to load serialized identity", e);
@@ -1066,22 +1074,10 @@ public class CassandraQueryExpressionEvaluator extends
 		public byte[] bumpUpValue() {
 			if (MetaDataUtils.INDEX_STRING.equals(indexName)) {
 				return Selector
-						.bumpUpColumnName(indexValue, OrderType.UTF8Type);
+						.bumpUpColumnName(ByteConverter.getString(indexValue), OrderType.UTF8Type);
 			}
 			
-			try {
-				long value = ByteConverter.getLong(indexValue);
-				
-				if(value < Long.MAX_VALUE){
-					value++;
-				}
-				
-				return ByteConverter.getBytes(value);
-				
-			} catch (IOException e) {
-				throw new NucleusException("Couldn't increase long value");
-			}
-			
+			return Selector.bumpUpColumnName(indexValue, OrderType.LongType);
 			
 
 		}
@@ -1093,23 +1089,12 @@ public class CassandraQueryExpressionEvaluator extends
 		 */
 		public byte[] bumpDownValue() {
 			if (MetaDataUtils.INDEX_STRING.equals(indexName)) {
-				return Selector.bumpDownColumnName(indexValue,
+				return Selector.bumpDownColumnName(ByteConverter.getString(indexValue),
 						OrderType.UTF8Type);
 			}
 
-			try {
-				long value = ByteConverter.getLong(indexValue);
-				
-				if(value > Long.MIN_VALUE){
-					value--;
-				}
-				
-				return ByteConverter.getBytes(value);
-				
-			} catch (IOException e) {
-				throw new NucleusException("Couldn't increase long value");
-			}
 			
+			return Selector.bumpDownColumnName(indexValue, OrderType.LongType);
 		}
 
 	}

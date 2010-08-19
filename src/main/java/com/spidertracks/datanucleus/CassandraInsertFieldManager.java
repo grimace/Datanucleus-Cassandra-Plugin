@@ -188,7 +188,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 				// then removing will work
 				this.mutator.deleteColumn(key, columnFamily, columnName);
 
-				removeIndex(fieldNumber, value, objectProvider, mutator);
+				removeIndex(fieldNumber, objectProvider, mutator);
 
 				return;
 
@@ -379,7 +379,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 			if (value == null) {
 				mutator.deleteColumn(key, columnFamily, columnName);
-				removeIndex(fieldNumber, value, objectProvider, mutator);
+				removeIndex(fieldNumber, objectProvider, mutator);
 				return;
 			}
 			mutator.writeColumn(key, columnFamily, mutator.newColumn(
