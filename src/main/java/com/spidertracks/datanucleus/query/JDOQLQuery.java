@@ -95,6 +95,8 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		Expression filter = this.getCompilation().getExprFilter();
 
 		boolean evaluteInMemory = true;
+		
+		CassandraQuery query = new CassandraQuery(ec, candidateClass);
 
 		if (filter != null) {
 
@@ -109,19 +111,16 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 			// evaluate the expression
 			// from secondary keys. NOT that the result set was empty
 			if (candidateKeys == null) {
-				results = CassandraQuery.getObjectsOfCandidateType(ec,
-						candidateClass, subclasses, ignoreCache, 1000, null);
+				results = query.getObjectsOfCandidateType(subclasses, ignoreCache, 1000);
 			} else {
-				results = CassandraQuery.getObjectsOfCandidateType(ec,
-						candidateClass, candidateKeys, subclasses, ignoreCache);
+				results = query.getObjectsOfCandidateType(candidateKeys, subclasses, ignoreCache);
 			}
 
 		}
 		// there's nothing to filter so get our scan range if required
 		else {
 
-			results = CassandraQuery.getObjectsOfCandidateType(ec,
-					candidateClass, subclasses, ignoreCache, 1000, null);
+			results = query.getObjectsOfCandidateType(subclasses, ignoreCache, 1000);
 		}
 
 		if (evaluteInMemory) {

@@ -153,6 +153,8 @@
  
 		<ColumnFamily CompareWith="UTF8Type" Name="ParentThree" />
 		
+		<ColumnFamily CompareWith="UTF8Type" Name="Search" />
+		
 	  <!--  Our indexing values we have to use super columns, otherwise we can't seek properly for < or <= queries -->
 	  
 	  <ColumnFamily Name="StringIndex"  ColumnType="Super"  CompareWith="UTF8Type"  CompareSubcolumnsWith="BytesType"   Comment="Secondary index for all fields that can't be converted to a long"/>

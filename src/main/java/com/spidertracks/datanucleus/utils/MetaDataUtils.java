@@ -59,6 +59,7 @@ public class MetaDataUtils {
 
 	public static final String INDEX_LONG = "LongIndex";
 	public static final String INDEX_STRING = "StringIndex";
+	
 
 	//		
 	/**

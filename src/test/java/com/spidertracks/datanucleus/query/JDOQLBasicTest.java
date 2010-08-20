@@ -34,6 +34,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.spidertracks.datanucleus.CassandraTest;
+import com.spidertracks.datanucleus.basic.inheritance.casefour.Search;
+import com.spidertracks.datanucleus.basic.inheritance.casefour.SearchOne;
+import com.spidertracks.datanucleus.basic.inheritance.casefour.SearchTwo;
 import com.spidertracks.datanucleus.basic.model.InvitationToken;
 import com.spidertracks.datanucleus.basic.model.Person;
 import com.spidertracks.datanucleus.basic.model.PrimitiveObject;
@@ -725,6 +728,77 @@ public class JDOQLBasicTest extends CassandraTest {
 
 		assertTrue(results.contains(p4));
 		assertTrue(results.contains(p5));
+
+	}
+	
+	
+	/**
+	 * Tests that when a field is common on 2 subclasses, the correct
+	 * subclass is returned
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testSharedFieldSubclass() {
+		PersistenceManager pm = pmf.getPersistenceManager();
+		Transaction trans = pm.currentTransaction();
+		trans.begin();
+		
+		SearchOne one = new SearchOne();
+		one.setSearchField("search");
+		one.setSearchOne("searchOne");
+		
+		SearchTwo two = new SearchTwo();
+		two.setSearchField("search");
+		two.setSearchTwo("searchTwo");
+		
+		pm.makePersistent(one);
+		pm.makePersistent(two);
+		
+		
+		trans.commit();
+		pm.close();
+		
+		pm = pmf.getPersistenceManager();
+		
+		
+		
+		Query query = pm.newQuery(SearchOne.class);
+		query.setFilter("searchField == :search");
+		query.setIgnoreCache(true);
+		
+		//now query on the subclass
+		List<SearchOne> resultsOne = (List<SearchOne>) query.execute("search");
+		
+		assertEquals(1, resultsOne.size());
+
+		assertTrue(resultsOne.contains(one));
+		
+		
+		query = pm.newQuery(SearchTwo.class);
+		query.setFilter("searchField == :search");
+		query.setIgnoreCache(true);
+		
+		//now query on the subclass
+		List<SearchTwo> resultsTwo = (List<SearchTwo>) query.execute("search");
+		
+		assertEquals(1, resultsTwo.size());
+
+		assertTrue(resultsTwo.contains(two));
+		
+		query = pm.newQuery(Search.class);
+		query.setFilter("searchField == :search");
+		query.setIgnoreCache(true);
+		
+		// should be p3-p5 with login date then p5 based on contains with Name, and p4 with firstname
+		List<Search> results = (List<Search>) query.execute("search");
+
+		// check we got p1, p2 and p3 and p5
+
+		assertEquals(2, results.size());
+
+		assertTrue(results.contains(one));
+		assertTrue(results.contains(two));
+		
 
 	}
 

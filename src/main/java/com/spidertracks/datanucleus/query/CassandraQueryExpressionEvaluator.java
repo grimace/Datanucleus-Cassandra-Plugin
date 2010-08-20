@@ -17,10 +17,8 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.query;
 
-import static com.spidertracks.datanucleus.utils.ByteConverter.getObject;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.*;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;

@@ -22,12 +22,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.jdo.identity.SingleFieldIdentity;
+
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.KeyRange;
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.exceptions.NucleusDataStoreException;
+import org.datanucleus.identity.OID;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.store.ExecutionContext;
+import org.datanucleus.store.query.CandidateIdsQueryResult;
+import org.datanucleus.util.ClassUtils;
 import org.wyki.cassandra.pelops.Pelops;
 import org.wyki.cassandra.pelops.Selector;
 
@@ -38,22 +43,32 @@ import com.spidertracks.datanucleus.utils.MetaDataUtils;
 public class CassandraQuery {
 
 	public static int search_slice_ratio = 1000; // should come from the
-													// settings file
+	// settings file
+
+	private ExecutionContext ec;
+
+	private Class<?> candidateClass;
+
+	private ClassLoaderResolver clr;
+
+	public CassandraQuery(ExecutionContext ec, Class<?> candidateClass) {
+		this.ec = ec;
+		this.candidateClass = candidateClass;
+		this.clr = ec.getClassLoaderResolver();
+	}
 
 	/**
 	 * Used to load all keys from a given persistence row
 	 */
 	@SuppressWarnings("unchecked")
-	public static List getObjectsOfCandidateType(final ExecutionContext ec,
-			Class candidateClass, boolean subclasses, boolean ignoreCache,
-			int limit, String startKey) {
+	public List getObjectsOfCandidateType(boolean subclasses,
+			boolean ignoreCache, int limit) {
 
 		try {
 
 			CassandraStoreManager manager = ((CassandraStoreManager) ec
 					.getStoreManager());
 
-			final ClassLoaderResolver clr = ec.getClassLoaderResolver();
 			final AbstractClassMetaData acmd = ec.getMetaDataManager()
 					.getMetaDataForClass(candidateClass, clr);
 
@@ -68,37 +83,38 @@ public class CassandraQuery {
 			// TODO TN set up our range keys
 			range.setStart_key("");
 			range.setEnd_key("");
-		
 
 			String identityColumn = MetaDataUtils.getIdentityColumn(acmd);
-			
+
 			// This behavior is somewhat undetermined. We have no idea what
 			// we're looking for. If there are
 			// subclass tables, we need to keep loading keys until we hit our
-			// limit if there are table per subclass entities.  Using this is woefully inneficient, and generally a very bad idea.  You should have defined secondary indexes
-			// and searched those.  If you need to get everything, you probably shouldn't be using JDO to access this data unless the set size is very small
+			// limit if there are table per subclass entities. Using this is
+			// woefully inneficient, and generally a very bad idea. You should
+			// have defined secondary indexes
+			// and searched those. If you need to get everything, you probably
+			// shouldn't be using JDO to access this data unless the set size is
+			// very small
 			Map<String, List<Column>> rows = selector.getColumnsFromRows(range,
 					columnFamily, Selector.newColumnsPredicate(identityColumn),
 					MetaDataUtils.DEFAULT);
 
-			
 			Set<Object> keys = new HashSet<Object>(rows.size());
-			
-			for(List<Column> entries: rows.values()){
-				
-				//deleted row, ignore it
-				if(entries == null || entries.size() != 1){
+
+			for (List<Column> entries : rows.values()) {
+
+				// deleted row, ignore it
+				if (entries == null || entries.size() != 1) {
 					continue;
 				}
-				
-				Object identity = MetaDataUtils.getObjectIdentity(ec, candidateClass, entries.get(0).getValue());
-				
-				
-			
+
+				Object identity = MetaDataUtils.getObjectIdentity(ec,
+						candidateClass, entries.get(0).getValue());
+
 				keys.add(identity);
 			}
-			
-			return getObjectsOfCandidateType(ec, candidateClass, keys, subclasses, ignoreCache );
+
+			return getObjectsOfCandidateType(keys, subclasses, ignoreCache);
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException("Unable to load results", e);
@@ -118,81 +134,39 @@ public class CassandraQuery {
 	 * @param startKey
 	 * @return
 	 */
-	public static List<?> getObjectsOfCandidateType(final ExecutionContext ec,
-			Class<?> candidateClass, Set<Object> keys, boolean subclasses,
-			boolean ignoreCache) {
-		
+	public List<?> getObjectsOfCandidateType(Set<Object> keys,
+			boolean subclasses, boolean ignoreCache) {
 
-		//final ClassLoaderResolver clr = ec.getClassLoaderResolver();
-		//final AbstractClassMetaData acmd = ec.getMetaDataManager().getMetaDataForClass(candidateClass, clr);
-		
-		List results = new ArrayList(keys.size());
-		//String tempKey = null;
+		// final ClassLoaderResolver clr = ec.getClassLoaderResolver();
+		// final AbstractClassMetaData acmd =
+		// ec.getMetaDataManager().getMetaDataForClass(candidateClass, clr);
+
+		List<Object> results = new ArrayList<Object>(keys.size());
+		// String tempKey = null;
 
 		for (Object id : keys) {
-			
-			Object returned = ec.findObject(id, ignoreCache, subclasses, candidateClass.getName());
+
+			// Not a valid subclass, don't return it as a candidate
+			if (!(id instanceof SingleFieldIdentity)) {
+				throw new NucleusDataStoreException(
+						"Only single field identities are supported");
+			}
+
+			if (!ClassUtils.typesAreCompatible(candidateClass,
+					((SingleFieldIdentity) id).getTargetClassName(), clr)) {
+				continue;
+			}
+
+			Object returned = ec.findObject(id, ignoreCache, subclasses,
+					candidateClass.getName());
 
 			if (returned != null) {
 				results.add(returned);
 			}
 		}
-		
+
 		return results;
 
 	}
 
-	
-
-	// /**
-	// * Fetches all of the column data into objects
-	// *
-	// * @param rows
-	// * @param ec
-	// * @param acmd
-	// * @param clr
-	// * @return
-	// */
-	// @SuppressWarnings("unchecked")
-	// private static List<?> loadResults(Map<String, List<Column>> rows,
-	// final ExecutionContext ec, final AbstractClassMetaData acmd,
-	// final ClassLoaderResolver clr) {
-	//
-	// List results = new ArrayList(rows.size());
-	//
-	// for (final List<Column> columnsForKey : rows.values()) {
-	//
-	// //This is due to eventual consistency
-	// //removed records could be returned, so we'll ignore them
-	// if(columnsForKey.size() == 0){
-	// continue;
-	// }
-	//			
-	// results.add(ec.findObjectUsingAID(new Type(clr.classForName(acmd
-	// .getFullClassName())), new FieldValues2() {
-	//
-	// @Override
-	// public FetchPlan getFetchPlanForLoading() {
-	// return null;
-	// }
-	//
-	// @Override
-	// public void fetchNonLoadedFields(ObjectProvider sm) {
-	// sm.replaceNonLoadedFields(sm.getDirtyFieldNumbers(),
-	// new CassandraFetchFieldManager(columnsForKey, sm));
-	// }
-	//
-	// @Override
-	// public void fetchFields(ObjectProvider sm) {
-	// sm.replaceFields(acmd.getAllMemberPositions(),
-	// new CassandraFetchFieldManager(columnsForKey, sm));
-	//					
-	//
-	// }
-	// }, true, true));
-	//
-	// }
-	//
-	// return results;
-	// }
 }
