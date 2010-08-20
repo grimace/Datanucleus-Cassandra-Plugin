@@ -426,6 +426,8 @@ public class IndexTest extends CassandraTest {
 		trans.begin();
 		
 	}
+	
+
 
 
 }

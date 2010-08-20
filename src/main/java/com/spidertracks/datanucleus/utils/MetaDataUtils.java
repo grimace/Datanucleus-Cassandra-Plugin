@@ -246,6 +246,10 @@ public class MetaDataUtils {
 				.getMetaDataForManagedMemberAtAbsolutePosition(identityFields[0]);
 		
 		try {
+			
+
+			//if the class of the pk is a primitive we'll want to get the value then set it as a string
+			
 			ObjectStringConverter converter = ec.getTypeManager()
 					.getStringConverter(member.getType());
 
@@ -266,8 +270,37 @@ public class MetaDataUtils {
 				return ec.newObjectId(candidateClass, id);
 			}
 
-			// try and de-serialize it as an object
-
+			//check if it's a primitive type
+			if(member.getType().equals(Boolean.class)){
+				return ec.newObjectId(candidateClass, ByteConverter.getBoolean(value));
+			}
+			
+			else if (member.getType().equals(Short.class)){
+				return ec.newObjectId(candidateClass,ByteConverter.getShort(value));
+			}
+			
+			else if (member.getType().equals(Integer.class)){
+				return ec.newObjectId(candidateClass,ByteConverter.getInt(value));
+			}
+			
+			else if (member.getType().equals(Long.class)){
+				return ec.newObjectId(candidateClass,ByteConverter.getLong(value));
+			}
+			
+			else if (member.getType().equals(Double.class)){
+				return ec.newObjectId(candidateClass,ByteConverter.getDouble(value));
+			}
+			
+			else if (member.getType().equals(Float.class)){
+				return ec.newObjectId(candidateClass,ByteConverter.getFloat(value));
+			}
+			
+			else if (member.getType().equals(String.class)){
+				return ec.newObjectId(candidateClass,ByteConverter.getString(value));
+			}
+			
+			// try and de-serialize it as an object as a last resort
+			
 			return ByteConverter.getObject(value);
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(

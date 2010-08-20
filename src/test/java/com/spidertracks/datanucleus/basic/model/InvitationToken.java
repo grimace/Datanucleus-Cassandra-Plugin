@@ -18,6 +18,7 @@ Contributors :
 package com.spidertracks.datanucleus.basic.model;
 
 import javax.jdo.annotations.IdentityType;
+import javax.jdo.annotations.Index;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
@@ -35,6 +36,10 @@ public class InvitationToken {
 
 	@Persistent(dependent="true", defaultFetchGroup="true")
 	private InvitedPerson person;
+	
+	@Index(name="InvitationToken_TestString")
+	@Persistent
+	private String testString;
 
 	/**
 	 * @return the token
@@ -62,5 +67,19 @@ public class InvitationToken {
 	 */
 	public void setPerson(InvitedPerson person) {
 		this.person = person;
+	}
+
+	/**
+	 * @return the testString
+	 */
+	public String getTestString() {
+		return testString;
+	}
+
+	/**
+	 * @param testString the testString to set
+	 */
+	public void setTestString(String testString) {
+		this.testString = testString;
 	}
 }

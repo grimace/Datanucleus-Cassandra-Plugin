@@ -18,10 +18,7 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.query;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Calendar;
 import java.util.Collection;
@@ -37,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.spidertracks.datanucleus.CassandraTest;
+import com.spidertracks.datanucleus.basic.model.InvitationToken;
 import com.spidertracks.datanucleus.basic.model.Person;
 import com.spidertracks.datanucleus.basic.model.PrimitiveObject;
 
@@ -401,7 +399,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 */
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testRetrieveSingle() {
+	public void testEqual() {
 		// now perform our select. We want everyone with firstname =
 		// "firstName1"
 		PersistenceManager pm = pmf.getPersistenceManager();
@@ -417,6 +415,59 @@ public class JDOQLBasicTest extends CassandraTest {
 		assertTrue(results.contains(p1));
 		assertTrue(results.contains(p2));
 		assertTrue(results.contains(p3));
+
+	}
+	
+	
+	@Test
+	public void testEqualStringId() throws Exception {
+		
+		// now perform our select. We want everyone with firstname =
+		// "firstName1"
+		PersistenceManager pm = pmf.getPersistenceManager();
+		Transaction trans = pm.currentTransaction();
+		trans.begin();
+		
+		InvitationToken token = new InvitationToken();
+		token.setToken("testKey");
+		token.setTestString("testIndexedString");
+		
+		pm.makePersistent(token);
+		
+		trans.commit();
+		
+		List<InvitationToken> results = (List<InvitationToken>) pm.newQuery(InvitationToken.class).execute();
+		
+
+		// check we got p1, p2 and p3.
+
+		assertEquals(1, results.size());
+
+		assertTrue(results.contains(token));
+		
+	}
+	
+	/**
+	 * Query returning an object with relation fields, testing the contents of
+	 * the relation fields.
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testEqualNoValue() {
+		// now perform our select. We want everyone with firstname =
+		// "firstName1"
+		PersistenceManager pm = pmf.getPersistenceManager();
+		
+		Query query = pm.newQuery(Person.class);
+		query.setFilter("firstName == :fN ");
+
+		// p1 firstName == p1-p3 and p4 lastName == p3 and p4
+		List<Person> results = (List<Person>) query.execute("foobar");
+
+		// check we got p1, p2 and p3 and p4
+
+		assertEquals(0, results.size());
+
 
 	}
 
@@ -474,6 +525,8 @@ public class JDOQLBasicTest extends CassandraTest {
 		assertTrue(results.contains(p4));
 
 	}
+	
+
 
 	/**
 	 * Query returning an object with relation fields, testing the contents of
@@ -577,6 +630,28 @@ public class JDOQLBasicTest extends CassandraTest {
 
 		assertTrue(results.contains(p1));
 		assertTrue(results.contains(p2));
+
+	}
+	
+	/**
+	 * Query returning an object with relation fields, testing the contents of
+	 * the relation fields.
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testRetrieveLessThanNoValue() {
+		PersistenceManager pm = pmf.getPersistenceManager();
+		
+		Query query = pm.newQuery(Person.class);
+		query.setFilter("lastLogin < :loginDate");
+
+		// should be p1 and p2
+		List<Person> results = (List<Person>) query.execute(p1.getLastLogin());
+
+		// check we got p1, p2 and p3 and p4
+
+		assertEquals(0, results.size());
+
 
 	}
 

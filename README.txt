@@ -27,7 +27,8 @@ http://code.google.com/p/pelops/
 Currently version 0.804 is supported.
 
 You will also need to manually install the cassandra depdenencies.  The next release will manually install all
-required jars during the build process.
+required jars during the build process.  I have uploaded our custom build of Pelops.  The current version on github
+has changed significantly. This plugin will be refactored in the next release to use the new client.
 
 USAGE:
 
