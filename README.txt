@@ -37,7 +37,7 @@ This is due to a limitation of the plugin.  Note that a CF per concrete class is
 storing all subclasses in the parent CF.  
 
 Storing the subclasses in the parent CF requires O(2) reads.  
-1. One to read the class type and instanciate the instance. O(1)
+1. One to read the class type and instantiate the instance. O(1)
 2. Read the columns and populate the object. O(1)
 
 Storing the subclass in its own table requires O(n+1) reads where n is the number of children from the queried class
