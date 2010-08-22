@@ -29,7 +29,7 @@ import com.spidertracks.datanucleus.model.BaseEntity;
  * @author Todd Nine
  *
  */
-@PersistenceCapable(table="Search")
+@PersistenceCapable(table="Search", detachable="true")
 @Inheritance(strategy=InheritanceStrategy.NEW_TABLE)
 public abstract class Search extends BaseEntity {
  

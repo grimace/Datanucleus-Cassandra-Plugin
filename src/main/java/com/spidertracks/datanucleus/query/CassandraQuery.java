@@ -28,16 +28,13 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.KeyRange;
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.exceptions.NucleusDataStoreException;
-import org.datanucleus.identity.OID;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.store.ExecutionContext;
-import org.datanucleus.store.query.CandidateIdsQueryResult;
 import org.datanucleus.util.ClassUtils;
 import org.wyki.cassandra.pelops.Pelops;
 import org.wyki.cassandra.pelops.Selector;
 
 import com.spidertracks.datanucleus.CassandraStoreManager;
-import com.spidertracks.datanucleus.utils.ByteConverter;
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 public class CassandraQuery {
@@ -61,8 +58,7 @@ public class CassandraQuery {
 	 * Used to load all keys from a given persistence row
 	 */
 	@SuppressWarnings("unchecked")
-	public List getObjectsOfCandidateType(boolean subclasses,
-			boolean ignoreCache, int limit) {
+	public List getObjectsOfCandidateType(boolean subclasses, int limit) {
 
 		try {
 
@@ -114,7 +110,7 @@ public class CassandraQuery {
 				keys.add(identity);
 			}
 
-			return getObjectsOfCandidateType(keys, subclasses, ignoreCache);
+			return getObjectsOfCandidateType(keys, subclasses);
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException("Unable to load results", e);
@@ -135,7 +131,7 @@ public class CassandraQuery {
 	 * @return
 	 */
 	public List<?> getObjectsOfCandidateType(Set<Object> keys,
-			boolean subclasses, boolean ignoreCache) {
+			boolean subclasses) {
 
 		// final ClassLoaderResolver clr = ec.getClassLoaderResolver();
 		// final AbstractClassMetaData acmd =
@@ -157,7 +153,7 @@ public class CassandraQuery {
 				continue;
 			}
 
-			Object returned = ec.findObject(id, ignoreCache, subclasses,
+			Object returned = ec.findObject(id, true, subclasses,
 					candidateClass.getName());
 
 			if (returned != null) {

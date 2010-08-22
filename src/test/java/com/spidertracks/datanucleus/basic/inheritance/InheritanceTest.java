@@ -18,12 +18,12 @@ Contributors :
 package com.spidertracks.datanucleus.basic.inheritance;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
+import javax.jdo.Transaction;
 
 import org.junit.Test;
 
@@ -221,6 +221,65 @@ public class InheritanceTest extends CassandraTest {
 		
 		assertEquals(third, savedChild);
 
+		
+		
+		
+
+	}
+	
+	/**
+	 * Test retrieval works when everything is stored in abstract parent class cf
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testChildIdQueryDetaches() throws Exception {
+
+		String parentField = "pf-gc1";
+		String childField = "cf-gc1";
+		String grandChildOne = "gcf-gc1";
+		
+		GrandChildThreeOne first = new GrandChildThreeOne();
+	
+		first.setChildField(childField);
+		
+		first.setGrandChildOneField(grandChildOne);
+	
+		first.setParentField(parentField);
+
+		ChildThree third = new ChildThree();
+		third.setChildField("cf-c1");
+		third.setParentField("pf-c1-new-test");
+
+		PersistenceManager pm = pmf.getPersistenceManager();
+		
+	
+		pm.makePersistent(first);
+		pm.makePersistent(third);
+		
+		
+		//create a new PM with detach on commit and return detached subclass.  Currently with the bug it is hollowing the instance of subclasses on detach.
+		
+
+		pm = pmf.getPersistenceManager();
+		pm.setDetachAllOnCommit(true);
+		Transaction trans = pm.currentTransaction();
+		trans.begin();
+		
+		
+		ChildThree returned = pm.getObjectById(ChildThree.class, first.getId());
+		
+		trans.commit();
+		
+		
+		assertNotNull(returned);
+		
+
+		assertEquals(first, returned);
+		assertEquals(childField, returned.getChildField());
+		assertEquals(parentField, returned.getParentField());
+		assertEquals(grandChildOne, ((GrandChildThreeOne)returned).getGrandChildOneField());
+		
 		
 		
 		

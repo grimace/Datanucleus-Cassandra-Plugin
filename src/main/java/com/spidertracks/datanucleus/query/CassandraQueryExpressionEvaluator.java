@@ -82,7 +82,7 @@ public class CassandraQueryExpressionEvaluator extends
 
 	private AbstractClassMetaData metaData;
 
-	private Class destinationClass;
+	private Class<?> destinationClass;
 
 	// Flag that marks an operation we can't support has been performed. We need
 	// to then run result set
@@ -670,20 +670,6 @@ public class CassandraQueryExpressionEvaluator extends
 		}
 	}
 
-	/**
-	 * Static helper function that converts sorted maps to a merged column set
-	 * 
-	 * @param columns
-	 * @return
-	 */
-	private Set<Object> convertCols(List<Column> columns) {
-
-		Set<Object> merged = new HashSet<Object>();
-
-		convertCols(columns, merged);
-
-		return merged;
-	}
 
 	/**
 	 * Static helper function that converts sorted maps to a merged column set
@@ -707,17 +693,7 @@ public class CassandraQueryExpressionEvaluator extends
 
 	}
 
-	private static Set<String> convertKeysToIndexColumns(
-			Map<String, List<Column>> columns) {
-		Set<String> merged = new HashSet<String>();
-
-		for (String key : columns.keySet()) {
-			merged.add(key);
-		}
-
-		return merged;
-	}
-
+	
 	/**
 	 * @return the inMemoryRequired
 	 */

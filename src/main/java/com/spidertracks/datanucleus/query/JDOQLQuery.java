@@ -111,16 +111,16 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 			// evaluate the expression
 			// from secondary keys. NOT that the result set was empty
 			if (candidateKeys == null) {
-				results = query.getObjectsOfCandidateType(subclasses, ignoreCache, 1000);
+				results = query.getObjectsOfCandidateType(subclasses, 1000);
 			} else {
-				results = query.getObjectsOfCandidateType(candidateKeys, subclasses, ignoreCache);
+				results = query.getObjectsOfCandidateType(candidateKeys, subclasses);
 			}
 
 		}
 		// there's nothing to filter so get our scan range if required
 		else {
 
-			results = query.getObjectsOfCandidateType(subclasses, ignoreCache, 1000);
+			results = query.getObjectsOfCandidateType(subclasses, 1000);
 		}
 
 		if (evaluteInMemory) {

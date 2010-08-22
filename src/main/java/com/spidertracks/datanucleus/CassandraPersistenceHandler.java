@@ -27,6 +27,7 @@ import static com.spidertracks.datanucleus.utils.MetaDataUtils.getRowKey;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getRowKeyForId;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -34,15 +35,18 @@ import java.util.Map;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.datanucleus.ClassLoaderResolver;
+import org.datanucleus.StateManager;
 import org.datanucleus.api.ApiAdapter;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusObjectNotFoundException;
+import org.datanucleus.identity.OID;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.DiscriminatorMetaData;
 import org.datanucleus.metadata.InheritanceStrategy;
 import org.datanucleus.metadata.Relation;
 import org.datanucleus.state.ObjectProviderFactory;
+import org.datanucleus.state.StateManagerFactory;
 import org.datanucleus.store.AbstractPersistenceHandler;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
@@ -98,18 +102,15 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 				AbstractMemberMetaData fieldMetaData = metaData
 						.getMetaDataForManagedMemberAtAbsolutePosition(current);
 
-				
 				// here we have the field value
 				Object value = op.provideField(current);
-				
+
 				IndexPersistenceHandler.removeIndex(current, op, mutator);
 
 				if (value == null) {
 					continue;
 				}
 
-				
-				
 				// if we're a collection, delete each element
 				// recurse to delete this object if it's marked as dependent
 				if (fieldMetaData.isDependent()
@@ -183,8 +184,6 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 				}
 
-				
-
 			}
 
 			this.batchManager.endWrite(ec, DEFAULT);
@@ -202,7 +201,8 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 			String key = getRowKey(op);
 
-			Selector selector = Pelops.createSelector(manager.getPoolName(), manager.getKeyspace());
+			Selector selector = Pelops.createSelector(manager.getPoolName(),
+					manager.getKeyspace());
 
 			List<Column> columns = selector.getColumnsFromRow(key,
 					getColumnFamily(metaData), getFetchColumnList(metaData,
@@ -275,19 +275,23 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 		String key = getRowKeyForId(ec, id);
 
-		Object pc =  findObject(key, metaData, clr, ec, id);
-		
-		if(pc == null){
-			//if we get to here, we couldn't find anything.  throw a not found exception
-			throw new NucleusObjectNotFoundException(String.format("Could not find instance for key %s", id));
+		Object pc = findObject(key, metaData, clr, ec, id);
+
+		if (pc == null) {
+			// if we get to here, we couldn't find anything. throw a not found
+			// exception
+			throw new NucleusObjectNotFoundException(String.format(
+					"Could not find instance for key %s", id));
 		}
-		
+
 		return pc;
 	}
 
-	private Object findObject(String key, AbstractClassMetaData metaData, ClassLoaderResolver clr, ExecutionContext ec, Object id) {
+	private Object findObject(String key, AbstractClassMetaData metaData,
+			ClassLoaderResolver clr, ExecutionContext ec, Object id) {
 
-		Selector selector = Pelops.createSelector(manager.getPoolName(), manager.getKeyspace());
+		Selector selector = Pelops.createSelector(manager.getPoolName(),
+				manager.getKeyspace());
 
 		// if we have a discriminator, fetch the discriminator column only
 		// and see if it's equal
@@ -297,7 +301,8 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 		try {
 
-			columns = selector.getColumnsFromRow(key, getColumnFamily(metaData),
+			columns = selector.getColumnsFromRow(key,
+					getColumnFamily(metaData),
 					getDescriminatorColumn(metaData), DEFAULT);
 
 		} catch (Exception e) {
@@ -310,33 +315,40 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 			// now check if we have subclasses from the given metaData, if we do
 			// recurse to a child class and search for the object
-			String[] decendents = ec.getMetaDataManager().getSubclassesForClass(metaData.getFullClassName(), true);
+			String[] decendents = ec.getMetaDataManager()
+					.getSubclassesForClass(metaData.getFullClassName(), true);
 
-			//it has decendents, only recurse to them if their inheritance strategy is a new table
+			// it has decendents, only recurse to them if their inheritance
+			// strategy is a new table
 			if (decendents == null || decendents.length == 0) {
 				return null;
 			}
-			
-			
+
 			AbstractClassMetaData decendentMetaData = null;
-			
-			for(String decendent: decendents){
-				decendentMetaData = ec.getMetaDataManager().getMetaDataForClass(decendent, clr);
-				
-				InheritanceStrategy strategy = decendentMetaData.getInheritanceMetaData().getStrategy();
-				
-				//either the subclass has it's own table, or one if it's children may, recurse to find the object
-				if(InheritanceStrategy.NEW_TABLE.equals(strategy) || InheritanceStrategy.SUBCLASS_TABLE.equals(strategy)){
-					Object result = findObject(key, decendentMetaData, clr, ec, id);
-					
-					// we found a subclass with the descriminator stored, return it
-					if(result != null){
+
+			for (String decendent : decendents) {
+				decendentMetaData = ec.getMetaDataManager()
+						.getMetaDataForClass(decendent, clr);
+
+				InheritanceStrategy strategy = decendentMetaData
+						.getInheritanceMetaData().getStrategy();
+
+				// either the subclass has it's own table, or one if it's
+				// children may, recurse to find the object
+				if (InheritanceStrategy.NEW_TABLE.equals(strategy)
+						|| InheritanceStrategy.SUBCLASS_TABLE.equals(strategy)) {
+					Object result = findObject(key, decendentMetaData, clr, ec,
+							id);
+
+					// we found a subclass with the descriminator stored, return
+					// it
+					if (result != null) {
 						return result;
 					}
 				}
 			}
-			
-			//nothing found in this class or it's children return null
+
+			// nothing found in this class or it's children return null
 			return null;
 
 		}
@@ -352,15 +364,22 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		Class<?> newObjectClass = ec.getClassLoaderResolver().classForName(
 				className);
 
-		ObjectProvider sm = ObjectProviderFactory.newForHollow(ec,
+		StateManager sm = StateManagerFactory.newStateManagerForHollow(ec,
 				newObjectClass, id);
-
 		Object pc = sm.getObject();
-
-		ObjectProvider pcSM = ec.findObjectProvider(pc);
-		if (pcSM == null) {
-			sm.replaceManagedPC(pc);
-		}
+		// fromCache = false;
+		//
+		//         
+		//
+		// ObjectProvider sm = ObjectProviderFactory.newForHollow(ec,
+		// newObjectClass, id);
+		//
+		// Object pc = sm.getObject();
+		//
+		// ObjectProvider pcSM = ec.findObjectProvider(pc);
+		// if (pcSM == null) {
+		// sm.replaceManagedPC(pc);
+		// }
 
 		return pc;
 	}
