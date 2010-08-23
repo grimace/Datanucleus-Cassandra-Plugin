@@ -18,16 +18,31 @@ Contributors : Pedro Gomes and Universidade do Minho.
  ***********************************************************************/
 package com.spidertracks.datanucleus;
 
+import static com.spidertracks.datanucleus.utils.ByteConverter.getString;
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.DEFAULT;
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnFamily;
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.getDescriminatorColumn;
+
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.SlicePredicate;
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.OMFContext;
 import org.datanucleus.PersistenceConfiguration;
+import org.datanucleus.exceptions.NucleusDataStoreException;
+import org.datanucleus.metadata.AbstractClassMetaData;
+import org.datanucleus.metadata.InheritanceStrategy;
 import org.datanucleus.store.AbstractStoreManager;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.NucleusConnection;
+import org.wyki.cassandra.pelops.Pelops;
+import org.wyki.cassandra.pelops.Selector;
+
+import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 public class CassandraStoreManager extends AbstractStoreManager {
 
@@ -121,7 +136,6 @@ public class CassandraStoreManager extends AbstractStoreManager {
 		return set;
 	}
 
-
 	public boolean isAutoCreateColumns() {
 		return autoCreateColumns;
 	}
@@ -170,5 +184,113 @@ public class CassandraStoreManager extends AbstractStoreManager {
 	 */
 	public void setPoolName(String poolName) {
 		this.poolName = poolName;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.datanucleus.store.AbstractStoreManager#getClassNameForObjectID(java
+	 * .lang.Object, org.datanucleus.ClassLoaderResolver,
+	 * org.datanucleus.store.ExecutionContext)
+	 */
+	@Override
+	public String getClassNameForObjectID(Object id, ClassLoaderResolver clr,
+			ExecutionContext ec) {
+		
+		String pcClassName = super.getClassNameForObjectID(id, clr, ec);
+		
+		AbstractClassMetaData metaData = ec.getMetaDataManager().getMetaDataForClass(pcClassName, clr);
+		
+		SlicePredicate descriminator = getDescriminatorColumn(metaData);
+
+		//We only support discriminator.  Even in a subclass per table scheme for clarity of the columns within Cassandra.
+		if (descriminator == null) {
+			return pcClassName;
+		}
+
+	
+
+		String key = MetaDataUtils.getRowKeyForId(ec, id);
+
+		return  findObject(key, metaData, clr, ec, id);
+
+
+	}
+
+	private String findObject(String key, AbstractClassMetaData metaData,
+			ClassLoaderResolver clr, ExecutionContext ec, Object id) {
+
+		Selector selector = Pelops.createSelector(getPoolName(), getKeyspace());
+
+		// if we have a discriminator, fetch the discriminator column only
+		// and see if it's equal
+		// to the class provided by the op
+
+		List<Column> columns = null;
+
+		try {
+
+			columns = selector.getColumnsFromRow(key,
+					getColumnFamily(metaData),
+					getDescriminatorColumn(metaData), DEFAULT);
+
+		} catch (Exception e) {
+			throw new NucleusDataStoreException(e.getMessage(), e);
+		}
+
+		// what do we do if no descriminator is found and one should be
+		// present?
+		if (columns == null || columns.size() != 1) {
+
+			// now check if we have subclasses from the given metaData, if we do
+			// recurse to a child class and search for the object
+			String[] decendents = ec.getMetaDataManager()
+					.getSubclassesForClass(metaData.getFullClassName(), true);
+
+			// it has decendents, only recurse to them if their inheritance
+			// strategy is a new table
+			if (decendents == null || decendents.length == 0) {
+				return null;
+			}
+
+			AbstractClassMetaData decendentMetaData = null;
+
+			for (String decendent : decendents) {
+				decendentMetaData = ec.getMetaDataManager()
+						.getMetaDataForClass(decendent, clr);
+
+				InheritanceStrategy strategy = decendentMetaData
+						.getInheritanceMetaData().getStrategy();
+
+				// either the subclass has it's own table, or one if it's
+				// children may, recurse to find the object
+				if (InheritanceStrategy.NEW_TABLE.equals(strategy)
+						|| InheritanceStrategy.SUBCLASS_TABLE.equals(strategy)) {
+					String result = findObject(key, decendentMetaData, clr, ec,
+							id);
+
+					// we found a subclass with the descriminator stored, return
+					// it
+					if (result != null) {
+						return result;
+					}
+				}
+			}
+
+			// nothing found in this class or it's children return null
+			return null;
+
+		}
+
+		String descriminatorValue = getString(columns.get(0).getValue());
+
+		String className = org.datanucleus.metadata.MetaDataUtils
+				.getClassNameFromDiscriminatorValue(descriminatorValue,
+						metaData.getDiscriminatorMetaData(), ec);
+
+		// now recursively load the search for our class
+
+		return className;
 	}
 }
