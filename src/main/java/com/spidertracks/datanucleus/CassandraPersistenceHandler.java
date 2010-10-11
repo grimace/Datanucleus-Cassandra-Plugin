@@ -80,6 +80,103 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 				return;
 			}
 
+			// delete our secondary index as well
+			AbstractClassMetaData metaData = op.getClassMetaData();
+
+
+			int[] fields = metaData.getAllMemberPositions();
+
+			for (int current : fields) {
+				AbstractMemberMetaData fieldMetaData = metaData
+						.getMetaDataForManagedMemberAtAbsolutePosition(current);
+
+				
+				// here we have the field value
+				Object value = op.provideField(current);
+				
+				if (value == null) {
+					continue;
+				}
+
+				
+				
+				// if we're a collection, delete each element
+				// recurse to delete this object if it's marked as dependent
+				if (fieldMetaData.isDependent()
+						|| (fieldMetaData.getCollection() != null && fieldMetaData
+								.getCollection().isDependentElement())) {
+
+					ClassLoaderResolver clr = ec.getClassLoaderResolver();
+
+					int relationType = fieldMetaData.getRelationType(clr);
+
+					// check if this is a relationship
+
+					if (relationType == Relation.ONE_TO_ONE_BI
+							|| relationType == Relation.ONE_TO_ONE_UNI
+							|| relationType == Relation.MANY_TO_ONE_BI) {
+						// Persistable object - persist the related object and
+						// store the
+						// identity in the cell
+
+						ec.deleteObjectInternal(value);
+					}
+
+					else if (relationType == Relation.MANY_TO_MANY_BI
+							|| relationType == Relation.ONE_TO_MANY_BI
+							|| relationType == Relation.ONE_TO_MANY_UNI) {
+						// Collection/Map/Array
+
+						if (fieldMetaData.hasCollection()) {
+
+							for (Object element : (Collection<?>) value) {
+								// delete the object
+								ec.deleteObjectInternal(element);
+							}
+
+						} else if (fieldMetaData.hasMap()) {
+							ApiAdapter adapter = ec.getApiAdapter();
+
+							Map<?, ?> map = ((Map<?, ?>) value);
+							Object mapValue;
+
+							// get each element and persist it.
+							for (Object mapKey : map.keySet()) {
+
+								mapValue = map.get(mapKey);
+
+								// handle the case if our key is a persistent
+								// class
+								// itself
+								if (adapter.isPersistable(mapKey)) {
+									ec.deleteObjectInternal(mapKey);
+
+								}
+								// persist the value if it can be persisted
+								if (adapter.isPersistable(mapValue)) {
+									ec.deleteObjectInternal(mapValue);
+								}
+
+							}
+
+						} else if (fieldMetaData.hasArray()) {
+							Object persisted = null;
+
+							for (int i = 0; i < Array.getLength(value); i++) {
+								// persist the object
+								persisted = Array.get(value, i);
+								ec.deleteObjectInternal(persisted);
+							}
+						}
+
+					}
+
+				}
+
+				
+
+			}
+
 			this.batchManager.endDelete(ec, DEFAULT);
 
 		} catch (Exception e) {
@@ -96,9 +193,9 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 			Selector selector = Pelops.createSelector(manager.getPoolName());
 
-			List<Column> columns = selector.getColumnsFromRow(key,
-					getColumnFamily(metaData), getFetchColumnList(metaData,
-							fieldNumbers), DEFAULT);
+			List<Column> columns = selector.getColumnsFromRow(
+					getColumnFamily(metaData), key,
+					getFetchColumnList(metaData, fieldNumbers), DEFAULT);
 
 			// nothing to do
 			if (columns == null || columns.size() == 0) {
@@ -191,8 +288,8 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 			String value = discriminator.getValue();
 
-			mutator.writeColumn(key, columnFamily, mutator.newColumn(colName,
-					value));
+			mutator.writeColumn(columnFamily, key,
+					mutator.newColumn(colName, value));
 		}
 
 		try {

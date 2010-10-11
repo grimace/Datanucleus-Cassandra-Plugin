@@ -49,6 +49,8 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 	private String keyspace;
 
 	private String poolName;
+	
+	private CassandraStoreManager manager;
 
 	/**
 	 * Constructor.
@@ -90,7 +92,7 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 
 		cluster = new Cluster(hosts, defaultPort);
 
-		CassandraStoreManager manager = (CassandraStoreManager) omfContext
+		manager = (CassandraStoreManager) omfContext
 				.getStoreManager();
 
 		manager.setConnectionFactory(this);
@@ -147,7 +149,9 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 	 * @param createSchema
 	 */
 	public void cfComplete(boolean createColumnFamilies) {
-
+		if(createColumnFamilies){
+			manager.getMetaDataManager().registerListener(new ColumnFamilyCreator(cluster, keyspace ));
+		}
 	}
 
 	/**

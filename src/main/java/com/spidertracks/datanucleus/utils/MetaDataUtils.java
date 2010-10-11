@@ -18,8 +18,9 @@ Contributors : Todd Nine
 package com.spidertracks.datanucleus.utils;
 
 import java.nio.charset.Charset;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.identity.ObjectIdentity;
 import javax.jdo.identity.SingleFieldIdentity;
 
@@ -36,6 +37,7 @@ import org.datanucleus.metadata.ColumnMetaData;
 import org.datanucleus.metadata.DiscriminatorMetaData;
 import org.datanucleus.metadata.IndexMetaData;
 import org.datanucleus.metadata.InheritanceMetaData;
+import org.datanucleus.metadata.InheritanceStrategy;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.mapped.exceptions.DatastoreFieldDefinitionException;
@@ -54,12 +56,14 @@ import org.scale7.cassandra.pelops.Selector;
  */
 public class MetaDataUtils {
 
-	public static final ConsistencyLevel DEFAULT = ConsistencyLevel.DCQUORUM;
+	public static final ConsistencyLevel DEFAULT = ConsistencyLevel.ONE;
 
 	public static final Charset UTF8 = Charset.forName("UTF-8");
 
 	public static final String INDEX_LONG = "LongIndex";
 	public static final String INDEX_STRING = "StringIndex";
+
+	private static ConcurrentMap<String, String> classToCfNames = new ConcurrentHashMap<String, String>();
 
 	//
 	/**
@@ -454,12 +458,20 @@ public class MetaDataUtils {
 
 	/**
 	 * Get the name of the column family. Uses table name, if one doesn't exist,
-	 * it uses the simple name of the class
+	 * it uses the simple name of the class.  If this class should never be persisted directly (subclass table persistence) null is returned
 	 * 
 	 * @param metaData
 	 * @return
 	 */
 	public static String getColumnFamily(AbstractClassMetaData metaData) {
+
+		String passedClassName = metaData.getFullClassName();
+		String cfName = classToCfNames.get(passedClassName);
+
+		if (cfName != null) {
+			return cfName;
+		}
+
 		AbstractClassMetaData current = metaData;
 		InheritanceMetaData inheritance = null;
 		String tableName = null;
@@ -468,18 +480,33 @@ public class MetaDataUtils {
 			tableName = current.getTable();
 
 			if (tableName != null) {
-				return tableName;
+				cfName = tableName;
+				break;
 			}
 
 			inheritance = metaData.getInheritanceMetaData();
 
 			if (inheritance != null) {
-				if (InheritanceStrategy.NEW_TABLE.equals(inheritance
-						.getStrategy())
-						|| InheritanceStrategy.UNSPECIFIED.equals(inheritance
-								.getStrategy())) {
-					return metaData.getName();
+				
+				InheritanceStrategy strategy = inheritance.getStrategy();
+				
+				if (InheritanceStrategy.NEW_TABLE.equals(strategy)){
+					cfName = metaData.getTable();
+					
+					if(cfName == null){
+						cfName = metaData.getEntityName();
+						
+					}
+					
+					break;
 				}
+				
+
+				// this class should never be persisted directly, return null
+				else if (InheritanceStrategy.SUBCLASS_TABLE.equals(strategy)) {
+					return null;
+				}
+				
 			}
 
 			current = (AbstractClassMetaData) current
@@ -487,9 +514,10 @@ public class MetaDataUtils {
 
 		}
 
-		// couldn't determine name via inheritance or annotations, default tl
-		// class name
-		return metaData.getName();
+		classToCfNames.put(passedClassName, cfName);
+
+		return cfName;
+
 	}
 
 	/**

@@ -35,6 +35,7 @@ import org.datanucleus.PersistenceConfiguration;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.InheritanceStrategy;
+import org.datanucleus.metadata.MetaDataListener;
 import org.datanucleus.store.AbstractStoreManager;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.NucleusConnection;
@@ -51,7 +52,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
 	private boolean autoCreateSchema = false;
 	private boolean autoCreateTables = false;
 	private boolean autoCreateColumns = false;
-	
+
 	private int poolTimeBetweenEvictionRunsMillis;
 	private int poolMinEvictableIdleTimeMillis;
 
@@ -80,8 +81,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
 		if (autoCreateSchema) {
 			autoCreateTables = true;
 			autoCreateColumns = true;
-			
-			
+
 		} else {
 			autoCreateTables = conf
 					.getBooleanProperty("datanucleus.autoCreateTables");
@@ -103,6 +103,12 @@ public class CassandraStoreManager extends AbstractStoreManager {
 
 		if (poolMinEvictableIdleTimeMillis == 0) {
 			poolMinEvictableIdleTimeMillis = 30 * 1000; // default, 30 secs
+		}
+
+		connectionFactory.keyspaceComplete(autoCreateSchema);
+
+		if (autoCreateTables) {
+			connectionFactory.cfComplete(autoCreateTables);
 		}
 
 		logConfiguration();
@@ -180,8 +186,6 @@ public class CassandraStoreManager extends AbstractStoreManager {
 	public void setConnectionFactory(ConnectionFactoryImpl connectionFactory) {
 		this.connectionFactory = connectionFactory;
 
-		connectionFactory.keyspaceComplete(autoCreateSchema);
-		connectionFactory.cfComplete(autoCreateTables);
 	}
 
 	/*
@@ -228,9 +232,8 @@ public class CassandraStoreManager extends AbstractStoreManager {
 
 		try {
 
-			columns = selector.getColumnsFromRow(key,
-					getColumnFamily(metaData),
-					getDescriminatorColumn(metaData), DEFAULT);
+			columns = selector.getColumnsFromRow(getColumnFamily(metaData),
+					key, getDescriminatorColumn(metaData), DEFAULT);
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);

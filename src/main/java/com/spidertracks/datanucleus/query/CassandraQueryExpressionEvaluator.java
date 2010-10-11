@@ -215,8 +215,7 @@ public class CassandraQueryExpressionEvaluator extends
 
 		try {
 
-			SuperColumn superCol = selector.getSuperColumnFromRow(indexName,
-					indexKey.getIndexName(), indexKey.getIndexValue(),
+			SuperColumn superCol = selector.getSuperColumnFromRow(indexKey.getIndexName(), indexName, indexKey.getIndexValue(),
 					MetaDataUtils.DEFAULT);
 			convertSuperCol(superCol, result);
 		} catch (NotFoundException nfe) {
@@ -260,8 +259,7 @@ public class CassandraQueryExpressionEvaluator extends
 		// now we'll query for our column sets
 		try {
 
-			List<SuperColumn> greaterThan = selector.getSuperColumnsFromRow(
-					indexName, indexKey.getIndexName(), Selector
+			List<SuperColumn> greaterThan = selector.getSuperColumnsFromRow(indexKey.getIndexName(), indexName, Selector
 							.newColumnsPredicate(indexKey.getIndexValue(),
 									Bytes.EMPTY, false, MAXCOUNT),
 					MetaDataUtils.DEFAULT);
@@ -303,8 +301,7 @@ public class CassandraQueryExpressionEvaluator extends
 		// now we'll query for our column sets
 		try {
 
-			List<SuperColumn> greaterThan = selector.getSuperColumnsFromRow(
-					indexName, indexKey.getIndexName(), Selector
+			List<SuperColumn> greaterThan = selector.getSuperColumnsFromRow(indexKey.getIndexName(), indexName, Selector
 							.newColumnsPredicate(indexKey.bumpUpValue(),
 									Bytes.EMPTY, false, MAXCOUNT),
 					MetaDataUtils.DEFAULT);
@@ -346,8 +343,7 @@ public class CassandraQueryExpressionEvaluator extends
 		// now we'll query for our column sets
 		try {
 
-			List<SuperColumn> lessThan = selector.getSuperColumnsFromRow(
-					indexName, indexKey.getIndexName(), Selector
+			List<SuperColumn> lessThan = selector.getSuperColumnsFromRow(indexKey.getIndexName(), indexName, Selector
 							.newColumnsPredicate(indexKey.getIndexValue(),
 									Bytes.EMPTY, true, MAXCOUNT),
 					MetaDataUtils.DEFAULT);
@@ -387,8 +383,7 @@ public class CassandraQueryExpressionEvaluator extends
 		// now we'll query for our column sets
 		try {
 
-			List<SuperColumn> lessThan = selector.getSuperColumnsFromRow(
-					indexName, indexKey.getIndexName(), Selector
+			List<SuperColumn> lessThan = selector.getSuperColumnsFromRow(indexKey.getIndexName(), indexName, Selector
 							.newColumnsPredicate(indexKey.bumpDownValue(),
 									Bytes.EMPTY, true, MAXCOUNT),
 					MetaDataUtils.DEFAULT);
@@ -430,14 +425,12 @@ public class CassandraQueryExpressionEvaluator extends
 		// now we'll query for our column sets
 		try {
 
-			List<SuperColumn> lessThan = selector.getSuperColumnsFromRow(
-					indexName, indexKey.getIndexName(), Selector
+			List<SuperColumn> lessThan = selector.getSuperColumnsFromRow(indexKey.getIndexName(), indexName, Selector
 							.newColumnsPredicate(indexKey.bumpDownValue(),
 									Bytes.EMPTY, true, MAXCOUNT),
 					MetaDataUtils.DEFAULT);
 
-			List<SuperColumn> greaterThan = selector.getSuperColumnsFromRow(
-					indexName, indexKey.getIndexName(), Selector
+			List<SuperColumn> greaterThan = selector.getSuperColumnsFromRow(indexKey.getIndexName(), indexName, Selector
 							.newColumnsPredicate(indexKey.bumpUpValue(),
 									Bytes.EMPTY, false, MAXCOUNT),
 					MetaDataUtils.DEFAULT);
