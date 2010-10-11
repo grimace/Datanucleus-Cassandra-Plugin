@@ -17,10 +17,10 @@ Contributors : Pedro Gomes and Universidade do Minho.
  ***********************************************************************/
 package com.spidertracks.datanucleus;
 
-import static com.spidertracks.datanucleus.utils.ByteConverter.*;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnName;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +39,7 @@ import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
 import org.datanucleus.store.types.ObjectStringConverter;
 import org.datanucleus.store.types.sco.SCOUtils;
+import org.scale7.cassandra.pelops.Bytes;
 
 /**
  * @author Todd Nine
@@ -72,7 +73,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 		this.columns = new HashMap<String, Column>();
 
 		for (Column column : columns) {
-			this.columns.put(getString(column.getName()), column);
+			this.columns.put(Bytes.toUTF8(column.getName()), column);
 		}
 
 		
@@ -94,7 +95,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 				return false;
 			}
 
-			return getBoolean(column.value);
+			return new Bytes(column.value).toBoolean();
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -136,7 +137,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 				return Character.MIN_VALUE;
 			}
 
-			return getChar(column.value);
+			return new Bytes(column.value).toChar();
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -156,7 +157,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 			if (column == null) {
 				return 0;
 			}
-			return getDouble(column.value);
+			return new Bytes(column.value).toDouble();
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -176,7 +177,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 			if (column == null) {
 				return 0;
 			}
-			return getFloat(column.value);
+			return new Bytes(column.value).toFloat();
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -197,7 +198,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 				return 0;
 			}
 
-			return getInt(column.value);
+			return new Bytes(column.value).toInt();
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -218,7 +219,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 				return 0;
 			}
 
-			return getLong(column.value);
+			return new Bytes(column.value).toLong();
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -254,7 +255,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 							"Embedded objects are currently unimplemented.");
 				}
 
-				Object key = getObject(column.getValue());
+				Object key = new Bytes(column.getValue()).toObject(null);
 
 				Object object = context.findObject(key, false, false,
 						fieldMetaData.getTypeName());
@@ -284,8 +285,8 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 					// get our list of Strings
 
-					List<Object> serializedIdList = getObject(columns.get(
-							columnName).getValue());
+					List<Object> serializedIdList = new Bytes(columns.get(
+							columnName).getValue()).toObject(new ArrayList<Object>());
 
 					for (Object key : serializedIdList) {
 
@@ -313,8 +314,8 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 					ApiAdapter adapter = objectProvider.getExecutionContext()
 							.getApiAdapter();
 
-					Map<Object, Object> serializedMap = getObject(columns.get(
-							columnName).getValue());
+					Map<Object, Object> serializedMap = new Bytes(columns.get(
+							columnName).getValue()).toObject(new HashMap<Object, Object>());
 
 					Class keyClass = clr.classForName(fieldMetaData.getMap()
 							.getKeyType());
@@ -350,8 +351,8 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 				} else if (fieldMetaData.getType().isArray()) {
 
-					List<Object> keys = getObject(columns.get(columnName)
-							.getValue());
+					List<Object> keys = new Bytes(columns.get(columnName)
+							.getValue()).toObject(new ArrayList<Object>());
 
 					Object array = Array.newInstance(fieldMetaData.getType()
 							.getComponentType(), keys.size());
@@ -374,10 +375,10 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 					.getStringConverter(fieldMetaData.getType());
 
 			if (converter != null) {
-				return converter.toObject(getString(column.getValue()));
+				return converter.toObject(Bytes.toUTF8(column.getValue()));
 			}
 
-			return getObject(column.value);
+			return new Bytes(column.value).toObject(null);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -398,7 +399,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 				return 0;
 			}
 
-			return getShort(column.value);
+			return new Bytes(column.value).toShort();
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -419,9 +420,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 				return null;
 			}
 
-			String value = getString(column.value);
-
-			return value;
+			return Bytes.toUTF8(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);

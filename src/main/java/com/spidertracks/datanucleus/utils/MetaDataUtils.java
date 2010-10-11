@@ -17,9 +17,7 @@ Contributors : Todd Nine
  ***********************************************************************/
 package com.spidertracks.datanucleus.utils;
 
-import static com.spidertracks.datanucleus.utils.ByteConverter.getBytes;
-
-import java.io.IOException;
+import java.nio.charset.Charset;
 
 import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.identity.ObjectIdentity;
@@ -43,7 +41,8 @@ import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.mapped.exceptions.DatastoreFieldDefinitionException;
 import org.datanucleus.store.types.ObjectLongConverter;
 import org.datanucleus.store.types.ObjectStringConverter;
-import org.wyki.cassandra.pelops.Selector;
+import org.scale7.cassandra.pelops.Bytes;
+import org.scale7.cassandra.pelops.Selector;
 
 /**
  * Utility class to convert instance data to Cassandra columns and data types
@@ -57,11 +56,12 @@ public class MetaDataUtils {
 
 	public static final ConsistencyLevel DEFAULT = ConsistencyLevel.DCQUORUM;
 
+	public static final Charset UTF8 = Charset.forName("UTF-8");
+
 	public static final String INDEX_LONG = "LongIndex";
 	public static final String INDEX_STRING = "StringIndex";
-	
 
-	//		
+	//
 	/**
 	 * Convenience method to find an object given a string form of its identity,
 	 * and the metadata for the class (or a superclass).
@@ -137,26 +137,23 @@ public class MetaDataUtils {
 	 * @param o
 	 * @return
 	 */
-	public static byte[] getIndexLong(ExecutionContext ec, Object o) {
-		try {
-			if (o instanceof Long || o instanceof Integer || o instanceof Short) {
-				return getBytes(((Long) o).longValue());
-			} else if (o instanceof Float || o instanceof Double) {
-				return getBytes(((Double) o).doubleValue());
-			}
+	public static Bytes getIndexLong(ExecutionContext ec, Object o) {
 
-			ObjectLongConverter converter = ec.getTypeManager()
-					.getLongConverter(o.getClass());
-
-			if (converter == null) {
-				return null;
-			}
-
-			return getBytes((long) converter.toLong(o));
-		} catch (IOException e) {
-			throw new NucleusDataStoreException(
-					"Unable to convert value to long", e);
+		if (o instanceof Long || o instanceof Integer || o instanceof Short) {
+			return Bytes.fromLong((Long) o);
+		} else if (o instanceof Float || o instanceof Double) {
+			return Bytes.fromDouble((Double) o);
 		}
+
+		ObjectLongConverter converter = ec.getTypeManager().getLongConverter(
+				o.getClass());
+
+		if (converter == null) {
+			return null;
+		}
+
+		return Bytes.fromLong(converter.toLong(o));
+
 	}
 
 	/**
@@ -167,10 +164,10 @@ public class MetaDataUtils {
 	 * @param o
 	 * @return
 	 */
-	public static byte[] getIndexString(ExecutionContext ec, Object o) {
+	public static Bytes getIndexString(ExecutionContext ec, Object o) {
 
 		if (o instanceof String) {
-			return getBytes((String) o);
+			return Bytes.fromUTF8((String) o);
 		}
 
 		ObjectStringConverter converter = ec.getTypeManager()
@@ -180,7 +177,7 @@ public class MetaDataUtils {
 			return null;
 		}
 
-		return getBytes(converter.toString(o));
+		return Bytes.fromUTF8(converter.toString(o));
 	}
 
 	/**
@@ -225,8 +222,8 @@ public class MetaDataUtils {
 	 * @param value
 	 * @return
 	 */
-	public static Object getObjectIdentity(ExecutionContext ec, Class candidateClass,
-			byte[] value) {
+	public static Object getObjectIdentity(ExecutionContext ec,
+			Class<?> candidateClass, byte[] value) {
 
 		ApiAdapter adapter = ec.getApiAdapter();
 
@@ -245,18 +242,20 @@ public class MetaDataUtils {
 
 		AbstractMemberMetaData member = cmd
 				.getMetaDataForManagedMemberAtAbsolutePosition(identityFields[0]);
-		
-		try {
-			
 
-			//if the class of the pk is a primitive we'll want to get the value then set it as a string
-			
+		try {
+
+			// if the class of the pk is a primitive we'll want to get the value
+			// then set it as a string
+
 			ObjectStringConverter converter = ec.getTypeManager()
 					.getStringConverter(member.getType());
 
+			Bytes bytes = new Bytes(value);
+
 			// use the converter if it's present
 			if (converter != null) {
-				Object id = converter.toObject(ByteConverter.getString(value));
+				Object id = converter.toObject(bytes.toUTF8());
 
 				return ec.newObjectId(candidateClass, id);
 			}
@@ -265,44 +264,43 @@ public class MetaDataUtils {
 					.getLongConverter(member.getType());
 
 			if (longConverter != null) {
-				Object id = longConverter
-						.toObject(ByteConverter.getLong(value));
+				Object id = longConverter.toObject(bytes.toLong());
 
 				return ec.newObjectId(candidateClass, id);
 			}
 
-			//check if it's a primitive type
-			if(member.getType().equals(Boolean.class)){
-				return ec.newObjectId(candidateClass, ByteConverter.getBoolean(value));
+			// check if it's a primitive type
+			if (member.getType().equals(Boolean.class)) {
+				return ec.newObjectId(candidateClass, bytes.toBoolean());
 			}
-			
-			else if (member.getType().equals(Short.class)){
-				return ec.newObjectId(candidateClass,ByteConverter.getShort(value));
+
+			else if (member.getType().equals(Short.class)) {
+				return ec.newObjectId(candidateClass, bytes.toShort());
 			}
-			
-			else if (member.getType().equals(Integer.class)){
-				return ec.newObjectId(candidateClass,ByteConverter.getInt(value));
+
+			else if (member.getType().equals(Integer.class)) {
+				return ec.newObjectId(candidateClass, bytes.toInt());
 			}
-			
-			else if (member.getType().equals(Long.class)){
-				return ec.newObjectId(candidateClass,ByteConverter.getLong(value));
+
+			else if (member.getType().equals(Long.class)) {
+				return ec.newObjectId(candidateClass, bytes.toLong());
 			}
-			
-			else if (member.getType().equals(Double.class)){
-				return ec.newObjectId(candidateClass,ByteConverter.getDouble(value));
+
+			else if (member.getType().equals(Double.class)) {
+				return ec.newObjectId(candidateClass, bytes.toDouble());
 			}
-			
-			else if (member.getType().equals(Float.class)){
-				return ec.newObjectId(candidateClass,ByteConverter.getFloat(value));
+
+			else if (member.getType().equals(Float.class)) {
+				return ec.newObjectId(candidateClass, bytes.toFloat());
 			}
-			
-			else if (member.getType().equals(String.class)){
-				return ec.newObjectId(candidateClass,ByteConverter.getString(value));
+
+			else if (member.getType().equals(String.class)) {
+				return ec.newObjectId(candidateClass, bytes.toUTF8());
 			}
-			
+
 			// try and de-serialize it as an object as a last resort
-			
-			return ByteConverter.getObject(value);
+
+			return bytes.toObject(null);
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(
 					"Unable to serialize bytes to object identity.  Please make sure it has the same SerializationId, long or string converter is was stored with. ");
@@ -428,8 +426,7 @@ public class MetaDataUtils {
 	public static byte[] getColumnNameBytes(AbstractClassMetaData metaData,
 			int absoluteFieldNumber) {
 
-		return ByteConverter.getBytes(getColumnName(metaData,
-				absoluteFieldNumber));
+		return getColumnName(metaData, absoluteFieldNumber).getBytes(UTF8);
 
 	}
 

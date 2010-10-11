@@ -18,7 +18,7 @@ package com.spidertracks.datanucleus.mutate;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.datanucleus.store.ExecutionContext;
-import org.wyki.cassandra.pelops.Mutator;
+import org.scale7.cassandra.pelops.Mutator;
 
 /**
  * Holds all mutations for the current execution context

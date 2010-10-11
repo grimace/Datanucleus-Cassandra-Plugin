@@ -25,8 +25,9 @@ import org.datanucleus.OMFContext;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.store.connection.AbstractConnectionFactory;
 import org.datanucleus.store.connection.ManagedConnection;
-import org.wyki.cassandra.pelops.Pelops;
-import org.wyki.cassandra.pelops.Policy;
+import org.scale7.cassandra.pelops.CachePerNodePool.Policy;
+import org.scale7.cassandra.pelops.Cluster;
+import org.scale7.cassandra.pelops.Pelops;
 
 /**
  * Implementation of a ConnectionFactory for HBase.
@@ -73,7 +74,11 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 		String[] hosts = hostMatcher.group(4).split(",");
 		
 		//by default we won't discover other nodes we're not explicitly connected to.  May change in future
-		Pelops.addPool(poolName, hosts, defaultPort, false, keyspace, new Policy());
+//		Pelops.addPool(poolName, hosts, defaultPort, false, keyspace, new Policy());
+		
+		Cluster cluster = new Cluster(hosts, defaultPort);
+		
+		Pelops.addPool(poolName, cluster, keyspace);
 		
 		CassandraStoreManager manager = (CassandraStoreManager)omfContext.getStoreManager();
 		manager.setKeyspace(keyspace);

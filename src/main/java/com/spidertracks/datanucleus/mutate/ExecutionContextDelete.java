@@ -23,7 +23,7 @@ import java.util.Stack;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
-import org.wyki.cassandra.pelops.KeyDeletor;
+import org.scale7.cassandra.pelops.RowDeletor;
 
 /**
  * Holds all mutations for the current execution context
@@ -39,10 +39,10 @@ public class ExecutionContextDelete extends ExecutionContextOp {
 	//our reference to visited objects so we don't get stuck in a recursive delete
 	private IdentityHashMap<ObjectProvider, Object> visited = new IdentityHashMap<ObjectProvider, Object>();
 	private List<Deletion> mutations = new Stack<Deletion>();
-	private KeyDeletor deletor;
+	private RowDeletor deletor;
 
 	
-	public ExecutionContextDelete(ExecutionContext ctx, KeyDeletor deletor) {
+	public ExecutionContextDelete(ExecutionContext ctx, RowDeletor deletor) {
 		super(ctx);
 		this.deletor = deletor;
 	}
@@ -74,7 +74,7 @@ public class ExecutionContextDelete extends ExecutionContextOp {
 
 	public void execute(ConsistencyLevel consistency) throws Exception {
 		for (Deletion deletion : mutations) {
-			deletor.deleteRow(deletion.rowKey, deletion.columnFamily, consistency);
+			deletor.deleteRow(deletion.columnFamily, deletion.rowKey, consistency);
 		}
 	}
 	

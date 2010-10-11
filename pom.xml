@@ -1,14 +1,17 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<parent>
-		<artifactId>settings</artifactId>
-		<groupId>com.spidertracks.standards</groupId>
-		<version>1.0.4</version>
-	</parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.spidertracks.datanucleus</groupId>
 	<artifactId>cassandra</artifactId>
 	<version>0.5.5-SNAPSHOT</version>
-
+	<properties>
+		<datanucleus.version>2.1.1</datanucleus.version>
+		<datanucleus.plugin.version>2.1.0-release</datanucleus.plugin.version>
+		<cassandra.version>0.7.0-beta2</cassandra.version>
+		<thrift.version>959516</thrift.version>
+		<pelops.version>0.906-0.7.0-st-SNAPSHOT</pelops.version>
+		<slf4j.version>1.6.1</slf4j.version>
+	</properties>
 	<repositories>
 
 		<repository>
@@ -30,15 +33,28 @@
 			<id>DN_M2_Repo</id>
 			<url>http://www.datanucleus.org/downloads/maven2/</url>
 		</repository>
+		<repository>
+			<id>maven.scale7.org</id>
+			<name>Scale7 Maven Repo</name>
+			<url>http://github.com/s7/mvnrepo/raw/master</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>maven.spidertracks.com</id>
+			<name>Spidertracks Maven Repo</name>
+			<url>http://github.com/tnine/m2repo/raw/master</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
 
 
 	</repositories>
 
 	<dependencies>
-		<!--
-			used as per cassandra's recommended UUID generation
-			http://johannburkard.de/software/uuid/
-		-->
+		<!-- used as per cassandra's recommended UUID generation http://johannburkard.de/software/uuid/ -->
 		<dependency>
 			<groupId>javax.jdo</groupId>
 			<artifactId>jdo2-api</artifactId>
@@ -54,14 +70,26 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.wyki</groupId>
-			<artifactId>pelops</artifactId>
-			<version>0.0.3</version>
+			<groupId>org.scale7</groupId>
+			<artifactId>scale7-pelops</artifactId>
+			<version>${pelops.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>libthrift</groupId>
+			<artifactId>libthrift</artifactId>
+			<version>${thrift.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.cassandra</groupId>
+			<artifactId>cassandra</artifactId>
+			<version>${cassandra.version}</version>
 		</dependency>
 
 
 
-		<!--  test depencencies -->
+		<!-- test dependencies -->
 
 		<dependency>
 			<groupId>org.datanucleus</groupId>
@@ -125,16 +153,67 @@
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.scale7</groupId>
+			<artifactId>scale7-pelops</artifactId>
+			<version>${pelops.version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
 
-		<!--  we still use hector for testing -->
-
-
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>1.6</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>  
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>${slf4j.version}</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>${slf4j.version}</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>r05</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>  
+		  
+		<dependency>
+			<groupId>org.apache.avro</groupId>
+			<artifactId>avro</artifactId>
+			<version>1.4.0</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<scm>
-		<connection>scm:svn:https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/</connection>
-		<url>https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/</url>
-		<developerConnection>scm:svn:https://staff.spidertracks.com/svn/clustering/datanucleus-cassandra/</developerConnection>
+		<connection>scm:git:http://github.com/tnine/Datanucleus-Cassandra-Plugin.git</connection>
+		<developerConnection>scm:git:ssh://github.com/tnine/Datanucleus-Cassandra-Plugin.git</developerConnection>
+		<url>http://github.com/tnine/Datanucleus-Cassandra-Plugin</url>
 	</scm>
 	<build>
 
@@ -150,7 +229,7 @@
 						</goals>
 					</execution>
 				</executions>
-				
+
 			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -161,7 +240,7 @@
 			</plugin>
 
 
-			<!--  only want to enhance classes that are within our test classes -->
+			<!-- only want to enhance classes that are within our test classes -->
 			<plugin>
 				<groupId>org.datanucleus</groupId>
 				<artifactId>maven-datanucleus-plugin</artifactId>
@@ -196,22 +275,95 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<!--
-					do not remove this configuration! Required to fork each test in
-					it's own thread otherwise the embedded cassandra causes the tests
-					to hang
-				-->
+				<!-- do not remove this configuration! Required to fork each test in 
+					it's own thread otherwise the embedded cassandra causes the tests to hang -->
 				<configuration>
 					<forkMode>always</forkMode>
 				</configuration>
 			</plugin>
 
 
-
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>install libthrift</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<packaging>jar</packaging>
+							<groupId>libthrift</groupId>
+							<artifactId>libthrift</artifactId>
+							<version>${thrift.version}</version>
+							<file>${basedir}/lib/libthrift-r${thrift.version}.jar</file>
+						</configuration>
+					</execution>
+					<execution>
+						<id>install cassandra</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<packaging>jar</packaging>
+							<groupId>org.apache.cassandra</groupId>
+							<artifactId>cassandra</artifactId>
+							<version>${cassandra.version}</version>
+							<file>${basedir}/lib/apache-cassandra-${cassandra.version}.jar</file>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- deploy the thrift binarie -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>deploy libthrift</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy-file</goal>
+						</goals>
+						<configuration>
+							<packaging>jar</packaging>
+							<groupId>libthrift</groupId>
+							<artifactId>libthrift</artifactId>
+							<version>${thrift.version}</version>
+							<file>${basedir}/lib/libthrift-r${thrift.version}.jar</file>
+						</configuration>
+					</execution>
+					<execution>
+						<id>deploy cassandra</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy-file</goal>
+						</goals>
+						<configuration>
+							<packaging>jar</packaging>
+							<groupId>org.apache.cassandra</groupId>
+							<artifactId>cassandra</artifactId>
+							<version>${cassandra.version}</version>
+							<file>${basedir}/lib/apache-cassandra-${cassandra.version}.jar</file>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
-	<properties>
-		<datanucleus.version>2.1.1</datanucleus.version>
-		<datanucleus.plugin.version>2.1.0-release</datanucleus.plugin.version>
-	</properties>
+
+	<distributionManagement>
+		<repository>
+			<id>maven.st.org.local</id>
+			<name>Deployment Staging Area</name>
+			<!-- The ${scale7.deploy.dir} is defined in your ~/.m2/settings.xml file 
+				and it should point to the directory that contains the clone of http://github.com/s7/mvnrepo. 
+				e.g. file:///Users/dan/Development/Projects/scale7/mvnrepo -->
+			<url>${st.deploy.dir}</url>
+			<layout>default</layout>
+		</repository>
+	</distributionManagement>
 </project>

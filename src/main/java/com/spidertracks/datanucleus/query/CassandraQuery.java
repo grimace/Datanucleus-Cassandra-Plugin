@@ -31,8 +31,9 @@ import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.util.ClassUtils;
-import org.wyki.cassandra.pelops.Pelops;
-import org.wyki.cassandra.pelops.Selector;
+import org.scale7.cassandra.pelops.Bytes;
+import org.scale7.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.Selector;
 
 import com.spidertracks.datanucleus.CassandraStoreManager;
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
@@ -70,15 +71,14 @@ public class CassandraQuery {
 
 			String columnFamily = MetaDataUtils.getColumnFamily(acmd);
 
-			Selector selector = Pelops.createSelector(manager.getPoolName(),
-					manager.getKeyspace());
+			Selector selector = Pelops.createSelector(manager.getPoolName());
 
 			KeyRange range = new KeyRange();
 			range.setCount(limit);
 
 			// TODO TN set up our range keys
-			range.setStart_key("");
-			range.setEnd_key("");
+			range.setStart_key(new byte[]{});
+			range.setEnd_key(new byte[]{});
 
 			String identityColumn = MetaDataUtils.getIdentityColumn(acmd);
 
@@ -91,8 +91,8 @@ public class CassandraQuery {
 			// and searched those. If you need to get everything, you probably
 			// shouldn't be using JDO to access this data unless the set size is
 			// very small
-			Map<String, List<Column>> rows = selector.getColumnsFromRows(range,
-					columnFamily, Selector.newColumnsPredicate(identityColumn),
+			Map<Bytes, List<Column>> rows = selector.getColumnsFromRows(columnFamily, range,
+					Selector.newColumnsPredicate(identityColumn),
 					MetaDataUtils.DEFAULT);
 
 			Set<Object> keys = new HashSet<Object>(rows.size());

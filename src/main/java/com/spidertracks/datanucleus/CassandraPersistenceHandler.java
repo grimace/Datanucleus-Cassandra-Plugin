@@ -40,9 +40,9 @@ import org.datanucleus.metadata.Relation;
 import org.datanucleus.store.AbstractPersistenceHandler;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
-import org.wyki.cassandra.pelops.Mutator;
-import org.wyki.cassandra.pelops.Pelops;
-import org.wyki.cassandra.pelops.Selector;
+import org.scale7.cassandra.pelops.Mutator;
+import org.scale7.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.Selector;
 
 import com.spidertracks.datanucleus.mutate.BatchMutationManager;
 import com.spidertracks.datanucleus.mutate.ExecutionContextDelete;
@@ -80,103 +80,6 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 				return;
 			}
 
-			// delete our secondary index as well
-			AbstractClassMetaData metaData = op.getClassMetaData();
-
-			// signal a write is about to start
-			Mutator mutator = this.batchManager.beginWrite(ec).getMutator();
-
-			int[] fields = metaData.getAllMemberPositions();
-
-			for (int current : fields) {
-				AbstractMemberMetaData fieldMetaData = metaData
-						.getMetaDataForManagedMemberAtAbsolutePosition(current);
-
-				// here we have the field value
-				Object value = op.provideField(current);
-
-				IndexPersistenceHandler.removeIndex(current, op, mutator);
-
-				if (value == null) {
-					continue;
-				}
-
-				// if we're a collection, delete each element
-				// recurse to delete this object if it's marked as dependent
-				if (fieldMetaData.isDependent()
-						|| (fieldMetaData.getCollection() != null && fieldMetaData
-								.getCollection().isDependentElement())) {
-
-					ClassLoaderResolver clr = ec.getClassLoaderResolver();
-
-					int relationType = fieldMetaData.getRelationType(clr);
-
-					// check if this is a relationship
-
-					if (relationType == Relation.ONE_TO_ONE_BI
-							|| relationType == Relation.ONE_TO_ONE_UNI
-							|| relationType == Relation.MANY_TO_ONE_BI) {
-						// Persistable object - persist the related object and
-						// store the
-						// identity in the cell
-
-						ec.deleteObjectInternal(value);
-					}
-
-					else if (relationType == Relation.MANY_TO_MANY_BI
-							|| relationType == Relation.ONE_TO_MANY_BI
-							|| relationType == Relation.ONE_TO_MANY_UNI) {
-						// Collection/Map/Array
-
-						if (fieldMetaData.hasCollection()) {
-
-							for (Object element : (Collection<?>) value) {
-								// delete the object
-								ec.deleteObjectInternal(element);
-							}
-
-						} else if (fieldMetaData.hasMap()) {
-							ApiAdapter adapter = ec.getApiAdapter();
-
-							Map<?, ?> map = ((Map<?, ?>) value);
-							Object mapValue;
-
-							// get each element and persist it.
-							for (Object mapKey : map.keySet()) {
-
-								mapValue = map.get(mapKey);
-
-								// handle the case if our key is a persistent
-								// class
-								// itself
-								if (adapter.isPersistable(mapKey)) {
-									ec.deleteObjectInternal(mapKey);
-
-								}
-								// persist the value if it can be persisted
-								if (adapter.isPersistable(mapValue)) {
-									ec.deleteObjectInternal(mapValue);
-								}
-
-							}
-
-						} else if (fieldMetaData.hasArray()) {
-							Object persisted = null;
-
-							for (int i = 0; i < Array.getLength(value); i++) {
-								// persist the object
-								persisted = Array.get(value, i);
-								ec.deleteObjectInternal(persisted);
-							}
-						}
-
-					}
-
-				}
-
-			}
-
-			this.batchManager.endWrite(ec, DEFAULT);
 			this.batchManager.endDelete(ec, DEFAULT);
 
 		} catch (Exception e) {
@@ -191,8 +94,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 			String key = getRowKey(op);
 
-			Selector selector = Pelops.createSelector(manager.getPoolName(),
-					manager.getKeyspace());
+			Selector selector = Pelops.createSelector(manager.getPoolName());
 
 			List<Column> columns = selector.getColumnsFromRow(key,
 					getColumnFamily(metaData), getFetchColumnList(metaData,

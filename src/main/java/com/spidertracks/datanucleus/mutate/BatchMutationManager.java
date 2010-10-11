@@ -22,7 +22,7 @@ import java.util.Map;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
-import org.wyki.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.Pelops;
 
 import com.spidertracks.datanucleus.CassandraStoreManager;
 
@@ -114,8 +114,7 @@ public class BatchMutationManager {
 
 		if (operations == null) {
 			operations = new ExecutionContextMutate(context,
-					Pelops.createMutator(manager.getPoolName(), manager
-							.getKeyspace()));
+					Pelops.createMutator(manager.getPoolName()));
 			contextMutations.put(context, operations);
 		}
 
@@ -133,8 +132,7 @@ public class BatchMutationManager {
 
 		if (operations == null) {
 			operations = new ExecutionContextDelete(context, Pelops
-					.createKeyDeletor(manager.getPoolName(), manager
-							.getKeyspace()));
+					.createRowDeletor(manager.getPoolName()));
 			contextDeletions.put(context, operations);
 		}
 

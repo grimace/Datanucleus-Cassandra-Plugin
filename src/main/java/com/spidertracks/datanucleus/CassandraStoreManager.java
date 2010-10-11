@@ -18,7 +18,6 @@ Contributors : Pedro Gomes and Universidade do Minho.
  ***********************************************************************/
 package com.spidertracks.datanucleus;
 
-import static com.spidertracks.datanucleus.utils.ByteConverter.getString;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.DEFAULT;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnFamily;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getDescriminatorColumn;
@@ -39,8 +38,9 @@ import org.datanucleus.metadata.InheritanceStrategy;
 import org.datanucleus.store.AbstractStoreManager;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.NucleusConnection;
-import org.wyki.cassandra.pelops.Pelops;
-import org.wyki.cassandra.pelops.Selector;
+import org.scale7.cassandra.pelops.Bytes;
+import org.scale7.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.Selector;
 
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
@@ -221,7 +221,8 @@ public class CassandraStoreManager extends AbstractStoreManager {
 	private String findObject(String key, AbstractClassMetaData metaData,
 			ClassLoaderResolver clr, ExecutionContext ec, Object id) {
 
-		Selector selector = Pelops.createSelector(getPoolName(), getKeyspace());
+		Selector selector = Pelops.createSelector(getPoolName());
+		
 
 		// if we have a discriminator, fetch the discriminator column only
 		// and see if it's equal
@@ -283,7 +284,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
 
 		}
 
-		String descriminatorValue = getString(columns.get(0).getValue());
+		String descriminatorValue = Bytes.toUTF8(columns.get(0).getValue());
 
 		String className = org.datanucleus.metadata.MetaDataUtils
 				.getClassNameFromDiscriminatorValue(descriminatorValue,

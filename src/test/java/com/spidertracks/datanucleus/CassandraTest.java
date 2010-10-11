@@ -18,47 +18,99 @@ Contributors :
 package com.spidertracks.datanucleus;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManagerFactory;
 
+import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.KsDef;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
-
-import com.spidertracks.datanucleus.cassandra.EmbeddedServerHelper;
+import org.scale7.cassandra.pelops.Cluster;
+import org.scale7.cassandra.pelops.ColumnFamilyManager;
+import org.scale7.cassandra.pelops.KeyspaceManager;
+import org.scale7.cassandra.pelops.support.EmbeddedCassandraServer;
 
 /**
  * @author Todd Nine
- *
+ * 
  */
 public abstract class CassandraTest {
 
 
-	protected static EmbeddedServerHelper defaultPool;
-	protected static PersistenceManagerFactory pmf;
+	public static final String RPC_LISTEN_ADDRESS = "localhost";
+
+	public static final int RPC_PORT = 19160;
 	
+	public static String BASE_DIRECTORY = "target/cassandra";
+
+	public static final String KEYSPACE = "Testing";
+	
+	private static Cluster cluster = new Cluster(RPC_LISTEN_ADDRESS, RPC_PORT);
+
+	private static KeyspaceManager keyspaceManager;
+
+	private static ColumnFamilyManager columnFamilyManager;
+
+	private static List<CfDef> colFamilyDefs;
+	
+	
+	protected static EmbeddedCassandraServer cassandraServer;
+	protected static PersistenceManagerFactory pmf;
 
 	/**
 	 * Set embedded cassandra up and spawn it in a new thread.
-	 * 
-	 * @throws TTransportException
-	 * @throws IOException
-	 * @throws InterruptedException
+	 * @throws Exception 
 	 */
 	@BeforeClass
-	public static void setup() throws TTransportException, IOException,
-			InterruptedException {
+	public static void setup() throws Exception {
+
+		if (cassandraServer == null) {
+			cassandraServer = new EmbeddedCassandraServer(RPC_LISTEN_ADDRESS,
+					RPC_PORT, BASE_DIRECTORY);
+			cassandraServer.start();
+
+			// wait until cassandra server starts up. could wait less time, but
+			// 2 seconds to be sure.
+			Thread.sleep(2000);
+		}
+
 		
-		defaultPool = new EmbeddedServerHelper();
-		defaultPool.setup(true);
-		
+
 		pmf = JDOHelper.getPersistenceManagerFactory("Test");
 	}
 
+	@Before
+	public void clean() throws Exception{
+		
+		keyspaceManager = new KeyspaceManager(cluster);
+		columnFamilyManager = new ColumnFamilyManager(cluster, KEYSPACE);
+
+		List<KsDef> keyspaces = keyspaceManager.getKeyspaceNames();
+		
+		for (KsDef ksDef : keyspaces)
+			if (ksDef.name.equals(KEYSPACE)) {
+				keyspaceManager.dropKeyspace(KEYSPACE);
+			}
+
+		KsDef keyspaceDefinition = new KsDef(KEYSPACE,
+				KeyspaceManager.KSDEF_STRATEGY_SIMPLE, 1,
+				new ArrayList<CfDef>());
+
+		for (CfDef colFamilyDef : colFamilyDefs) {
+			keyspaceDefinition.addToCf_defs(colFamilyDef);
+		}
+
+		keyspaceManager.addKeyspace(keyspaceDefinition);
+	}
+	
 	@AfterClass
-	public static void teardown() throws IOException {
-		//no shutdown for now
-		defaultPool.teardown();
+	public static void teardown() throws Exception {
+		// no shutdown for now
+		cassandraServer.stop();
 	}
 }
