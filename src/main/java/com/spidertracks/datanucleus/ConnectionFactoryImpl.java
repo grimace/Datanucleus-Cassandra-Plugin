@@ -14,19 +14,23 @@ limitations under the License.
 
 Contributors : Todd Nine
 
-***********************************************************************/
+ ***********************************************************************/
 package com.spidertracks.datanucleus;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.KsDef;
 import org.datanucleus.OMFContext;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.store.connection.AbstractConnectionFactory;
 import org.datanucleus.store.connection.ManagedConnection;
-import org.scale7.cassandra.pelops.CachePerNodePool.Policy;
 import org.scale7.cassandra.pelops.Cluster;
+import org.scale7.cassandra.pelops.KeyspaceManager;
 import org.scale7.cassandra.pelops.Pelops;
 
 /**
@@ -34,9 +38,17 @@ import org.scale7.cassandra.pelops.Pelops;
  */
 public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 
-	// matches the pattern cassandra:<poolname>:<keyspace>:<connectionport>:host1, host2, host3... etc
+	// matches the pattern
+	// cassandra:<poolname>:<keyspace>:<connectionport>:host1, host2, host3...
+	// etc
 	private static final Pattern URL = Pattern
 			.compile("cassandra:(\\w+):(\\w+):(\\d+):(\\s*\\w+[.\\w+]*[\\s*,\\s*\\w+[.\\w+]*]*)");
+
+	private Cluster cluster;
+
+	private String keyspace;
+
+	private String poolName;
 
 	/**
 	 * Constructor.
@@ -62,30 +74,80 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 					"Your URL must be in the format of cassandra:poolname:keyspace:port:host1[,hostN");
 		}
 
-		//pool name
-		String poolName = hostMatcher.group(1);
-		
-		// set our keyspace
-		String keyspace = hostMatcher.group(2);
-		
-		//grab our port
-		int defaultPort = Integer.parseInt(hostMatcher.group(3));
-		
-		String[] hosts = hostMatcher.group(4).split(",");
-		
-		//by default we won't discover other nodes we're not explicitly connected to.  May change in future
-//		Pelops.addPool(poolName, hosts, defaultPort, false, keyspace, new Policy());
-		
-		Cluster cluster = new Cluster(hosts, defaultPort);
-		
-		Pelops.addPool(poolName, cluster, keyspace);
-		
-		CassandraStoreManager manager = (CassandraStoreManager)omfContext.getStoreManager();
-		manager.setKeyspace(keyspace);
-		manager.setPoolName(poolName);
-		
+		// pool name
+		poolName = hostMatcher.group(1);
 
-	
+		// set our keyspace
+		keyspace = hostMatcher.group(2);
+
+		// grab our port
+		int defaultPort = Integer.parseInt(hostMatcher.group(3));
+
+		String[] hosts = hostMatcher.group(4).split(",");
+
+		// by default we won't discover other nodes we're not explicitly
+		// connected to. May change in future
+
+		cluster = new Cluster(hosts, defaultPort);
+
+		CassandraStoreManager manager = (CassandraStoreManager) omfContext
+				.getStoreManager();
+
+		manager.setConnectionFactory(this);
+
+	}
+
+	/**
+	 * Setup the keyspace if the schema should be created
+	 * 
+	 * @param createSchema
+	 */
+	public void keyspaceComplete(boolean createSchema) {
+		if (!createSchema) {
+			return;
+		}
+
+		KeyspaceManager keyspaceManager = new KeyspaceManager(cluster);
+
+		List<KsDef> keyspaces;
+		try {
+			keyspaces = keyspaceManager.getKeyspaceNames();
+		} catch (Exception e) {
+			throw new NucleusDataStoreException("Unable to scan for keyspace");
+		}
+
+		boolean found = false;
+
+		for (KsDef ksDef : keyspaces) {
+			if (ksDef.name.equals(keyspace)) {
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			KsDef keyspaceDefinition = new KsDef(keyspace,
+					KeyspaceManager.KSDEF_STRATEGY_SIMPLE, 1,
+					new ArrayList<CfDef>());
+
+			try {
+				keyspaceManager.addKeyspace(keyspaceDefinition);
+			} catch (Exception e) {
+				throw new NucleusDataStoreException("Not supported", e);
+			}
+
+		}
+
+		Pelops.addPool(poolName, cluster, keyspace);
+	}
+
+	/**
+	 * Setup the keyspace if the schema should be created
+	 * 
+	 * @param createSchema
+	 */
+	public void cfComplete(boolean createColumnFamilies) {
+
 	}
 
 	/**
@@ -100,20 +162,33 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 	 *            Any options for then creating the connection
 	 * @return the {@link org.datanucleus.store.connection.ManagedConnection}
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public ManagedConnection createManagedConnection(Object poolKey,
 			Map transactionOptions) {
-
-//		try {
-//			return new CassandraManagedConnection(this.keyspace);
-//		} catch (Exception e) {
-//			throw new NucleusException("Couldn't connect to cassandra", e);
-//		}
 
 		throw new NucleusDataStoreException("Not supported");
 
 	}
 
-	
+	/**
+	 * @return the cluster
+	 */
+	public Cluster getCluster() {
+		return cluster;
+	}
+
+	/**
+	 * @return the keyspace
+	 */
+	public String getKeyspace() {
+		return keyspace;
+	}
+
+	/**
+	 * @return the poolName
+	 */
+	public String getPoolName() {
+		return poolName;
+	}
 
 }

@@ -7,9 +7,9 @@
 	<persistence-manager-factory name="Test">
 		<property name="javax.jdo.PersistenceManagerFactoryClass"
 			value="org.datanucleus.jdo.JDOPersistenceManagerFactory" />
-		<property name="javax.jdo.option.ConnectionURL" value="cassandra:TestPool:Keyspace1:9170:localhost" />
+		<property name="javax.jdo.option.ConnectionURL" value="cassandra:TestPool:TestingKeyspace:19160:localhost" />
 		<property name="javax.jdo.option.Optimistic" value="false" />
-		
+		<property name="datanucleus.autoCreateSchema" value="true" />
 		<!-- <property name="datanucleus.datastoreIdentityType" value="date-cassandra, uuid-cassandra" />
 		<property name="datanucleus.identityTranslatorType" value="cassandratranslator" />
  -->

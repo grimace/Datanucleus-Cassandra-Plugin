@@ -41,30 +41,25 @@ import org.scale7.cassandra.pelops.support.EmbeddedCassandraServer;
  */
 public abstract class CassandraTest {
 
-
 	public static final String RPC_LISTEN_ADDRESS = "localhost";
 
 	public static final int RPC_PORT = 19160;
-	
+
 	public static String BASE_DIRECTORY = "target/cassandra";
 
-	public static final String KEYSPACE = "Testing";
-	
+	public static final String KEYSPACE = "TestingKeyspace";
+
 	private static Cluster cluster = new Cluster(RPC_LISTEN_ADDRESS, RPC_PORT);
 
-	private static KeyspaceManager keyspaceManager;
-
-	private static ColumnFamilyManager columnFamilyManager;
-
 	private static List<CfDef> colFamilyDefs;
-	
-	
+
 	protected static EmbeddedCassandraServer cassandraServer;
 	protected static PersistenceManagerFactory pmf;
 
 	/**
 	 * Set embedded cassandra up and spawn it in a new thread.
-	 * @throws Exception 
+	 * 
+	 * @throws Exception
 	 */
 	@BeforeClass
 	public static void setup() throws Exception {
@@ -79,35 +74,10 @@ public abstract class CassandraTest {
 			Thread.sleep(2000);
 		}
 
-		
-
 		pmf = JDOHelper.getPersistenceManagerFactory("Test");
 	}
 
-	@Before
-	public void clean() throws Exception{
-		
-		keyspaceManager = new KeyspaceManager(cluster);
-		columnFamilyManager = new ColumnFamilyManager(cluster, KEYSPACE);
 
-		List<KsDef> keyspaces = keyspaceManager.getKeyspaceNames();
-		
-		for (KsDef ksDef : keyspaces)
-			if (ksDef.name.equals(KEYSPACE)) {
-				keyspaceManager.dropKeyspace(KEYSPACE);
-			}
-
-		KsDef keyspaceDefinition = new KsDef(KEYSPACE,
-				KeyspaceManager.KSDEF_STRATEGY_SIMPLE, 1,
-				new ArrayList<CfDef>());
-
-		for (CfDef colFamilyDef : colFamilyDefs) {
-			keyspaceDefinition.addToCf_defs(colFamilyDef);
-		}
-
-		keyspaceManager.addKeyspace(keyspaceDefinition);
-	}
-	
 	@AfterClass
 	public static void teardown() throws Exception {
 		// no shutdown for now

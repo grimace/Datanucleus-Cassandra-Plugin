@@ -48,14 +48,14 @@ public class CassandraStoreManager extends AbstractStoreManager {
 
 	// MetaDataListener metadataListener;
 
+	private boolean autoCreateSchema = false;
 	private boolean autoCreateTables = false;
 	private boolean autoCreateColumns = false;
-
+	
 	private int poolTimeBetweenEvictionRunsMillis;
 	private int poolMinEvictableIdleTimeMillis;
 
-	private String keySpace;
-	private String poolName;
+	private ConnectionFactoryImpl connectionFactory;
 
 	/**
 	 * Constructor.
@@ -73,13 +73,15 @@ public class CassandraStoreManager extends AbstractStoreManager {
 
 		PersistenceConfiguration conf = omfContext
 				.getPersistenceConfiguration();
-		boolean autoCreateSchema = conf
+
+		autoCreateSchema = conf
 				.getBooleanProperty("datanucleus.autoCreateSchema");
 
-		// Cassandra can't do this until 0.7
 		if (autoCreateSchema) {
 			autoCreateTables = true;
 			autoCreateColumns = true;
+			
+			
 		} else {
 			autoCreateTables = conf
 					.getBooleanProperty("datanucleus.autoCreateTables");
@@ -104,6 +106,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
 		}
 
 		logConfiguration();
+
 	}
 
 	protected void registerConnectionMgr() {
@@ -156,34 +159,29 @@ public class CassandraStoreManager extends AbstractStoreManager {
 	 * @return the defaultKeyspace
 	 */
 	public String getKeyspace() {
-		return keySpace;
-	}
-
-	/**
-	 * DO NOT CALL OUTSIDE OF FRAMEWORK
-	 * 
-	 * @param defaultKeyspace
-	 *            the defaultKeyspace to set
-	 */
-	public void setKeyspace(String defaultKeyspace) {
-		this.keySpace = defaultKeyspace;
+		return connectionFactory.getKeyspace();
 	}
 
 	/**
 	 * @return the poolName
 	 */
 	public String getPoolName() {
-		return poolName;
+		return connectionFactory.getPoolName();
 	}
 
 	/**
-	 * DO NOT CALL OUTSIDE OF FRAMEWORK
+	 * DO NOT CALL OUTSIDE OF FRAMEWORK. This is a callback for the connection
+	 * factory to signal to the store manager that it has finished configuring
+	 * itself.
 	 * 
 	 * @param poolName
 	 *            the poolName to set
 	 */
-	public void setPoolName(String poolName) {
-		this.poolName = poolName;
+	public void setConnectionFactory(ConnectionFactoryImpl connectionFactory) {
+		this.connectionFactory = connectionFactory;
+
+		connectionFactory.keyspaceComplete(autoCreateSchema);
+		connectionFactory.cfComplete(autoCreateTables);
 	}
 
 	/*
@@ -197,24 +195,23 @@ public class CassandraStoreManager extends AbstractStoreManager {
 	@Override
 	public String getClassNameForObjectID(Object id, ClassLoaderResolver clr,
 			ExecutionContext ec) {
-		
+
 		String pcClassName = super.getClassNameForObjectID(id, clr, ec);
-		
-		AbstractClassMetaData metaData = ec.getMetaDataManager().getMetaDataForClass(pcClassName, clr);
-		
+
+		AbstractClassMetaData metaData = ec.getMetaDataManager()
+				.getMetaDataForClass(pcClassName, clr);
+
 		SlicePredicate descriminator = getDescriminatorColumn(metaData);
 
-		//We only support discriminator.  Even in a subclass per table scheme for clarity of the columns within Cassandra.
+		// We only support discriminator. Even in a subclass per table scheme
+		// for clarity of the columns within Cassandra.
 		if (descriminator == null) {
 			return pcClassName;
 		}
 
-	
-
 		String key = MetaDataUtils.getRowKeyForId(ec, id);
 
-		return  findObject(key, metaData, clr, ec, id);
-
+		return findObject(key, metaData, clr, ec, id);
 
 	}
 
@@ -222,7 +219,6 @@ public class CassandraStoreManager extends AbstractStoreManager {
 			ClassLoaderResolver clr, ExecutionContext ec, Object id) {
 
 		Selector selector = Pelops.createSelector(getPoolName());
-		
 
 		// if we have a discriminator, fetch the discriminator column only
 		// and see if it's equal
