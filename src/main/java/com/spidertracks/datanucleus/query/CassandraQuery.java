@@ -95,7 +95,7 @@ public class CassandraQuery {
 					Selector.newColumnsPredicate(identityColumn),
 					MetaDataUtils.DEFAULT);
 
-			Set<Object> keys = new HashSet<Object>(rows.size());
+			Set<Bytes> keys = new HashSet<Bytes>(rows.size());
 
 			for (List<Column> entries : rows.values()) {
 
@@ -104,10 +104,9 @@ public class CassandraQuery {
 					continue;
 				}
 
-				Object identity = MetaDataUtils.getObjectIdentity(ec,
-						candidateClass, entries.get(0).getValue());
+				
 
-				keys.add(identity);
+				keys.add(new Bytes(entries.get(0).getValue()));
 			}
 
 			return getObjectsOfCandidateType(keys, subclasses);
@@ -130,7 +129,7 @@ public class CassandraQuery {
 	 * @param startKey
 	 * @return
 	 */
-	public List<?> getObjectsOfCandidateType(Set<Object> keys,
+	public List<?> getObjectsOfCandidateType(Set<Bytes> keys,
 			boolean subclasses) {
 
 		// final ClassLoaderResolver clr = ec.getClassLoaderResolver();
@@ -140,8 +139,10 @@ public class CassandraQuery {
 		List<Object> results = new ArrayList<Object>(keys.size());
 		// String tempKey = null;
 
-		for (Object id : keys) {
+		for (Bytes idBytes : keys) {
 
+			Object id = idBytes.toObject(null);
+			
 			// Not a valid subclass, don't return it as a candidate
 			if (!(id instanceof SingleFieldIdentity)) {
 				throw new NucleusDataStoreException(

@@ -17,26 +17,15 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.query;
 
-import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnFamily;
-import static com.spidertracks.datanucleus.utils.MetaDataUtils.getIdentityColumn;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getIndexName;
-import static com.spidertracks.datanucleus.utils.MetaDataUtils.getObjectIdentity;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 
-import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.KeyRange;
-import org.apache.cassandra.thrift.NotFoundException;
-import org.apache.cassandra.thrift.SlicePredicate;
-import org.apache.cassandra.thrift.SuperColumn;
+import org.apache.cassandra.thrift.IndexExpression;
+import org.apache.cassandra.thrift.IndexOperator;
 import org.datanucleus.ClassLoaderResolver;
-import org.datanucleus.exceptions.NucleusDataStoreException;
-import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.query.QueryUtils;
@@ -52,13 +41,15 @@ import org.datanucleus.query.expression.SubqueryExpression;
 import org.datanucleus.query.expression.VariableExpression;
 import org.datanucleus.store.ExecutionContext;
 import org.scale7.cassandra.pelops.Bytes;
-import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
-import org.scale7.cassandra.pelops.Selector.OrderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.spidertracks.datanucleus.CassandraStoreManager;
+import com.spidertracks.datanucleus.query.runtime.AndOperand;
+import com.spidertracks.datanucleus.query.runtime.CompressableOperand;
+import com.spidertracks.datanucleus.query.runtime.EqualityOperand;
+import com.spidertracks.datanucleus.query.runtime.Operand;
+import com.spidertracks.datanucleus.query.runtime.OrOperand;
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 /**
@@ -73,19 +64,17 @@ import com.spidertracks.datanucleus.utils.MetaDataUtils;
 public class CassandraQueryExpressionEvaluator extends
 		AbstractExpressionEvaluator {
 
-	// TODO TN get this from the query
-	private static final int MAXCOUNT = 10000;
-
+	
+	
 	private static final Logger logger = LoggerFactory
 			.getLogger(CassandraQueryExpressionEvaluator.class);
+	
+	private static final int MAX = 1000;
 
-	private Stack<String> indexNames = new Stack<String>();
 	private Stack<IndexParam> indexKeys = new Stack<IndexParam>();
-	private Stack<Set<Object>> columnStack = new Stack<Set<Object>>();
+	private Stack<Operand> operationStack = new Stack<Operand>();
 
 	private AbstractClassMetaData metaData;
-
-	private Class<?> destinationClass;
 
 	// Flag that marks an operation we can't support has been performed. We need
 	// to then run result set
@@ -96,10 +85,6 @@ public class CassandraQueryExpressionEvaluator extends
 	private Map<String, Object> parameterValues;
 
 	private ExecutionContext ec;
-
-	private Selector selector;
-
-	private SlicePredicate idSelector;
 
 	/**
 	 * Constructor for an in-memory evaluator.
@@ -121,7 +106,6 @@ public class CassandraQueryExpressionEvaluator extends
 			Map<String, Object> params, ClassLoaderResolver clr,
 			Class<?> destinationClass) {
 		this.ec = ec;
-		this.destinationClass = destinationClass;
 		metaData = ec.getMetaDataManager().getMetaDataForClass(
 				destinationClass, clr);
 		this.parameterValues = (params != null ? params
@@ -129,16 +113,11 @@ public class CassandraQueryExpressionEvaluator extends
 		// this.state = state;
 		// this.imports = imports;
 
-		CassandraStoreManager manager = (CassandraStoreManager) ec
-				.getStoreManager();
-
-		selector = Pelops.createSelector(manager.getPoolName());
-
 		inMemoryRequired = false;
 
 		// assume only one identity field
 
-		idSelector = Selector.newColumnsPredicate(getIdentityColumn(metaData));
+		
 
 	}
 
@@ -152,34 +131,27 @@ public class CassandraQueryExpressionEvaluator extends
 	protected Object processAndExpression(Expression expr) {
 		logger.debug("Processing && expression {}", expr);
 
-		// if we get here, the right and the left have been evaluated. Pop the
-		// left set list x2 and the right set
-		// then intersect them
-
-		Set<Object> right = this.columnStack.pop();
-		Set<Object> left = this.columnStack.pop();
-
-		Set<Object> result = null;
-
-		// if our left is null set the result to our right
-		if (left == null) {
-			result = right;
+		//get our current left and right
+		Operand left = operationStack.pop();
+		Operand right = operationStack.pop();
+		
+		//compress the right and left on this && into a single statement for efficiency
+		if(left instanceof CompressableOperand && right instanceof CompressableOperand){
+			EqualityOperand op = new EqualityOperand(MAX);
+			
+			op.addAll(((CompressableOperand)left).getIndexClause().getExpressions());
+			
+			op.addAll(((CompressableOperand)right).getIndexClause().getExpressions());
+			
+			return operationStack.push(op);
 		}
-		// if our left isn't null but our right is, set the result to the left
-		else if (right == null) {
-			result = left;
-		}
-		// if neither is null, perform an intersection
-		else {
-			// perform an intersection of the sets
-			left.retainAll(right);
-			result = left;
-		}
+		
+		//we can't compress, just add the left and right
+		AndOperand op = new AndOperand();
+		op.setLeft(left);
+		op.setRight(right);
 
-		// push the result back on the stack
-		this.columnStack.push(result);
-
-		return result;
+		return operationStack.push(op);
 	}
 
 	/*
@@ -190,44 +162,21 @@ public class CassandraQueryExpressionEvaluator extends
 	 */
 	@Override
 	protected Object processEqExpression(Expression expr) {
+
 		logger.debug("Processing == expression {}", expr);
 
 		// get our corresponding index name from the stack
-		String indexName = getIndexNameResult();
 		IndexParam indexKey = getIndexKeyResult();
 
-		// nothing to do since we don't have an index for this parameter
-		if (indexName == null || indexKey == null) {
-			// do nothing, one of our left or right items require an in memory
-			// evaluation and we've loaded potential keys
-			if (this.columnStack.size() == 2) {
-				return this.columnStack.peek();
-			}
+		IndexExpression expression = Selector.newIndexExpression(
+				indexKey.getIndexName(), IndexOperator.EQ,
+				indexKey.getIndexValue());
 
-			this.columnStack.push(null);
-			return null;
+		EqualityOperand op = new EqualityOperand(MAX);
+		op.addExpression(expression);
 
-		}
+		return this.operationStack.push(op);
 
-		// now we'll query for our column sets
-	
-		Set<Object> result = new HashSet<Object>();
-
-		try {
-
-			SuperColumn superCol = selector.getSuperColumnFromRow(indexKey.getIndexName(), indexName, indexKey.getIndexValue(),
-					MetaDataUtils.DEFAULT);
-			convertSuperCol(superCol, result);
-		} catch (NotFoundException nfe) {
-			// do nothing no records exist
-		} catch (Exception e) {
-			throw new NucleusException("Error processing keys", e);
-		}
-
-		this.columnStack.push(result);
-
-		return this.columnStack.peek();
-		
 	}
 
 	/*
@@ -238,38 +187,17 @@ public class CassandraQueryExpressionEvaluator extends
 	 */
 	@Override
 	protected Object processGteqExpression(Expression expr) {
-		logger.debug("Processing >= expression {}", expr);
-
 		// get our corresponding index name from the stack
-		String indexName = getIndexNameResult();
 		IndexParam indexKey = getIndexKeyResult();
 
-		// nothing to do since we don't have an index for this parameter
-		if (indexName == null || indexKey == null) {
-			// do nothing, one of our left or right items require an in memory
-			// evaluation and we've loaded potential keys
-			if (this.columnStack.size() == 2) {
-				return this.columnStack.peek();
-			}
+		IndexExpression expression = Selector.newIndexExpression(
+				indexKey.getIndexName(), IndexOperator.GTE,
+				indexKey.getIndexValue());
 
-			this.columnStack.push(null);
-			return null;
-		}
+		EqualityOperand op = new EqualityOperand(MAX);
+		op.addExpression(expression);
 
-		// now we'll query for our column sets
-		try {
-
-			List<SuperColumn> greaterThan = selector.getSuperColumnsFromRow(indexKey.getIndexName(), indexName, Selector
-							.newColumnsPredicate(indexKey.getIndexValue(),
-									Bytes.EMPTY, false, MAXCOUNT),
-					MetaDataUtils.DEFAULT);
-
-			this.columnStack.push(convertSuperCols(greaterThan));
-
-			return this.columnStack.peek();
-		} catch (Exception e) {
-			throw new NucleusException("Error processing keys", e);
-		}
+		return this.operationStack.push(op);
 	}
 
 	/*
@@ -280,38 +208,17 @@ public class CassandraQueryExpressionEvaluator extends
 	 */
 	@Override
 	protected Object processGtExpression(Expression expr) {
-		logger.debug("Processing > expression {}", expr);
 		// get our corresponding index name from the stack
-		String indexName = getIndexNameResult();
 		IndexParam indexKey = getIndexKeyResult();
 
-		// nothing to do since we don't have an index for this parameter
-		if (indexName == null || indexKey == null) {
+		IndexExpression expression = Selector.newIndexExpression(
+				indexKey.getIndexName(), IndexOperator.GT,
+				indexKey.getIndexValue());
 
-			// do nothing, one of our left or right items require an in memory
-			// evaluation and we've loaded potential keys
-			if (this.columnStack.size() == 2) {
-				return this.columnStack.peek();
-			}
+		EqualityOperand op = new EqualityOperand(MAX);
+		op.addExpression(expression);
 
-			this.columnStack.push(null);
-			return null;
-		}
-
-		// now we'll query for our column sets
-		try {
-
-			List<SuperColumn> greaterThan = selector.getSuperColumnsFromRow(indexKey.getIndexName(), indexName, Selector
-							.newColumnsPredicate(indexKey.bumpUpValue(),
-									Bytes.EMPTY, false, MAXCOUNT),
-					MetaDataUtils.DEFAULT);
-
-			this.columnStack.push(convertSuperCols(greaterThan));
-
-			return this.columnStack.peek();
-		} catch (Exception e) {
-			throw new NucleusException("Error processing keys", e);
-		}
+		return this.operationStack.push(op);
 	}
 
 	/*
@@ -322,37 +229,17 @@ public class CassandraQueryExpressionEvaluator extends
 	 */
 	@Override
 	protected Object processLteqExpression(Expression expr) {
-		logger.debug("Processing <= expression {}", expr);
-
 		// get our corresponding index name from the stack
-		String indexName = getIndexNameResult();
 		IndexParam indexKey = getIndexKeyResult();
 
-		// nothing to do since we don't have an index for this parameter
-		if (indexName == null || indexKey == null) {
-			// do nothing, one of our left or right items require an in memory
-			// evaluation and we've loaded potential keys
-			if (this.columnStack.size() == 2) {
-				return this.columnStack.peek();
-			}
+		IndexExpression expression = Selector.newIndexExpression(
+				indexKey.getIndexName(), IndexOperator.LTE,
+				indexKey.getIndexValue());
 
-			this.columnStack.push(null);
-			return null;
-		}
+		EqualityOperand op = new EqualityOperand(MAX);
+		op.addExpression(expression);
 
-		// now we'll query for our column sets
-		try {
-
-			List<SuperColumn> lessThan = selector.getSuperColumnsFromRow(indexKey.getIndexName(), indexName, Selector
-							.newColumnsPredicate(indexKey.getIndexValue(),
-									Bytes.EMPTY, true, MAXCOUNT),
-					MetaDataUtils.DEFAULT);
-
-			this.columnStack.push(convertSuperCols(lessThan));
-			return this.columnStack.peek();
-		} catch (Exception e) {
-			throw new NucleusException("Error processing keys", e);
-		}
+		return this.operationStack.push(op);
 	}
 
 	/*
@@ -363,37 +250,17 @@ public class CassandraQueryExpressionEvaluator extends
 	 */
 	@Override
 	protected Object processLtExpression(Expression expr) {
-		logger.debug("Processing < expression {}", expr);
-
-		String indexName = getIndexNameResult();
+		// get our corresponding index name from the stack
 		IndexParam indexKey = getIndexKeyResult();
 
-		// nothing to do since we don't have an index for this parameter
-		if (indexName == null || indexKey == null) {
-			this.columnStack.push(null);
-			// do nothing, one of our left or right items require an in memory
-			// evaluation and we've loaded potential keys
-			if (this.columnStack.size() == 2) {
-				return this.columnStack.peek();
-			}
+		IndexExpression expression = Selector.newIndexExpression(
+				indexKey.getIndexName(), IndexOperator.LT,
+				indexKey.getIndexValue());
 
-			return null;
-		}
+		EqualityOperand op = new EqualityOperand(MAX);
+		op.addExpression(expression);
 
-		// now we'll query for our column sets
-		try {
-
-			List<SuperColumn> lessThan = selector.getSuperColumnsFromRow(indexKey.getIndexName(), indexName, Selector
-							.newColumnsPredicate(indexKey.bumpDownValue(),
-									Bytes.EMPTY, true, MAXCOUNT),
-					MetaDataUtils.DEFAULT);
-
-			this.columnStack.push(convertSuperCols(lessThan));
-
-			return this.columnStack.peek();
-		} catch (Exception e) {
-			throw new NucleusException("Error processing keys", e);
-		}
+		return this.operationStack.push(op);
 
 	}
 
@@ -407,44 +274,21 @@ public class CassandraQueryExpressionEvaluator extends
 	protected Object processNoteqExpression(Expression expr) {
 		logger.debug("Processing != expression {}", expr);
 
-		String indexName = getIndexNameResult();
+		// get our corresponding index name from the stack
 		IndexParam indexKey = getIndexKeyResult();
 
-		// nothing to do since we don't have an index for this parameter
-		if (indexName == null || indexKey == null) {
-			// do nothing, one of our left or right items require an in memory
-			// evaluation and we've loaded potential keys
-			if (this.columnStack.size() == 2) {
-				return this.columnStack.peek();
-			}
+		IndexExpression less = Selector.newIndexExpression(
+				indexKey.getIndexName(), IndexOperator.LT,
+				indexKey.getIndexValue());
+		IndexExpression greater = Selector.newIndexExpression(
+				indexKey.getIndexName(), IndexOperator.GT,
+				indexKey.getIndexValue());
 
-			this.columnStack.push(null);
-			return null;
-		}
+		EqualityOperand op = new EqualityOperand(MAX);
+		op.addExpression(less);
+		op.addExpression(greater);
 
-		// now we'll query for our column sets
-		try {
-
-			List<SuperColumn> lessThan = selector.getSuperColumnsFromRow(indexKey.getIndexName(), indexName, Selector
-							.newColumnsPredicate(indexKey.bumpDownValue(),
-									Bytes.EMPTY, true, MAXCOUNT),
-					MetaDataUtils.DEFAULT);
-
-			List<SuperColumn> greaterThan = selector.getSuperColumnsFromRow(indexKey.getIndexName(), indexName, Selector
-							.newColumnsPredicate(indexKey.bumpUpValue(),
-									Bytes.EMPTY, false, MAXCOUNT),
-					MetaDataUtils.DEFAULT);
-
-			Set<Object> results = convertSuperCols(lessThan);
-
-			convertSuperCols(greaterThan, results);
-
-			this.columnStack.push(results);
-
-			return this.columnStack.peek();
-		} catch (Exception e) {
-			throw new NucleusException("Error processing keys", e);
-		}
+		return this.operationStack.push(op);
 	}
 
 	/*
@@ -456,31 +300,19 @@ public class CassandraQueryExpressionEvaluator extends
 	@Override
 	protected Object processOrExpression(Expression expr) {
 		logger.debug("Processing || expression {}", expr);
+		
+		//get our current left and right
+		Operand left = operationStack.pop();
+		Operand right = operationStack.pop();
+		
+	
+		
+		//we can't compress, just add the left and right
+		OrOperand op = new OrOperand();
+		op.setLeft(left);
+		op.setRight(right);
 
-		Set<Object> right = this.columnStack.pop();
-		Set<Object> left = this.columnStack.pop();
-
-		Set<Object> result = null;
-
-		// if our left is null set the result to our right
-		if (left == null) {
-			result = right;
-		}
-		// if our left isn't null but our right is, set the result to the left
-		else if (right == null) {
-			result = left;
-		}
-		// if neither is null, perform an intersection
-		else {
-			// perform an intersection of the sets
-			left.addAll(right);
-			result = left;
-		}
-
-		// push the result back on the stack
-		this.columnStack.push(result);
-
-		return result;
+		return operationStack.push(op);
 	}
 
 	/*
@@ -523,6 +355,7 @@ public class CassandraQueryExpressionEvaluator extends
 	 */
 	@Override
 	protected Object processPrimaryExpression(PrimaryExpression expr) {
+
 		// should be the root object return the value on the set
 		logger.debug("Processing expression primary {}", expr);
 
@@ -531,18 +364,9 @@ public class CassandraQueryExpressionEvaluator extends
 
 		String indexName = getIndexName(metaData, member);
 
-		if (indexName == null) {
-			logger
-					.warn(
-							"You declared parameter {} in a query but it is not indexed",
-							expr.getAlias());
-			// no secondary index, so results will need to be in memory
-			this.inMemoryRequired = true;
-		}
+		IndexParam param = new IndexParam(indexName, null);
 
-		indexNames.push(indexName);
-
-		return indexName;
+		return indexKeys.push(param);
 
 	}
 
@@ -560,16 +384,18 @@ public class CassandraQueryExpressionEvaluator extends
 		Object value = expr.getLiteral();
 
 		Bytes byteVal = MetaDataUtils.getIndexLong(ec, value);
+		
+		IndexParam param = indexKeys.peek();
 
 		if (byteVal != null) {
-			indexKeys.push(new IndexParam(MetaDataUtils.INDEX_LONG, byteVal));
+			param.setIndexValue(byteVal);
 			return value;
 		}
 
 		byteVal = MetaDataUtils.getIndexString(ec, value);
 
 		if (byteVal != null) {
-			indexKeys.push(new IndexParam(MetaDataUtils.INDEX_STRING, byteVal));
+			param.setIndexValue(byteVal);
 		}
 
 		return value;
@@ -584,135 +410,54 @@ public class CassandraQueryExpressionEvaluator extends
 	 */
 	@Override
 	protected Object processInvokeExpression(InvokeExpression expr) {
-		logger.debug("Processing expression invoke {}", expr);
 
-		logger
-				.warn("Processing invoke expression.  This is very inefficient!  Try to create a query without an invoke expression");
-
-		// we don't know how this expression will be used, so we'll want to load
-		// all potential keys from
-		// primary table
-
-		KeyRange keyRange = new KeyRange();
-		keyRange.setStart_key(Bytes.EMPTY.getBytes());
-		keyRange.setEnd_key(Bytes.EMPTY.getBytes());
-		keyRange.setCount(MAXCOUNT);
-
-		// don't select any columns, just keys
-		try {
-
-			Map<Bytes, List<Column>> rows = selector.getColumnsFromRows(
-					getColumnFamily(metaData), keyRange,  idSelector,
-					MetaDataUtils.DEFAULT);
-
-			Set<Object> results = new HashSet<Object>();
-
-			for (List<Column> cols : rows.values()) {
-				convertCols(cols, results);
-			}
-
-			this.columnStack.push(results);
-
-		} catch (Exception e) {
-			throw new NucleusException("Error processing keys", e);
-		}
-
-		this.inMemoryRequired = true;
-
-		return this.columnStack.peek();
+		logger.error("Processing invoke expression.  This is very inefficient!  Try to create a query without an invoke expression");
+		//
+		return null;
+		// logger.debug("Processing expression invoke {}", expr);
+		//
+		// logger
+		// .warn("Processing invoke expression.  This is very inefficient!  Try to create a query without an invoke expression");
+		//
+		// // we don't know how this expression will be used, so we'll want to
+		// load
+		// // all potential keys from
+		// // primary table
+		//
+		// KeyRange keyRange = new KeyRange();
+		// keyRange.setStart_key(Bytes.EMPTY.getBytes());
+		// keyRange.setEnd_key(Bytes.EMPTY.getBytes());
+		// keyRange.setCount(MAXCOUNT);
+		//
+		// // don't select any columns, just keys
+		// try {
+		//
+		// Map<Bytes, List<Column>> rows = selector.getColumnsFromRows(
+		// getColumnFamily(metaData), keyRange, idSelector,
+		// MetaDataUtils.DEFAULT);
+		//
+		// Set<Object> results = new HashSet<Object>();
+		//
+		// for (List<Column> cols : rows.values()) {
+		// convertCols(cols, results);
+		// }
+		//
+		// this.columnStack.push(results);
+		//
+		// } catch (Exception e) {
+		// throw new NucleusException("Error processing keys", e);
+		// }
+		//
+		// this.inMemoryRequired = true;
+		//
+		// return this.columnStack.peek();
 	}
 
-	/**
-	 * Static helper function that converts sorted maps to a merged column set
-	 * 
-	 * @param columns
-	 * @return
-	 */
-	private static Set<Object> convertSuperCols(List<SuperColumn> columns) {
-
-		Set<Object> merged = new HashSet<Object>();
-
-		convertSuperCols(columns, merged);
-
-		return merged;
-	}
-
-	/**
-	 * Convert the columns to strings by column name and add them to the set
-	 * 
-	 * @param columns
-	 * @param set
-	 * @return
-	 */
-	private static void convertSuperCols(List<SuperColumn> columns,
-			Set<Object> set) {
-
-		for (SuperColumn superCol : columns) {
-			convertSuperCol(superCol, set);
-
-		}
-
-	}
-
-	private static void convertSuperCol(SuperColumn superCol, Set<Object> set) {
-		for (Column col : superCol.getColumns()) {
-			try {
-				set.add(new Bytes(col.getName()).toObject(null));
-			} catch (Exception e) {
-				throw new NucleusDataStoreException(
-						"Unable to load serialized object identity", e);
-			}
-		}
-	}
-
-
-	/**
-	 * Static helper function that converts sorted maps to a merged column set
-	 * 
-	 * @param columns
-	 * @return
-	 */
-	private void convertCols(List<Column> columns, Set<Object> set) {
-
-		for (Column col : columns) {
-
-			try {
-				set
-						.add(getObjectIdentity(ec, destinationClass, col
-								.getValue()));
-			} catch (Exception e) {
-				throw new NucleusDataStoreException(
-						"Unable to load serialized identity", e);
-			}
-		}
-
-	}
-
-	
 	/**
 	 * @return the inMemoryRequired
 	 */
 	public boolean isInMemoryRequired() {
 		return inMemoryRequired;
-	}
-
-	/**
-	 * Get the index name off the stack. Will only pop if the stack sizes are
-	 * equal
-	 * 
-	 * @return
-	 */
-	private String getIndexNameResult() {
-		if (indexNames.size() == 0) {
-			return null;
-		}
-
-		// unbalanced subtree, don't perfrom an op
-		if (indexNames.size() == indexKeys.size() - 1) {
-			return null;
-		}
-
-		return indexNames.pop();
 	}
 
 	/**
@@ -723,10 +468,6 @@ public class CassandraQueryExpressionEvaluator extends
 	 */
 	private IndexParam getIndexKeyResult() {
 		if (indexKeys.size() == 0) {
-			return null;
-		}
-
-		if (indexKeys.size() == indexNames.size() - 1) {
 			return null;
 		}
 
@@ -750,7 +491,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression add {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -765,7 +506,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression case {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -780,7 +521,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression cast {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -795,7 +536,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression com {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -811,7 +552,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression creator {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -826,7 +567,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression distinct {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -841,7 +582,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression div {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -856,7 +597,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression in {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -871,7 +612,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression is {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -886,7 +627,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing is not expression {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -901,7 +642,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression like {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -916,7 +657,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression mod {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -931,7 +672,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression mult {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -946,7 +687,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression neg {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -961,7 +702,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression not {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -976,7 +717,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression sub {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -992,7 +733,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression subquery {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -1008,7 +749,7 @@ public class CassandraQueryExpressionEvaluator extends
 		logger.debug("Processing expression variable {}", expr);
 
 		this.inMemoryRequired = true;
-		this.columnStack.push(null);
+		// this.columnStack.push(null);
 		return null;
 	}
 
@@ -1043,32 +784,11 @@ public class CassandraQueryExpressionEvaluator extends
 		}
 
 		/**
-		 * Bump the byte value down. Equivlanet of < op
 		 * 
-		 * @return
+		 * @param indexValue
 		 */
-		public Bytes bumpUpValue() {
-			if (MetaDataUtils.INDEX_STRING.equals(indexName)) {
-				
-			
-				return Selector.bumpUpColumnName(indexValue, OrderType.UTF8Type);
-			}
-
-			return Selector.bumpUpColumnName(indexValue, OrderType.LongType);
-
-		}
-
-		/**
-		 * Bump byte value up. Equivalent of > op
-		 * 
-		 * @return
-		 */
-		public Bytes bumpDownValue() {
-			if (MetaDataUtils.INDEX_STRING.equals(indexName)) {
-				return Selector.bumpDownColumnName(indexValue, OrderType.UTF8Type);
-			}
-
-			return Selector.bumpDownColumnName(indexValue, OrderType.LongType);
+		public void setIndexValue(Bytes indexValue) {
+			this.indexValue = indexValue;
 		}
 
 	}

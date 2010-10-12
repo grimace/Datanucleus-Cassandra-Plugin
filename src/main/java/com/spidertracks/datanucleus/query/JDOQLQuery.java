@@ -21,12 +21,19 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.query.evaluator.JDOQLEvaluator;
 import org.datanucleus.query.evaluator.JavaQueryEvaluator;
 import org.datanucleus.query.expression.Expression;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.query.AbstractJDOQLQuery;
 import org.datanucleus.util.NucleusLogger;
+import org.scale7.cassandra.pelops.Bytes;
+
+import com.spidertracks.datanucleus.CassandraStoreManager;
+import com.spidertracks.datanucleus.query.runtime.Operand;
+import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 /**
  * @author Todd Nine
@@ -97,15 +104,31 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		boolean evaluteInMemory = true;
 		
 		CassandraQuery query = new CassandraQuery(ec, candidateClass);
+		
+		
+		String poolName = ((CassandraStoreManager)ec.getStoreManager()).getPoolName();
+		
+		
+		AbstractClassMetaData acmd =  ec.getMetaDataManager().getMetaDataForClass(candidateClass.getName(), ec.getClassLoaderResolver());
+		
+		String columnFamily = MetaDataUtils.getColumnFamily(acmd);
+		
+		String identityCol = MetaDataUtils.getIdentityColumn(acmd);
+		
+		
 
 		if (filter != null) {
 
 			CassandraQueryExpressionEvaluator evaluator = new CassandraQueryExpressionEvaluator(
 					ec, parameters, ec.getClassLoaderResolver(), candidateClass);
 
-			Set<Object> candidateKeys = (Set<Object>) filter.evaluate(evaluator);
+			Operand opTree = (Operand) filter.evaluate(evaluator);
 
 			evaluteInMemory = evaluator.isInMemoryRequired();
+			
+			opTree.performQuery(poolName, columnFamily, identityCol, ConsistencyLevel.ONE);
+			
+			Set<Bytes> candidateKeys = opTree.getCandidateKeys();
 
 			// didn't get any candidates. Note that this means we couldn't
 			// evaluate the expression

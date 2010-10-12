@@ -302,13 +302,14 @@ public class MetaDataUtils {
 				return ec.newObjectId(candidateClass, bytes.toUTF8());
 			}
 
-			// try and de-serialize it as an object as a last resort
-
+		
 			return bytes.toObject(null);
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(
 					"Unable to serialize bytes to object identity.  Please make sure it has the same SerializationId, long or string converter is was stored with. ");
 		}
+
+	
 
 	}
 
@@ -405,18 +406,7 @@ public class MetaDataUtils {
 			return null;
 		}
 
-		StringBuffer nameBuffer = new StringBuffer();
-
-		String assignedName = metaData.getName();
-
-		if (assignedName == null) {
-
-			nameBuffer.append(getColumnFamily(classMetaData)).append("_")
-					.append(fieldMetaData.getName());
-			assignedName = nameBuffer.toString();
-		}
-
-		return assignedName;
+		return getColumnName(classMetaData, fieldMetaData.getFieldId());
 
 	}
 
@@ -458,7 +448,8 @@ public class MetaDataUtils {
 
 	/**
 	 * Get the name of the column family. Uses table name, if one doesn't exist,
-	 * it uses the simple name of the class.  If this class should never be persisted directly (subclass table persistence) null is returned
+	 * it uses the simple name of the class. If this class should never be
+	 * persisted directly (subclass table persistence) null is returned
 	 * 
 	 * @param metaData
 	 * @return
@@ -487,26 +478,25 @@ public class MetaDataUtils {
 			inheritance = metaData.getInheritanceMetaData();
 
 			if (inheritance != null) {
-				
+
 				InheritanceStrategy strategy = inheritance.getStrategy();
-				
-				if (InheritanceStrategy.NEW_TABLE.equals(strategy)){
+
+				if (InheritanceStrategy.NEW_TABLE.equals(strategy)) {
 					cfName = metaData.getTable();
-					
-					if(cfName == null){
+
+					if (cfName == null) {
 						cfName = metaData.getEntityName();
-						
+
 					}
-					
+
 					break;
 				}
-				
 
 				// this class should never be persisted directly, return null
 				else if (InheritanceStrategy.SUBCLASS_TABLE.equals(strategy)) {
 					return null;
 				}
-				
+
 			}
 
 			current = (AbstractClassMetaData) current
