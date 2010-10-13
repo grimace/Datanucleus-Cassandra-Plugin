@@ -22,13 +22,16 @@ import static org.junit.Assert.*;
 
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jdo.Transaction;
 
+import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -176,32 +179,6 @@ public class JDOQLBasicTest extends CassandraTest {
 	}
 
 	/**
-	 * Runs basic query extent
-	 */
-	@Test
-	public void testExtent() {
-		PersistenceManager pm = pmf.getPersistenceManager();
-		Transaction tx = pm.currentTransaction();
-		try {
-			tx.begin();
-			Iterator it = pm.getExtent(PrimitiveObject.class).iterator();
-			assertTrue(it.hasNext());
-			it.next();
-			assertTrue(it.hasNext());
-			it.next();
-			assertTrue(it.hasNext());
-			it.next();
-			assertFalse(it.hasNext());
-			tx.commit();
-		} finally {
-			if (tx.isActive()) {
-				tx.rollback();
-			}
-			pm.close();
-		}
-	}
-
-	/**
 	 * Runs basic query
 	 */
 	public void testBasicQuery() {
@@ -214,54 +191,6 @@ public class JDOQLBasicTest extends CassandraTest {
 			assertEquals(3, c.size());
 			tx.commit();
 
-		} finally {
-			if (tx.isActive()) {
-				tx.rollback();
-			}
-			pm.close();
-		}
-	}
-
-	/**
-	 * ordering
-	 */
-	@Test
-	public void testOrdering() {
-		PersistenceManager pm = pmf.getPersistenceManager();
-		Transaction tx = pm.currentTransaction();
-		try {
-			tx.begin();
-			Query q = pm.newQuery(PrimitiveObject.class);
-			q.setOrdering("testString DESC, testDouble");
-			Collection c = (Collection) q.execute();
-			assertEquals(3, c.size());
-			Iterator it = c.iterator();
-			assertEquals("two", ((PrimitiveObject) it.next()).getTestString());
-			assertEquals("three", ((PrimitiveObject) it.next()).getTestString());
-			assertEquals("one", ((PrimitiveObject) it.next()).getTestString());
-			tx.commit();
-		} finally {
-			if (tx.isActive()) {
-				tx.rollback();
-			}
-			pm.close();
-		}
-	}
-
-	/**
-	 * result test
-	 */
-	@Test
-	public void testResult() {
-		PersistenceManager pm = pmf.getPersistenceManager();
-		Transaction tx = pm.currentTransaction();
-		try {
-			tx.begin();
-			Query q = pm.newQuery(PrimitiveObject.class);
-			q.setResult("count(this)");
-			Long count = (Long) q.execute();
-			assertEquals("Count value was wrong", 3, count.longValue());
-			tx.commit();
 		} finally {
 			if (tx.isActive()) {
 				tx.rollback();
@@ -330,73 +259,6 @@ public class JDOQLBasicTest extends CassandraTest {
 	}
 
 	/**
-	 * result grouping
-	 */
-	@Test
-	public void testGrouping() {
-		PersistenceManager pm = pmf.getPersistenceManager();
-		Transaction tx = pm.currentTransaction();
-		try {
-			tx.begin();
-			Query q = pm.newQuery(PrimitiveObject.class);
-			q.setResult("count(this), testString");
-			q.setGrouping("testString");
-			q.setOrdering("testString");
-			Collection c = (Collection) q.execute();
-			Iterator it = c.iterator();
-			Object[] obj = (Object[]) it.next();
-			assertEquals(1, ((Long) obj[0]).longValue());
-			assertEquals("one", obj[1].toString());
-			tx.commit();
-		} finally {
-			if (tx.isActive()) {
-				tx.rollback();
-			}
-			pm.close();
-		}
-	}
-
-	/**
-	 * Tests for JDOQL String methods (startsWith, endsWith) specification.
-	 */
-	@Test
-	public void testStringMethods() {
-		PersistenceManager pm = pmf.getPersistenceManager();
-		Transaction tx = pm.currentTransaction();
-
-		tx.begin();
-		try {
-			Query q = pm.newQuery(PrimitiveObject.class,
-					"testString.startsWith('o')");
-			Object res = q.execute();
-			assertNotNull("Result set from JDOQL query is null!", res);
-			assertTrue("Result set from JDOQL query is of incorrect type!",
-					res instanceof List);
-			Collection c = (Collection) res;
-			assertEquals("Collection from String.startsWith() has wrong size",
-					1, c.size());
-
-			q = pm
-					.newQuery(PrimitiveObject.class,
-							"testString.endsWith('ree')");
-			res = q.execute();
-			assertNotNull("Result set from JDOQL query is null!", res);
-			assertTrue("Result set from JDOQL query is of incorrect type!",
-					res instanceof List);
-			c = (Collection) res;
-			assertEquals("Collection from String.endsWith() has wrong size", 1,
-					c.size());
-
-			tx.commit();
-		} finally {
-			if (tx.isActive()) {
-				tx.rollback();
-			}
-			pm.close();
-		}
-	}
-
-	/**
 	 * Query returning an object with relation fields, testing the contents of
 	 * the relation fields.
 	 */
@@ -406,7 +268,7 @@ public class JDOQLBasicTest extends CassandraTest {
 		// now perform our select. We want everyone with firstname =
 		// "firstName1"
 		PersistenceManager pm = pmf.getPersistenceManager();
-		
+
 		Query query = pm.newQuery(Person.class);
 		query.setFilter("firstName == :fN");
 
@@ -420,36 +282,34 @@ public class JDOQLBasicTest extends CassandraTest {
 		assertTrue(results.contains(p3));
 
 	}
-	
-	
+
 	@Test
 	public void testEqualStringId() throws Exception {
-		
+
 		// now perform our select. We want everyone with firstname =
 		// "firstName1"
 		PersistenceManager pm = pmf.getPersistenceManager();
 		Transaction trans = pm.currentTransaction();
 		trans.begin();
-		
+
 		InvitationToken token = new InvitationToken();
 		token.setToken("testKey");
 		token.setTestString("testIndexedString");
-		
+
 		pm.makePersistent(token);
-		
+
 		trans.commit();
-		
-		List<InvitationToken> results = (List<InvitationToken>) pm.newQuery(InvitationToken.class).execute();
-		
 
-		// check we got p1, p2 and p3.
+		try {
+			List<InvitationToken> results = (List<InvitationToken>) pm
+					.newQuery(InvitationToken.class).execute();
+		} catch (NucleusDataStoreException ndse) {
+			return;
+		}
 
-		assertEquals(1, results.size());
-
-		assertTrue(results.contains(token));
-		
+		fail("Should have thrown an exception.  You can't query without a == clause");
 	}
-	
+
 	/**
 	 * Query returning an object with relation fields, testing the contents of
 	 * the relation fields.
@@ -460,7 +320,7 @@ public class JDOQLBasicTest extends CassandraTest {
 		// now perform our select. We want everyone with firstname =
 		// "firstName1"
 		PersistenceManager pm = pmf.getPersistenceManager();
-		
+
 		Query query = pm.newQuery(Person.class);
 		query.setFilter("firstName == :fN ");
 
@@ -470,7 +330,6 @@ public class JDOQLBasicTest extends CassandraTest {
 		// check we got p1, p2 and p3 and p4
 
 		assertEquals(0, results.size());
-
 
 	}
 
@@ -485,7 +344,7 @@ public class JDOQLBasicTest extends CassandraTest {
 		// now perform our select. We want everyone with firstname =
 		// "firstName1"
 		PersistenceManager pm = pmf.getPersistenceManager();
-		
+
 		Query query = pm.newQuery(Person.class);
 		query.setFilter("firstName == :fN && lastName == :lN");
 
@@ -510,7 +369,7 @@ public class JDOQLBasicTest extends CassandraTest {
 		// now perform our select. We want everyone with firstname =
 		// "firstName1"
 		PersistenceManager pm = pmf.getPersistenceManager();
-		
+
 		Query query = pm.newQuery(Person.class);
 		query.setFilter("firstName == :fN || lastName == :lN");
 
@@ -528,8 +387,6 @@ public class JDOQLBasicTest extends CassandraTest {
 		assertTrue(results.contains(p4));
 
 	}
-	
-
 
 	/**
 	 * Query returning an object with relation fields, testing the contents of
@@ -542,20 +399,20 @@ public class JDOQLBasicTest extends CassandraTest {
 		// now perform our select. We want everyone with firstname =
 		// "firstName1"
 		PersistenceManager pm = pmf.getPersistenceManager();
-		
+
 		Query query = pm.newQuery(Person.class);
-		query.setFilter("lastLogin >= :loginDate");
+		query.setFilter("lastLogin >= :loginDate && lastName == :secondName");
 
 		// should be p3 p4 and p5
-		List<Person> results = (List<Person>) query.execute(p3.getLastLogin());
+		List<Person> results = (List<Person>) query.execute(p3.getLastLogin(),
+				"secondName2");
 
 		// check we got p1, p2 and p3 and p4
 
-		assertEquals(3, results.size());
+		assertEquals(2, results.size());
 
 		assertTrue(results.contains(p3));
 		assertTrue(results.contains(p4));
-		assertTrue(results.contains(p5));
 
 	}
 
@@ -570,17 +427,16 @@ public class JDOQLBasicTest extends CassandraTest {
 		// now perform our select. We want everyone with firstname =
 		// "firstName1"
 		PersistenceManager pm = pmf.getPersistenceManager();
-		
+
 		Query query = pm.newQuery(Person.class);
-		query.setFilter("lastLogin > :loginDate");
+		query.setFilter("lastLogin > :loginDate && lastName == :secondName");
 
 		// should be p4 and p5
-		List<Person> results = (List<Person>) query.execute(p3.getLastLogin());
+		List<Person> results = (List<Person>) query.execute(p3.getLastLogin(), "secondName2");
 
-		assertEquals(2, results.size());
+		assertEquals(1, results.size());
 
 		assertTrue(results.contains(p4));
-		assertTrue(results.contains(p5));
 
 	}
 
@@ -595,12 +451,13 @@ public class JDOQLBasicTest extends CassandraTest {
 		// now perform our select. We want everyone with firstname =
 		// "firstName1"
 		PersistenceManager pm = pmf.getPersistenceManager();
-		
+
 		Query query = pm.newQuery(Person.class);
-		query.setFilter("lastLogin <= :loginDate");
+		query.setFilter("lastLogin <= :loginDate && firstName == :fName");
 
 		// should be p1 p2 p3
-		List<Person> results = (List<Person>) query.execute(p3.getLastLogin());
+		List<Person> results = (List<Person>) query.execute(p3.getLastLogin(),
+				"firstName1");
 
 		// check we got p1, p2 and p3
 
@@ -620,12 +477,13 @@ public class JDOQLBasicTest extends CassandraTest {
 	@Test
 	public void testRetrieveLessThan() {
 		PersistenceManager pm = pmf.getPersistenceManager();
-		
+
 		Query query = pm.newQuery(Person.class);
-		query.setFilter("lastLogin < :loginDate");
+		query.setFilter("lastLogin < :loginDate && firstName == :fName");
 
 		// should be p1 and p2
-		List<Person> results = (List<Person>) query.execute(p3.getLastLogin());
+		List<Person> results = (List<Person>) query.execute(p3.getLastLogin(),
+				"firstName1");
 
 		// check we got p1, p2 and p3 and p4
 
@@ -635,7 +493,7 @@ public class JDOQLBasicTest extends CassandraTest {
 		assertTrue(results.contains(p2));
 
 	}
-	
+
 	/**
 	 * Query returning an object with relation fields, testing the contents of
 	 * the relation fields.
@@ -644,97 +502,26 @@ public class JDOQLBasicTest extends CassandraTest {
 	@Test
 	public void testRetrieveLessThanNoValue() {
 		PersistenceManager pm = pmf.getPersistenceManager();
-		
+
 		Query query = pm.newQuery(Person.class);
-		query.setFilter("lastLogin < :loginDate");
+		query.setFilter("lastLogin < :loginDate  && firstName == :fName");
 
 		// should be p1 and p2
-		List<Person> results = (List<Person>) query.execute(p1.getLastLogin());
+		List<Person> results = (List<Person>) query.execute(p1.getLastLogin(),
+				"firstName1");
 
 		// check we got p1, p2 and p3 and p4
 
 		assertEquals(0, results.size());
 
-
 	}
 
-	/**
-	 * Query returning an object with relation fields, testing the contents of
-	 * the relation fields.
-	 */
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testRetrieveNotEqual() {
-		PersistenceManager pm = pmf.getPersistenceManager();
-		
-		Query query = pm.newQuery(Person.class);
-		query.setFilter("lastLogin != :loginDate");
-
-		// should be p1 and p2
-		List<Person> results = (List<Person>) query.execute(p4.getLastLogin());
-
-		// check we got p1, p2 and p3 and p5
-
-		assertEquals(4, results.size());
-
-		assertTrue(results.contains(p1));
-		assertTrue(results.contains(p2));
-		assertTrue(results.contains(p3));
-		assertTrue(results.contains(p5));
-
-	}
 	
+
+
 	/**
-	 * Query returning an object with relation fields, testing the contents of
-	 * the relation fields.
-	 */
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testRetrieveEqualWithContains() {
-		PersistenceManager pm = pmf.getPersistenceManager();
-		
-		Query query = pm.newQuery(Person.class);
-		query.setFilter("lastLogin >= :loginDate && lastName.indexOf(:namePart) > -1");
-
-		// should be p3-p5 with login date then p5 based on contains with Name
-		List<Person> results = (List<Person>) query.execute(p3.getLastLogin(), "Name3");
-
-		// check we got p1, p2 and p3 and p5
-
-		assertEquals(1, results.size());
-
-		assertTrue(results.contains(p5));
-
-	}
-	
-	/**
-	 * Query returning an object with relation fields, testing the contents of
-	 * the relation fields.
-	 */
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testRetrieveExpressionWithContains() {
-		PersistenceManager pm = pmf.getPersistenceManager();
-		
-		Query query = pm.newQuery(Person.class);
-		query.setFilter("lastLogin >= :loginDate && (lastName.indexOf(:namePart) > -1 || firstName == :fn)");
-
-		// should be p3-p5 with login date then p5 based on contains with Name, and p4 with firstname
-		List<Person> results = (List<Person>) query.execute(p3.getLastLogin(), "Name3", p4.getFirstName());
-
-		// check we got p1, p2 and p3 and p5
-
-		assertEquals(2, results.size());
-
-		assertTrue(results.contains(p4));
-		assertTrue(results.contains(p5));
-
-	}
-	
-	
-	/**
-	 * Tests that when a field is common on 2 subclasses, the correct
-	 * subclass is returned
+	 * Tests that when a field is common on 2 subclasses, the correct subclass
+	 * is returned
 	 */
 	@SuppressWarnings("unchecked")
 	@Test
@@ -742,54 +529,51 @@ public class JDOQLBasicTest extends CassandraTest {
 		PersistenceManager pm = pmf.getPersistenceManager();
 		Transaction trans = pm.currentTransaction();
 		trans.begin();
-		
+
 		SearchOne one = new SearchOne();
 		one.setSearchField("search");
 		one.setSearchOne("searchOne");
-		
+
 		SearchTwo two = new SearchTwo();
 		two.setSearchField("search");
 		two.setSearchTwo("searchTwo");
-		
+
 		pm.makePersistent(one);
 		pm.makePersistent(two);
-		
-		
+
 		trans.commit();
 		pm.close();
-		
+
 		pm = pmf.getPersistenceManager();
-		
-		
-		
+
 		Query query = pm.newQuery(SearchOne.class);
 		query.setFilter("searchField == :search");
 		query.setIgnoreCache(true);
-		
-		//now query on the subclass
+
+		// now query on the subclass
 		List<SearchOne> resultsOne = (List<SearchOne>) query.execute("search");
-		
+
 		assertEquals(1, resultsOne.size());
 
 		assertTrue(resultsOne.contains(one));
-		
-		
+
 		query = pm.newQuery(SearchTwo.class);
 		query.setFilter("searchField == :search");
 		query.setIgnoreCache(true);
-		
-		//now query on the subclass
+
+		// now query on the subclass
 		List<SearchTwo> resultsTwo = (List<SearchTwo>) query.execute("search");
-		
+
 		assertEquals(1, resultsTwo.size());
 
 		assertTrue(resultsTwo.contains(two));
-		
+
 		query = pm.newQuery(Search.class);
 		query.setFilter("searchField == :search");
 		query.setIgnoreCache(true);
-		
-		// should be p3-p5 with login date then p5 based on contains with Name, and p4 with firstname
+
+		// should be p3-p5 with login date then p5 based on contains with Name,
+		// and p4 with firstname
 		List<Search> results = (List<Search>) query.execute("search");
 
 		// check we got p1, p2 and p3 and p5
@@ -798,9 +582,7 @@ public class JDOQLBasicTest extends CassandraTest {
 
 		assertTrue(results.contains(one));
 		assertTrue(results.contains(two));
-		
 
 	}
-
 
 }

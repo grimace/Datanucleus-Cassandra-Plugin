@@ -26,7 +26,6 @@ import org.datanucleus.store.types.ObjectLongConverter;
 import org.datanucleus.store.types.ObjectStringConverter;
 import org.datanucleus.store.types.TypeManager;
 import org.scale7.cassandra.pelops.Bytes;
-import org.scale7.cassandra.pelops.ColumnFamilyManager;
 
 import com.eaio.uuid.UUID;
 
@@ -82,8 +81,9 @@ public class ByteConverter {
 		}
 
 		if (value instanceof UUID) {
-			long high = ((UUID) value).getClockSeqAndNode();
-			long low = ((UUID) value).getTime();
+			long high = ((UUID) value).getTime();
+			long low = ((UUID) value).getClockSeqAndNode();
+			
 
 			return Bytes.fromUuid(high, low);
 		}
@@ -160,5 +160,6 @@ public class ByteConverter {
 			throw new RuntimeException("Unable to de-serialize to object", e);
 		}
 	}
-
+	
+	
 }

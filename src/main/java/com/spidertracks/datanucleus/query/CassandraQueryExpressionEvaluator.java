@@ -17,7 +17,7 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.query;
 
-import static com.spidertracks.datanucleus.utils.MetaDataUtils.*;
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnName;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,15 +30,10 @@ import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.query.QueryUtils;
 import org.datanucleus.query.evaluator.AbstractExpressionEvaluator;
-import org.datanucleus.query.expression.CaseExpression;
-import org.datanucleus.query.expression.CreatorExpression;
 import org.datanucleus.query.expression.Expression;
-import org.datanucleus.query.expression.InvokeExpression;
 import org.datanucleus.query.expression.Literal;
 import org.datanucleus.query.expression.ParameterExpression;
 import org.datanucleus.query.expression.PrimaryExpression;
-import org.datanucleus.query.expression.SubqueryExpression;
-import org.datanucleus.query.expression.VariableExpression;
 import org.datanucleus.store.ExecutionContext;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Selector;
@@ -51,7 +46,6 @@ import com.spidertracks.datanucleus.query.runtime.EqualityOperand;
 import com.spidertracks.datanucleus.query.runtime.Operand;
 import com.spidertracks.datanucleus.query.runtime.OrOperand;
 import com.spidertracks.datanucleus.utils.ByteConverter;
-import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 /**
  * Class that will recursively query and merge results from our tree as we're
@@ -265,32 +259,7 @@ public class CassandraQueryExpressionEvaluator extends
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processNoteqExpression(org.datanucleus.query.expression.Expression)
-	 */
-	@Override
-	protected Object processNoteqExpression(Expression expr) {
-		logger.debug("Processing != expression {}", expr);
-
-		// get our corresponding index name from the stack
-		IndexParam indexKey = getIndexKeyResult();
-
-		IndexExpression less = Selector.newIndexExpression(
-				indexKey.getIndexName(), IndexOperator.LT,
-				indexKey.getIndexValue());
-		IndexExpression greater = Selector.newIndexExpression(
-				indexKey.getIndexName(), IndexOperator.GT,
-				indexKey.getIndexValue());
-
-		EqualityOperand op = new EqualityOperand(MAX);
-		op.addExpression(less);
-		op.addExpression(greater);
-
-		return this.operationStack.push(op);
-	}
+	
 
 	/*
 	 * (non-Javadoc)
@@ -387,58 +356,6 @@ public class CassandraQueryExpressionEvaluator extends
 		return param;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processInvokeExpression
-	 * (org.datanucleus.query.expression.InvokeExpression)
-	 */
-	@Override
-	protected Object processInvokeExpression(InvokeExpression expr) {
-
-		logger.error("Processing invoke expression.  This is very inefficient!  Try to create a query without an invoke expression");
-		//
-		return null;
-		// logger.debug("Processing expression invoke {}", expr);
-		//
-		// logger
-		// .warn("Processing invoke expression.  This is very inefficient!  Try to create a query without an invoke expression");
-		//
-		// // we don't know how this expression will be used, so we'll want to
-		// load
-		// // all potential keys from
-		// // primary table
-		//
-		// KeyRange keyRange = new KeyRange();
-		// keyRange.setStart_key(Bytes.EMPTY.getBytes());
-		// keyRange.setEnd_key(Bytes.EMPTY.getBytes());
-		// keyRange.setCount(MAXCOUNT);
-		//
-		// // don't select any columns, just keys
-		// try {
-		//
-		// Map<Bytes, List<Column>> rows = selector.getColumnsFromRows(
-		// getColumnFamily(metaData), keyRange, idSelector,
-		// MetaDataUtils.DEFAULT);
-		//
-		// Set<Object> results = new HashSet<Object>();
-		//
-		// for (List<Column> cols : rows.values()) {
-		// convertCols(cols, results);
-		// }
-		//
-		// this.columnStack.push(results);
-		//
-		// } catch (Exception e) {
-		// throw new NucleusException("Error processing keys", e);
-		// }
-		//
-		// this.inMemoryRequired = true;
-		//
-		// return this.columnStack.peek();
-	}
-
 	/**
 	 * @return the inMemoryRequired
 	 */
@@ -460,284 +377,7 @@ public class CassandraQueryExpressionEvaluator extends
 		return indexKeys.pop();
 	}
 
-	/**
-	 * Anything past this point isn't supported by our expression evaluator. We
-	 * need to set the flag to signal to the caller to invoke the inmemory
-	 * evaluator
-	 */
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processAddExpression(org.datanucleus.query.expression.Expression)
-	 */
-	@Override
-	protected Object processAddExpression(Expression expr) {
-		logger.debug("Processing expression add {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processCaseExpression(org.datanucleus.query.expression.CaseExpression)
-	 */
-	@Override
-	protected Object processCaseExpression(CaseExpression expr) {
-		logger.debug("Processing expression case {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processCastExpression(org.datanucleus.query.expression.Expression)
-	 */
-	@Override
-	protected Object processCastExpression(Expression expr) {
-		logger.debug("Processing expression cast {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processComExpression(org.datanucleus.query.expression.Expression)
-	 */
-	@Override
-	protected Object processComExpression(Expression expr) {
-		logger.debug("Processing expression com {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processCreatorExpression
-	 * (org.datanucleus.query.expression.CreatorExpression)
-	 */
-	@Override
-	protected Object processCreatorExpression(CreatorExpression expr) {
-		logger.debug("Processing expression creator {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processDistinctExpression(org.datanucleus.query.expression.Expression)
-	 */
-	@Override
-	protected Object processDistinctExpression(Expression expr) {
-		logger.debug("Processing expression distinct {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processDivExpression(org.datanucleus.query.expression.Expression)
-	 */
-	@Override
-	protected Object processDivExpression(Expression expr) {
-		logger.debug("Processing expression div {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processInExpression(org.datanucleus.query.expression.Expression)
-	 */
-	@Override
-	protected Object processInExpression(Expression expr) {
-		logger.debug("Processing expression in {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processIsExpression(org.datanucleus.query.expression.Expression)
-	 */
-	@Override
-	protected Object processIsExpression(Expression expr) {
-		logger.debug("Processing expression is {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processIsnotExpression(org.datanucleus.query.expression.Expression)
-	 */
-	@Override
-	protected Object processIsnotExpression(Expression expr) {
-		logger.debug("Processing is not expression {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processLikeExpression(org.datanucleus.query.expression.Expression)
-	 */
-	@Override
-	protected Object processLikeExpression(Expression expr) {
-		logger.debug("Processing expression like {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processModExpression(org.datanucleus.query.expression.Expression)
-	 */
-	@Override
-	protected Object processModExpression(Expression expr) {
-		logger.debug("Processing expression mod {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processMulExpression(org.datanucleus.query.expression.Expression)
-	 */
-	@Override
-	protected Object processMulExpression(Expression expr) {
-		logger.debug("Processing expression mult {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processNegExpression(org.datanucleus.query.expression.Expression)
-	 */
-	@Override
-	protected Object processNegExpression(Expression expr) {
-		logger.debug("Processing expression neg {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processNotExpression(org.datanucleus.query.expression.Expression)
-	 */
-	@Override
-	protected Object processNotExpression(Expression expr) {
-		logger.debug("Processing expression not {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processSubExpression(org.datanucleus.query.expression.Expression)
-	 */
-	@Override
-	protected Object processSubExpression(Expression expr) {
-		logger.debug("Processing expression sub {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processSubqueryExpression
-	 * (org.datanucleus.query.expression.SubqueryExpression)
-	 */
-	@Override
-	protected Object processSubqueryExpression(SubqueryExpression expr) {
-		logger.debug("Processing expression subquery {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.datanucleus.query.evaluator.AbstractExpressionEvaluator#
-	 * processVariableExpression
-	 * (org.datanucleus.query.expression.VariableExpression)
-	 */
-	@Override
-	protected Object processVariableExpression(VariableExpression expr) {
-		logger.debug("Processing expression variable {}", expr);
-
-		this.inMemoryRequired = true;
-		// this.columnStack.push(null);
-		return null;
-	}
+	
 
 	/**
 	 * Helper class to wrap indexing functinality

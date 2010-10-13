@@ -67,9 +67,14 @@ public class MetaDataUtils {
 	public static final String INDEX_LONG = "LongIndex";
 	public static final String INDEX_STRING = "StringIndex";
 
-	private static ConcurrentMap<String, String> classToCfNames = new ConcurrentHashMap<String, String>();
-	private static ConcurrentMap<IndexMetaData, String> fieldToIndexNames = new ConcurrentHashMap<IndexMetaData, String>();
+	private static final String NULL = "\uffff\uffff";
 
+	private static ConcurrentMap<String, String> classToCfNames = new ConcurrentHashMap<String, String>();
+
+	private static ConcurrentMap<AbstractMemberMetaData, String> fieldToColumnNames = new ConcurrentHashMap<AbstractMemberMetaData, String>();
+	
+	private static ConcurrentMap<AbstractMemberMetaData, String> fieldToIndexNames = new ConcurrentHashMap<AbstractMemberMetaData, String>();
+	
 	//
 	/**
 	 * Convenience method to find an object given a string form of its identity,
@@ -137,9 +142,6 @@ public class MetaDataUtils {
 		// else just call the default tostring since it's a user defined key
 		return id.toString();
 	}
-
-	
-
 
 	/**
 	 * Use the datanucleus converers to convert from the string to a new
@@ -259,14 +261,11 @@ public class MetaDataUtils {
 				return ec.newObjectId(candidateClass, bytes.toUTF8());
 			}
 
-		
 			return ByteConverter.getObject(bytes.getBytes());
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(
 					"Unable to serialize bytes to object identity.  Please make sure it has the same SerializationId, long or string converter is was stored with. ");
 		}
-
-	
 
 	}
 
@@ -283,20 +282,26 @@ public class MetaDataUtils {
 		AbstractMemberMetaData memberMetaData = metaData
 				.getMetaDataForManagedMemberAtAbsolutePosition(absoluteFieldNumber);
 
+		String name = fieldToColumnNames.get(memberMetaData);
+
+		if (name != null) {
+			return name;
+		}
+
 		// Try the first column if specified
 		ColumnMetaData[] colmds = memberMetaData.getColumnMetaData();
 		if (colmds != null && colmds.length > 0) {
-			return colmds[0].getName();
+			name = colmds[0].getName();
+		} else {
+			name = memberMetaData.getName();
 		}
 
-		// TODO should we allow defaults?
-		return memberMetaData.getName();
+		fieldToColumnNames.putIfAbsent(memberMetaData, name);
 
-		// throw new UnsupportedOperationException(String.format(
-		// "You must specify a column name for property %s",
-		// memberMetaData.getName()));
+		return name;
 
 	}
+
 
 	/**
 	 * Get the column metadata for the class and fieldname
@@ -357,34 +362,38 @@ public class MetaDataUtils {
 	public static String getIndexName(AbstractClassMetaData classMetaData,
 			AbstractMemberMetaData fieldMetaData) {
 
-		IndexMetaData metaData = fieldMetaData.getIndexMetaData();
+		// already indexed, return it
+		String name = fieldToIndexNames.get(fieldMetaData);
 
-		if (metaData == null) {
+		if (NULL == name) {
 			return null;
 		}
 
-		
-		String name = fieldToIndexNames.get(metaData);
-		
-		if(name != null){
-			return name;
+		IndexMetaData metaData = fieldMetaData.getIndexMetaData();
+
+		// no index defined, set it to null and cache it
+		if (metaData == null) {
+			fieldToIndexNames.putIfAbsent(fieldMetaData, NULL);
+			return null;
+
 		}
-				
-		
+
 		name = metaData.getName();
 
 		if (name == null) {
 			StringBuffer nameBuffer = new StringBuffer();
 
-			nameBuffer.append(fieldMetaData.getName()).append("_").append("index");
+			nameBuffer.append(fieldMetaData.getName()).append("_index");
 			name = nameBuffer.toString();
 		}
-		
-		fieldToIndexNames.putIfAbsent(metaData, name);
+
+		fieldToIndexNames.putIfAbsent(fieldMetaData, name);
 
 		return name;
 
 	}
+
+	
 
 	/**
 	 * Get the byte value of the column names
@@ -527,67 +536,65 @@ public class MetaDataUtils {
 
 		return Selector.newColumnsPredicate(columnName);
 	}
-	
+
 	/**
 	 * Return the cassandra validator for the class specified.
+	 * 
 	 * @param fieldClass
 	 * @return
 	 */
-	public static String getValidationClass(Class<?> fieldClass, TypeManager manager){
-		
+	public static String getValidationClass(Class<?> fieldClass,
+			TypeManager manager) {
+
 		if (Boolean.class.equals(fieldClass)) {
 			return ColumnFamilyManager.CFDEF_COMPARATOR_BYTES;
 		}
 
-		if (String.class.equals(fieldClass)){
+		if (String.class.equals(fieldClass)) {
 			return ColumnFamilyManager.CFDEF_COMPARATOR_UTF8;
 		}
 
-		if (Short.class.equals(fieldClass)){
+		if (Short.class.equals(fieldClass)) {
 			return ColumnFamilyManager.CFDEF_COMPARATOR_BYTES;
 		}
 
-		if (Integer.class.equals(fieldClass)){
-			return ColumnFamilyManager.CFDEF_COMPARATOR_INTEGER;
-		}
-		
-		if (Double.class.equals(fieldClass)){
+		if (Integer.class.equals(fieldClass)) {
 			return ColumnFamilyManager.CFDEF_COMPARATOR_INTEGER;
 		}
 
-		if (Long.class.equals(fieldClass)){
+		if (Double.class.equals(fieldClass)) {
+			return ColumnFamilyManager.CFDEF_COMPARATOR_INTEGER;
+		}
+
+		if (Long.class.equals(fieldClass)) {
 			return ColumnFamilyManager.CFDEF_COMPARATOR_LONG;
 		}
 
-		if (Float.class.equals(fieldClass)){
+		if (Float.class.equals(fieldClass)) {
 			return ColumnFamilyManager.CFDEF_COMPARATOR_LONG;
 		}
 
-		if (java.util.UUID.class.equals(fieldClass)){
+		if (java.util.UUID.class.equals(fieldClass)) {
 			return ColumnFamilyManager.CFDEF_COMPARATOR_TIME_UUID;
 		}
 
-		if (UUID.class.equals(fieldClass)){
+		if (UUID.class.equals(fieldClass)) {
 			return ColumnFamilyManager.CFDEF_COMPARATOR_LEXICAL_UUID;
 		}
 
-		
 		ObjectLongConverter converter = manager.getLongConverter(fieldClass);
 
 		if (converter != null) {
 			return ColumnFamilyManager.CFDEF_COMPARATOR_LONG;
 		}
 
-		
-		
-		ObjectStringConverter stringConverter = manager.getStringConverter(fieldClass);
-		
-		if(stringConverter != null){
+		ObjectStringConverter stringConverter = manager
+				.getStringConverter(fieldClass);
+
+		if (stringConverter != null) {
 			return ColumnFamilyManager.CFDEF_COMPARATOR_UTF8;
 		}
-		
-		
-		
+
 		throw new NucleusDataStoreException(
 				"Could not convert object to byte.  Object types must be of any primitive, a UTF8 String, or com.eaio.uuid.UUID/java.util.UUID");
 	}
