@@ -36,6 +36,7 @@ import org.datanucleus.metadata.Relation;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
+import org.datanucleus.store.types.ObjectLongConverter;
 import org.datanucleus.store.types.ObjectStringConverter;
 import org.datanucleus.store.types.sco.SCOUtils;
 import org.scale7.cassandra.pelops.Bytes;
@@ -372,6 +373,13 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 			}
 
+			ObjectLongConverter longConverter = this.context.getTypeManager().getLongConverter(fieldMetaData.getType());
+			
+			
+			if(longConverter != null){
+				return longConverter.toObject(new Bytes(column.getValue()).toLong());
+			}
+			
 			ObjectStringConverter converter = this.context.getTypeManager()
 					.getStringConverter(fieldMetaData.getType());
 
