@@ -1,13 +1,23 @@
 package com.spidertracks.datanucleus;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.ColumnDef;
+import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.KsDef;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.metadata.AbstractClassMetaData;
+import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.MetaDataListener;
+import org.datanucleus.store.StoreManager;
+import org.datanucleus.store.types.TypeManager;
+import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Cluster;
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 import org.scale7.cassandra.pelops.KeyspaceManager;
@@ -20,11 +30,15 @@ public class ColumnFamilyCreator implements MetaDataListener {
 	private Cluster cluster = null;
 	private String keyspace;
 
-	private Set<String> currentCfs = new HashSet<String>();
+	private Set<String> existingCfs = new HashSet<String>();
+	private Set<String> visitedCfs = new HashSet<String>();
+	
+	private StoreManager storeManager;
 
 	private Object mutex = new Object();
 
-	public ColumnFamilyCreator(Cluster cluster, String keyspace) {
+	public ColumnFamilyCreator(StoreManager storeManager, Cluster cluster, String keyspace) {
+		this.storeManager = storeManager;
 		this.cluster = cluster;
 		this.keyspace = keyspace;
 
@@ -34,7 +48,7 @@ public class ColumnFamilyCreator implements MetaDataListener {
 			KsDef schema = manager.getKeyspaceSchema(keyspace);
 
 			for (CfDef cf : schema.getCf_defs()) {
-				currentCfs.add(cf.getName());
+				existingCfs.add(cf.getName());
 			}
 
 		} catch (Exception e) {
@@ -48,41 +62,79 @@ public class ColumnFamilyCreator implements MetaDataListener {
 	public void loaded(AbstractClassMetaData cmd) {
 
 		String cfName = MetaDataUtils.getColumnFamily(cmd);
-		
-		//shouldn't check the keyspace
-		if(cfName == null){
+
+		// shouldn't check the keyspace
+		if (cfName == null) {
 			return;
 		}
-
-		if (currentCfs.contains(cfName)) {
+		
+		if(visitedCfs.contains(cfName)){
 			return;
 		}
 
 		synchronized (mutex) {
-
-			// check again in case we're the second thread into this lock
-			if (currentCfs.contains(cfName)) {
+			//could be the second into the mutex
+			if(visitedCfs.contains(cfName)){
 				return;
 			}
 
 			ColumnFamilyManager manager = Pelops.createColumnFamilyManager(
 					cluster, keyspace);
 
-			CfDef columnFamily = new CfDef();
-			columnFamily.setName(cfName);
+			CfDef columnFamily = new CfDef(keyspace, cfName);
 			columnFamily.setComparator_type("UTF8Type");
-			columnFamily.setKeyspace(keyspace);
 
-			try {
-				manager.addColumnFamily(columnFamily);
-			} catch (Exception e) {
-				throw new NucleusDataStoreException(
-						String.format("Could not create column family %s", cfName), e);
+			// now go through the corresponding fields and create our indexes
+
+			List<ColumnDef> indexColumns = new ArrayList<ColumnDef>(
+					cmd.getAllMemberPositions().length);
+			
+
+			TypeManager typeManager = storeManager.getOMFContext().getTypeManager();
+			
+			for (int field : cmd.getAllMemberPositions()) {
+				AbstractMemberMetaData memberData = cmd
+						.getMetaDataForManagedMemberAtAbsolutePosition(field);
+
+				String indexName = MetaDataUtils.getIndexName(cmd, memberData);
+
+				if (indexName == null) {
+					continue;
+				}
+
+				String columnName = MetaDataUtils.getColumnName(cmd, field);
+				
+			
+				String validationClass = MetaDataUtils.getValidationClass(memberData.getType(), typeManager);
+
+				ColumnDef def = new ColumnDef(Bytes.fromUTF8(columnName)
+						.getBytes(), validationClass);
+
+				def.setIndex_name(indexName);
+				def.setIndex_type(IndexType.KEYS);
+
+				indexColumns.add(def);
+
 			}
 
-			currentCfs.add(cfName);
+			columnFamily.setColumn_metadata(indexColumns);
+			
+			
+			try {
+				if (existingCfs.contains(cfName)) {
+					manager.updateColumnFamily(columnFamily);
+				} else {
+					manager.addColumnFamily(columnFamily);
+				}
+			} catch (Exception e) {
+				throw new NucleusDataStoreException(String.format(
+						"Could not create column family %s", cfName), e);
+			}
+
+			visitedCfs.add(cfName);
 
 		}
 
 	}
+
 }

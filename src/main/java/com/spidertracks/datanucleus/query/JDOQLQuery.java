@@ -17,22 +17,30 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.query;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.jdo.identity.SingleFieldIdentity;
+
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.datanucleus.ClassLoaderResolver;
+import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.query.evaluator.JDOQLEvaluator;
 import org.datanucleus.query.evaluator.JavaQueryEvaluator;
 import org.datanucleus.query.expression.Expression;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.query.AbstractJDOQLQuery;
+import org.datanucleus.util.ClassUtils;
 import org.datanucleus.util.NucleusLogger;
 import org.scale7.cassandra.pelops.Bytes;
 
 import com.spidertracks.datanucleus.CassandraStoreManager;
 import com.spidertracks.datanucleus.query.runtime.Operand;
+import com.spidertracks.datanucleus.utils.ByteConverter;
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 /**
@@ -85,6 +93,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 	public JDOQLQuery(ExecutionContext ec, String query) {
 		super(ec, query);
 	}
+	
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -97,54 +106,43 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 					getSingleStringQuery(), null));
 		}
 
-		Collection results = null;
-
 		Expression filter = this.getCompilation().getExprFilter();
 
 		boolean evaluteInMemory = true;
+
 		
-		CassandraQuery query = new CassandraQuery(ec, candidateClass);
-		
-		
-		String poolName = ((CassandraStoreManager)ec.getStoreManager()).getPoolName();
-		
-		
-		AbstractClassMetaData acmd =  ec.getMetaDataManager().getMetaDataForClass(candidateClass.getName(), ec.getClassLoaderResolver());
-		
+		String poolName = ((CassandraStoreManager) ec.getStoreManager())
+				.getPoolName();
+
+		AbstractClassMetaData acmd = ec.getMetaDataManager()
+				.getMetaDataForClass(candidateClass.getName(),
+						ec.getClassLoaderResolver());
+
 		String columnFamily = MetaDataUtils.getColumnFamily(acmd);
-		
+
 		String identityCol = MetaDataUtils.getIdentityColumn(acmd);
-		
-		
 
-		if (filter != null) {
-
-			CassandraQueryExpressionEvaluator evaluator = new CassandraQueryExpressionEvaluator(
-					ec, parameters, ec.getClassLoaderResolver(), candidateClass);
-
-			Operand opTree = (Operand) filter.evaluate(evaluator);
-
-			evaluteInMemory = evaluator.isInMemoryRequired();
-			
-			opTree.performQuery(poolName, columnFamily, identityCol, ConsistencyLevel.ONE);
-			
-			Set<Bytes> candidateKeys = opTree.getCandidateKeys();
-
-			// didn't get any candidates. Note that this means we couldn't
-			// evaluate the expression
-			// from secondary keys. NOT that the result set was empty
-			if (candidateKeys == null) {
-				results = query.getObjectsOfCandidateType(subclasses, 1000);
-			} else {
-				results = query.getObjectsOfCandidateType(candidateKeys, subclasses);
-			}
-
+		if (filter == null) {
+			throw new NucleusDataStoreException(
+					"You cannot invoke a query without an expression against Cassandra.");
 		}
-		// there's nothing to filter so get our scan range if required
-		else {
 
-			results = query.getObjectsOfCandidateType(subclasses, 1000);
-		}
+		
+		ClassLoaderResolver clr = ec.getClassLoaderResolver();
+		
+		CassandraQueryExpressionEvaluator evaluator = new CassandraQueryExpressionEvaluator(
+				ec, parameters, clr, candidateClass);
+
+		Operand opTree = (Operand) filter.evaluate(evaluator);
+
+		evaluteInMemory = evaluator.isInMemoryRequired();
+
+		opTree.performQuery(poolName, columnFamily, identityCol,
+				ConsistencyLevel.ONE);
+
+		Set<Bytes> candidateKeys = opTree.getCandidateKeys();
+
+		Collection<?> results = getObjectsOfCandidateType(candidateKeys, subclasses, clr);
 
 		if (evaluteInMemory) {
 
@@ -165,4 +163,52 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 	}
 
+	/**
+	 * Used to load specific keys
+	 * 
+	 * @param ec
+	 * @param candidateClass
+	 * @param keys
+	 * @param subclasses
+	 * @param ignoreCache
+	 * @param limit
+	 * @param startKey
+	 * @return
+	 */
+	public List<?> getObjectsOfCandidateType(Set<Bytes> keys, boolean subclasses, ClassLoaderResolver clr) {
+
+		// final ClassLoaderResolver clr = ec.getClassLoaderResolver();
+		// final AbstractClassMetaData acmd =
+		// ec.getMetaDataManager().getMetaDataForClass(candidateClass, clr);
+
+		List<Object> results = new ArrayList<Object>(keys.size());
+		// String tempKey = null;
+
+		for (Bytes idBytes : keys) {
+
+			Object identity = MetaDataUtils.getObjectIdentity(ec,
+					candidateClass, idBytes.getBytes());
+			
+			// Not a valid subclass, don't return it as a candidate
+			if (!(identity instanceof SingleFieldIdentity)) {
+				throw new NucleusDataStoreException(
+						"Only single field identities are supported");
+			}
+
+			if (!ClassUtils.typesAreCompatible(candidateClass,
+					((SingleFieldIdentity) identity).getTargetClassName(), clr)) {
+				continue;
+			}
+
+			Object returned = ec.findObject(identity, true, subclasses,
+					candidateClass.getName());
+
+			if (returned != null) {
+				results.add(returned);
+			}
+		}
+
+		return results;
+
+	}
 }

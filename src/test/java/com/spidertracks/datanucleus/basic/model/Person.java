@@ -38,11 +38,11 @@ public class Person extends BaseEntity {
 	
 	//all 3 fields and persistent and secondary indexed
 	@Persistent
-	@Index(name="Person_FirstName")
+	@Index
 	private String firstName;
 	
 	@Persistent
-	@Index(name="Person_LastName")
+	@Index
 	private String lastName;
 	
 	//should auto generate secondary index name with name "Person_email"
@@ -56,7 +56,7 @@ public class Person extends BaseEntity {
 	private int loginCount;
 	
 	@Persistent
-	@Index(name="Person_LastLogin")
+	@Index
 	private Date lastLogin;
 	/**
 	 * @return the firstName

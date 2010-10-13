@@ -65,11 +65,18 @@ public abstract class Operand {
 
 	public void setLeft(Operand left) {
 		this.left = left;
+		if(left != null){
+			left.setParent(this);
+		}
 	}
 
 
 	public void setRight(Operand right) {
 		this.right = right;
+		
+		if(right != null){
+			right.setParent(this);
+		}
 	}
 	
 	

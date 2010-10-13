@@ -17,7 +17,7 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.query;
 
-import static com.spidertracks.datanucleus.utils.MetaDataUtils.getIndexName;
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +50,7 @@ import com.spidertracks.datanucleus.query.runtime.CompressableOperand;
 import com.spidertracks.datanucleus.query.runtime.EqualityOperand;
 import com.spidertracks.datanucleus.query.runtime.Operand;
 import com.spidertracks.datanucleus.query.runtime.OrOperand;
+import com.spidertracks.datanucleus.utils.ByteConverter;
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 /**
@@ -64,11 +65,9 @@ import com.spidertracks.datanucleus.utils.MetaDataUtils;
 public class CassandraQueryExpressionEvaluator extends
 		AbstractExpressionEvaluator {
 
-	
-	
 	private static final Logger logger = LoggerFactory
 			.getLogger(CassandraQueryExpressionEvaluator.class);
-	
+
 	private static final int MAX = 1000;
 
 	private Stack<IndexParam> indexKeys = new Stack<IndexParam>();
@@ -117,8 +116,6 @@ public class CassandraQueryExpressionEvaluator extends
 
 		// assume only one identity field
 
-		
-
 	}
 
 	/*
@@ -131,22 +128,26 @@ public class CassandraQueryExpressionEvaluator extends
 	protected Object processAndExpression(Expression expr) {
 		logger.debug("Processing && expression {}", expr);
 
-		//get our current left and right
+		// get our current left and right
 		Operand left = operationStack.pop();
 		Operand right = operationStack.pop();
-		
-		//compress the right and left on this && into a single statement for efficiency
-		if(left instanceof CompressableOperand && right instanceof CompressableOperand){
+
+		// compress the right and left on this && into a single statement for
+		// efficiency
+		if (left instanceof CompressableOperand
+				&& right instanceof CompressableOperand) {
 			EqualityOperand op = new EqualityOperand(MAX);
-			
-			op.addAll(((CompressableOperand)left).getIndexClause().getExpressions());
-			
-			op.addAll(((CompressableOperand)right).getIndexClause().getExpressions());
-			
+
+			op.addAll(((CompressableOperand) left).getIndexClause()
+					.getExpressions());
+
+			op.addAll(((CompressableOperand) right).getIndexClause()
+					.getExpressions());
+
 			return operationStack.push(op);
 		}
-		
-		//we can't compress, just add the left and right
+
+		// we can't compress, just add the left and right
 		AndOperand op = new AndOperand();
 		op.setLeft(left);
 		op.setRight(right);
@@ -300,14 +301,12 @@ public class CassandraQueryExpressionEvaluator extends
 	@Override
 	protected Object processOrExpression(Expression expr) {
 		logger.debug("Processing || expression {}", expr);
-		
-		//get our current left and right
+
+		// get our current left and right
 		Operand left = operationStack.pop();
 		Operand right = operationStack.pop();
-		
-	
-		
-		//we can't compress, just add the left and right
+
+		// we can't compress, just add the left and right
 		OrOperand op = new OrOperand();
 		op.setLeft(left);
 		op.setRight(right);
@@ -329,20 +328,14 @@ public class CassandraQueryExpressionEvaluator extends
 		Object value = QueryUtils.getValueForParameterExpression(
 				parameterValues, expr);
 
-		Bytes byteVal = MetaDataUtils.getIndexLong(ec, value);
+		Bytes byteVal = ByteConverter.convertToStorageType(value,
+				ec.getTypeManager());
 
-		if (byteVal != null) {
-			indexKeys.push(new IndexParam(MetaDataUtils.INDEX_LONG, byteVal));
-			return value;
-		}
+		IndexParam param = indexKeys.peek();
 
-		byteVal = MetaDataUtils.getIndexString(ec, value);
+		param.setIndexValue(byteVal);
 
-		if (byteVal != null) {
-			indexKeys.push(new IndexParam(MetaDataUtils.INDEX_STRING, byteVal));
-		}
-
-		return value;
+		return param;
 
 	}
 
@@ -362,9 +355,10 @@ public class CassandraQueryExpressionEvaluator extends
 		AbstractMemberMetaData member = metaData.getMetaDataForMember(expr
 				.getSymbol().getQualifiedName());
 
-		String indexName = getIndexName(metaData, member);
+		String columnName = getColumnName(metaData,
+				member.getAbsoluteFieldNumber());
 
-		IndexParam param = new IndexParam(indexName, null);
+		IndexParam param = new IndexParam(columnName, null);
 
 		return indexKeys.push(param);
 
@@ -383,22 +377,14 @@ public class CassandraQueryExpressionEvaluator extends
 
 		Object value = expr.getLiteral();
 
-		Bytes byteVal = MetaDataUtils.getIndexLong(ec, value);
-		
+		Bytes byteVal = ByteConverter.convertToStorageType(value,
+				ec.getTypeManager());
+
 		IndexParam param = indexKeys.peek();
 
-		if (byteVal != null) {
-			param.setIndexValue(byteVal);
-			return value;
-		}
+		param.setIndexValue(byteVal);
 
-		byteVal = MetaDataUtils.getIndexString(ec, value);
-
-		if (byteVal != null) {
-			param.setIndexValue(byteVal);
-		}
-
-		return value;
+		return param;
 	}
 
 	/*

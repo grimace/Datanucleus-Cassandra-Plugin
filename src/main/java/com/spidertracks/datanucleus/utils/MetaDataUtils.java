@@ -43,8 +43,12 @@ import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.mapped.exceptions.DatastoreFieldDefinitionException;
 import org.datanucleus.store.types.ObjectLongConverter;
 import org.datanucleus.store.types.ObjectStringConverter;
+import org.datanucleus.store.types.TypeManager;
 import org.scale7.cassandra.pelops.Bytes;
+import org.scale7.cassandra.pelops.ColumnFamilyManager;
 import org.scale7.cassandra.pelops.Selector;
+
+import com.eaio.uuid.UUID;
 
 /**
  * Utility class to convert instance data to Cassandra columns and data types
@@ -64,6 +68,7 @@ public class MetaDataUtils {
 	public static final String INDEX_STRING = "StringIndex";
 
 	private static ConcurrentMap<String, String> classToCfNames = new ConcurrentHashMap<String, String>();
+	private static ConcurrentMap<IndexMetaData, String> fieldToIndexNames = new ConcurrentHashMap<IndexMetaData, String>();
 
 	//
 	/**
@@ -133,56 +138,8 @@ public class MetaDataUtils {
 		return id.toString();
 	}
 
-	/**
-	 * Convert from the given object to long bytes. If it can't be converted
-	 * null is returned
-	 * 
-	 * @param ec
-	 * @param o
-	 * @return
-	 */
-	public static Bytes getIndexLong(ExecutionContext ec, Object o) {
+	
 
-		if (o instanceof Long || o instanceof Integer || o instanceof Short) {
-			return Bytes.fromLong((Long) o);
-		} else if (o instanceof Float || o instanceof Double) {
-			return Bytes.fromDouble((Double) o);
-		}
-
-		ObjectLongConverter converter = ec.getTypeManager().getLongConverter(
-				o.getClass());
-
-		if (converter == null) {
-			return null;
-		}
-
-		return Bytes.fromLong(converter.toLong(o));
-
-	}
-
-	/**
-	 * Convert from the given object to a string. Null is returned if it cannot
-	 * be convered
-	 * 
-	 * @param ec
-	 * @param o
-	 * @return
-	 */
-	public static Bytes getIndexString(ExecutionContext ec, Object o) {
-
-		if (o instanceof String) {
-			return Bytes.fromUTF8((String) o);
-		}
-
-		ObjectStringConverter converter = ec.getTypeManager()
-				.getStringConverter(o.getClass());
-
-		if (converter == null) {
-			return null;
-		}
-
-		return Bytes.fromUTF8(converter.toString(o));
-	}
 
 	/**
 	 * Use the datanucleus converers to convert from the string to a new
@@ -303,7 +260,7 @@ public class MetaDataUtils {
 			}
 
 		
-			return bytes.toObject(null);
+			return ByteConverter.getObject(bytes.getBytes());
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(
 					"Unable to serialize bytes to object identity.  Please make sure it has the same SerializationId, long or string converter is was stored with. ");
@@ -406,7 +363,26 @@ public class MetaDataUtils {
 			return null;
 		}
 
-		return getColumnName(classMetaData, fieldMetaData.getFieldId());
+		
+		String name = fieldToIndexNames.get(metaData);
+		
+		if(name != null){
+			return name;
+		}
+				
+		
+		name = metaData.getName();
+
+		if (name == null) {
+			StringBuffer nameBuffer = new StringBuffer();
+
+			nameBuffer.append(fieldMetaData.getName()).append("_").append("index");
+			name = nameBuffer.toString();
+		}
+		
+		fieldToIndexNames.putIfAbsent(metaData, name);
+
+		return name;
 
 	}
 
@@ -550,6 +526,70 @@ public class MetaDataUtils {
 		String columnName = getDiscriminatorColumnName(discriminatorMetaData);
 
 		return Selector.newColumnsPredicate(columnName);
+	}
+	
+	/**
+	 * Return the cassandra validator for the class specified.
+	 * @param fieldClass
+	 * @return
+	 */
+	public static String getValidationClass(Class<?> fieldClass, TypeManager manager){
+		
+		if (Boolean.class.equals(fieldClass)) {
+			return ColumnFamilyManager.CFDEF_COMPARATOR_BYTES;
+		}
+
+		if (String.class.equals(fieldClass)){
+			return ColumnFamilyManager.CFDEF_COMPARATOR_UTF8;
+		}
+
+		if (Short.class.equals(fieldClass)){
+			return ColumnFamilyManager.CFDEF_COMPARATOR_BYTES;
+		}
+
+		if (Integer.class.equals(fieldClass)){
+			return ColumnFamilyManager.CFDEF_COMPARATOR_INTEGER;
+		}
+		
+		if (Double.class.equals(fieldClass)){
+			return ColumnFamilyManager.CFDEF_COMPARATOR_INTEGER;
+		}
+
+		if (Long.class.equals(fieldClass)){
+			return ColumnFamilyManager.CFDEF_COMPARATOR_LONG;
+		}
+
+		if (Float.class.equals(fieldClass)){
+			return ColumnFamilyManager.CFDEF_COMPARATOR_LONG;
+		}
+
+		if (java.util.UUID.class.equals(fieldClass)){
+			return ColumnFamilyManager.CFDEF_COMPARATOR_TIME_UUID;
+		}
+
+		if (UUID.class.equals(fieldClass)){
+			return ColumnFamilyManager.CFDEF_COMPARATOR_LEXICAL_UUID;
+		}
+
+		
+		ObjectLongConverter converter = manager.getLongConverter(fieldClass);
+
+		if (converter != null) {
+			return ColumnFamilyManager.CFDEF_COMPARATOR_LONG;
+		}
+
+		
+		
+		ObjectStringConverter stringConverter = manager.getStringConverter(fieldClass);
+		
+		if(stringConverter != null){
+			return ColumnFamilyManager.CFDEF_COMPARATOR_UTF8;
+		}
+		
+		
+		
+		throw new NucleusDataStoreException(
+				"Could not convert object to byte.  Object types must be of any primitive, a UTF8 String, or com.eaio.uuid.UUID/java.util.UUID");
 	}
 
 }

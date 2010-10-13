@@ -150,7 +150,7 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 	 */
 	public void cfComplete(boolean createColumnFamilies) {
 		if(createColumnFamilies){
-			manager.getMetaDataManager().registerListener(new ColumnFamilyCreator(cluster, keyspace ));
+			manager.getMetaDataManager().registerListener(new ColumnFamilyCreator(manager, cluster, keyspace ));
 		}
 	}
 

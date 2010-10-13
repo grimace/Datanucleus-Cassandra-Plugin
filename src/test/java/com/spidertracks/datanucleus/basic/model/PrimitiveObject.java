@@ -4,6 +4,7 @@
 package com.spidertracks.datanucleus.basic.model;
 
 import javax.jdo.annotations.IdentityType;
+import javax.jdo.annotations.Index;
 import javax.jdo.annotations.Inheritance;
 import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
@@ -48,6 +49,7 @@ public class PrimitiveObject extends BaseEntity{
 	private char testChar;
 
 	@Persistent
+	@Index
 	private String testString;
 
 	public boolean isTestBool() {

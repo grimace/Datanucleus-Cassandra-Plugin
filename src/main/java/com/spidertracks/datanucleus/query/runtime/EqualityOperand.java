@@ -17,6 +17,7 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.query.runtime;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +43,7 @@ public class EqualityOperand extends Operand implements CompressableOperand{
 		clause = new IndexClause();
 		clause.setStart_key(new byte[]{});
 		clause.setCount(count);
+		super.candidateKeys = new HashSet<Bytes>();
 	}
 	
 	
@@ -84,6 +86,7 @@ public class EqualityOperand extends Operand implements CompressableOperand{
 		
 		try {
 			Map<Bytes, List<Column>> results = Pelops.createSelector(poolName).getIndexedColumns(cfName, clause, Selector.newColumnsPredicate(identityColumnName), consistency);
+			
 			
 			for(List<Column> columns: results.values()){
 				

@@ -20,7 +20,6 @@ package com.spidertracks.datanucleus;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnName;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +39,8 @@ import org.datanucleus.store.fieldmanager.AbstractFieldManager;
 import org.datanucleus.store.types.ObjectStringConverter;
 import org.datanucleus.store.types.sco.SCOUtils;
 import org.scale7.cassandra.pelops.Bytes;
+
+import com.spidertracks.datanucleus.utils.ByteConverter;
 
 /**
  * @author Todd Nine
@@ -255,7 +256,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 							"Embedded objects are currently unimplemented.");
 				}
 
-				Object key = new Bytes(column.getValue()).toObject(null);
+				Object key = ByteConverter.getObject(column.getValue());
 
 				Object object = context.findObject(key, false, false,
 						fieldMetaData.getTypeName());
@@ -285,8 +286,8 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 					// get our list of Strings
 
-					List<Object> serializedIdList = new Bytes(columns.get(
-							columnName).getValue()).toObject(new ArrayList<Object>());
+					List<Object> serializedIdList = ByteConverter.getObject(columns.get(
+							columnName).getValue());
 
 					for (Object key : serializedIdList) {
 
@@ -314,8 +315,8 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 					ApiAdapter adapter = objectProvider.getExecutionContext()
 							.getApiAdapter();
 
-					Map<Object, Object> serializedMap = new Bytes(columns.get(
-							columnName).getValue()).toObject(new HashMap<Object, Object>());
+					Map<Object, Object> serializedMap = ByteConverter.getObject(columns.get(
+							columnName).getValue());
 
 					Class keyClass = clr.classForName(fieldMetaData.getMap()
 							.getKeyType());
@@ -351,8 +352,8 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 				} else if (fieldMetaData.getType().isArray()) {
 
-					List<Object> keys = new Bytes(columns.get(columnName)
-							.getValue()).toObject(new ArrayList<Object>());
+					List<Object> keys = ByteConverter.getObject(columns.get(columnName)
+							.getValue());
 
 					Object array = Array.newInstance(fieldMetaData.getType()
 							.getComponentType(), keys.size());
@@ -378,7 +379,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 				return converter.toObject(Bytes.toUTF8(column.getValue()));
 			}
 
-			return new Bytes(column.value).toObject(null);
+			return ByteConverter.getObject(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
