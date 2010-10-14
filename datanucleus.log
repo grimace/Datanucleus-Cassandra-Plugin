@@ -1,0 +1,872 @@
+12:09:47,469 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer : Using ClassEnhancer "ASM" for API "JDO"
+12:09:47,797 (main) INFO  [DataNucleus.Persistence] - Property datanucleus.rdbms.stringDefaultLength unknown - will be ignored
+12:09:47,799 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 2.1.0-release) : Enhancement of classes
+12:09:47,935 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraFetchFieldManager" has no MetaData or annotations.
+12:09:47,939 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraInsertFieldManager" has no MetaData or annotations.
+12:09:47,943 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraPersistenceHandler" has no MetaData or annotations.
+12:09:47,949 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraStoreManager" has no MetaData or annotations.
+12:09:47,953 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ColumnFamilyCreator" has no MetaData or annotations.
+12:09:47,958 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ConnectionFactoryImpl" has no MetaData or annotations.
+12:09:47,963 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.CassandraUUIDGenerator" has no MetaData or annotations.
+12:09:47,967 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.DateConverter" has no MetaData or annotations.
+12:09:47,996 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.UUIDConverter" has no MetaData or annotations.
+12:09:48,000 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.BatchMutationManager" has no MetaData or annotations.
+12:09:48,004 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete$Deletion" has no MetaData or annotations.
+12:09:48,009 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete" has no MetaData or annotations.
+12:09:48,012 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextMutate" has no MetaData or annotations.
+12:09:48,015 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextOp" has no MetaData or annotations.
+12:09:48,055 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$IndexParam" has no MetaData or annotations.
+12:09:48,063 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator" has no MetaData or annotations.
+12:09:48,072 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLQuery" has no MetaData or annotations.
+12:09:48,078 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.AndOperand" has no MetaData or annotations.
+12:09:48,100 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Columns" has no MetaData or annotations.
+12:09:48,101 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.CompressableOperand" has no MetaData or annotations.
+12:09:48,109 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.EqualityOperand" has no MetaData or annotations.
+12:09:48,114 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Operand" has no MetaData or annotations.
+12:09:48,120 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.OrOperand" has no MetaData or annotations.
+12:09:48,124 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.ByteConverter" has no MetaData or annotations.
+12:09:48,129 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.MetaDataUtils" has no MetaData or annotations.
+12:09:48,131 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraTest" has no MetaData or annotations.
+12:09:48,135 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.ArrayTest" has no MetaData or annotations.
+12:09:48,197 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.model.CardArray" has been specified with JDO annotations so using those.
+12:09:48,214 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.model.PackArray" has been specified with JDO annotations so using those.
+12:09:48,225 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.CascadeTest" has no MetaData or annotations.
+12:09:48,228 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.PrimitiveTest" has no MetaData or annotations.
+12:09:48,231 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.converter.EnumConverter" has no MetaData or annotations.
+12:09:48,234 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.InheritanceTest" has no MetaData or annotations.
+12:09:48,239 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.Search" has been specified with JDO annotations so using those.
+12:09:48,242 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchOne" has been specified with JDO annotations so using those.
+12:09:48,244 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchThree" has been specified with JDO annotations so using those.
+12:09:48,245 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchTwo" has been specified with JDO annotations so using those.
+12:09:48,246 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Child" has been specified with JDO annotations so using those.
+12:09:48,247 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildOne" has been specified with JDO annotations so using those.
+12:09:48,249 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildTwo" has been specified with JDO annotations so using those.
+12:09:48,249 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Parent" has been specified with JDO annotations so using those.
+12:09:48,251 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ChildThree" has been specified with JDO annotations so using those.
+12:09:48,252 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeOne" has been specified with JDO annotations so using those.
+12:09:48,253 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeTwo" has been specified with JDO annotations so using those.
+12:09:48,254 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ParentThree" has been specified with JDO annotations so using those.
+12:09:48,269 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Child" has been specified with JDO annotations so using those.
+12:09:48,278 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.ChildTwo" has been specified with JDO annotations so using those.
+12:09:48,294 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoOne" has been specified with JDO annotations so using those.
+12:09:48,296 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoTwo" has been specified with JDO annotations so using those.
+12:09:48,297 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Parent" has been specified with JDO annotations so using those.
+12:09:48,298 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.DateEntity" has been specified with JDO annotations so using those.
+12:09:48,301 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject$Embedded" has been specified with JDO annotations so using those.
+12:09:48,302 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject" has been specified with JDO annotations so using those.
+12:09:48,306 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EnumEntity" has been specified with JDO annotations so using those.
+12:09:48,306 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EnumValues" has no MetaData or annotations.
+12:09:48,306 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.InvitationToken" has been specified with JDO annotations so using those.
+12:09:48,309 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.InvitedPerson" has been specified with JDO annotations so using those.
+12:09:48,309 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.Person" has been specified with JDO annotations so using those.
+12:09:48,311 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObject" has been specified with JDO annotations so using those.
+12:09:48,331 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObjectSubclass" has been specified with JDO annotations so using those.
+12:09:48,333 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.UnitData" has been specified with JDO annotations so using those.
+12:09:48,340 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.UnitDataKey" has no MetaData or annotations.
+12:09:48,343 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.CollectionTest" has no MetaData or annotations.
+12:09:48,344 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.model.Card" has been specified with JDO annotations so using those.
+12:09:48,345 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.model.Pack" has been specified with JDO annotations so using those.
+12:09:48,369 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.MapTest" has no MetaData or annotations.
+12:09:48,370 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.CardMap" has been specified with JDO annotations so using those.
+12:09:48,372 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.CardMapDate" has been specified with JDO annotations so using those.
+12:09:48,374 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.PackMap" has been specified with JDO annotations so using those.
+12:09:48,378 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.PackMapDate" has been specified with JDO annotations so using those.
+12:09:48,379 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.model.BaseEntity" has been specified with JDO annotations so using those.
+12:09:48,383 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLBasicTest" has no MetaData or annotations.
+12:09:48,386 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.CassandraUUIDGeneratorTest" has no MetaData or annotations.
+12:09:48,389 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.SerializedClass" has no MetaData or annotations.
+12:09:48,474 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/array/model/CardArray.class" with enhanced definition
+12:09:48,478 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/array/model/PackArray.class" with enhanced definition
+12:09:48,485 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casefour/Search.class" with enhanced definition
+12:09:48,489 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casefour/SearchOne.class" with enhanced definition
+12:09:48,493 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casefour/SearchThree.class" with enhanced definition
+12:09:48,498 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casefour/SearchTwo.class" with enhanced definition
+12:09:48,504 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/caseone/Child.class" with enhanced definition
+12:09:48,508 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/caseone/GrandChildOne.class" with enhanced definition
+12:09:48,512 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/caseone/GrandChildTwo.class" with enhanced definition
+12:09:48,516 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/caseone/Parent.class" with enhanced definition
+12:09:48,520 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casethree/ChildThree.class" with enhanced definition
+12:09:48,524 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casethree/GrandChildThreeOne.class" with enhanced definition
+12:09:48,527 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casethree/GrandChildThreeTwo.class" with enhanced definition
+12:09:48,530 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casethree/ParentThree.class" with enhanced definition
+12:09:48,533 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casetwo/Child.class" with enhanced definition
+12:09:48,537 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casetwo/ChildTwo.class" with enhanced definition
+12:09:48,539 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casetwo/GrandChildTwoOne.class" with enhanced definition
+12:09:48,542 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casetwo/GrandChildTwoTwo.class" with enhanced definition
+12:09:48,545 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casetwo/Parent.class" with enhanced definition
+12:09:48,589 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/DateEntity.class" with enhanced definition
+12:09:48,593 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/EmbeddedObject$Embedded.class" with enhanced definition
+12:09:48,596 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/EmbeddedObject.class" with enhanced definition
+12:09:48,599 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/EnumEntity.class" with enhanced definition
+12:09:48,604 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/InvitationToken.class" with enhanced definition
+12:09:48,606 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/InvitedPerson.class" with enhanced definition
+12:09:48,628 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/Person.class" with enhanced definition
+12:09:48,634 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/PrimitiveObject.class" with enhanced definition
+12:09:48,637 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/PrimitiveObjectSubclass.class" with enhanced definition
+12:09:48,641 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/UnitData.class" with enhanced definition
+12:09:48,643 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/collection/model/Card.class" with enhanced definition
+12:09:48,645 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/collection/model/Pack.class" with enhanced definition
+12:09:48,647 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/map/model/CardMap.class" with enhanced definition
+12:09:48,649 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/map/model/CardMapDate.class" with enhanced definition
+12:09:48,651 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/map/model/PackMap.class" with enhanced definition
+12:09:48,653 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/map/model/PackMapDate.class" with enhanced definition
+12:09:48,655 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/model/BaseEntity.class" with enhanced definition
+12:09:48,656 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 36 classes. Timings : input=601 ms, enhance=252 ms, total=853 ms. Consult the log for full details
+12:09:50,480 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer : Using ClassEnhancer "ASM" for API "JDO"
+12:09:50,752 (main) INFO  [DataNucleus.Persistence] - Property datanucleus.rdbms.stringDefaultLength unknown - will be ignored
+12:09:50,753 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 2.1.0-release) : Enhancement of classes
+12:09:50,837 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraFetchFieldManager" has no MetaData or annotations.
+12:09:50,841 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraInsertFieldManager" has no MetaData or annotations.
+12:09:50,845 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraPersistenceHandler" has no MetaData or annotations.
+12:09:50,851 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraStoreManager" has no MetaData or annotations.
+12:09:50,855 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ColumnFamilyCreator" has no MetaData or annotations.
+12:09:50,859 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ConnectionFactoryImpl" has no MetaData or annotations.
+12:09:50,864 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.CassandraUUIDGenerator" has no MetaData or annotations.
+12:09:50,868 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.DateConverter" has no MetaData or annotations.
+12:09:50,872 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.UUIDConverter" has no MetaData or annotations.
+12:09:50,875 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.BatchMutationManager" has no MetaData or annotations.
+12:09:50,879 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete$Deletion" has no MetaData or annotations.
+12:09:50,882 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete" has no MetaData or annotations.
+12:09:50,885 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextMutate" has no MetaData or annotations.
+12:09:50,888 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextOp" has no MetaData or annotations.
+12:09:50,911 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$IndexParam" has no MetaData or annotations.
+12:09:50,940 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator" has no MetaData or annotations.
+12:09:50,965 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLQuery" has no MetaData or annotations.
+12:09:50,970 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.AndOperand" has no MetaData or annotations.
+12:09:50,973 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Columns" has no MetaData or annotations.
+12:09:50,974 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.CompressableOperand" has no MetaData or annotations.
+12:09:50,977 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.EqualityOperand" has no MetaData or annotations.
+12:09:50,981 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Operand" has no MetaData or annotations.
+12:09:50,985 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.OrOperand" has no MetaData or annotations.
+12:09:50,988 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.ByteConverter" has no MetaData or annotations.
+12:09:50,992 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.MetaDataUtils" has no MetaData or annotations.
+12:09:50,995 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraTest" has no MetaData or annotations.
+12:09:50,999 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.ArrayTest" has no MetaData or annotations.
+12:09:51,060 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.model.CardArray" has been specified with JDO annotations so using those.
+12:09:51,073 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.model.PackArray" has been specified with JDO annotations so using those.
+12:09:51,083 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.CascadeTest" has no MetaData or annotations.
+12:09:51,086 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.PrimitiveTest" has no MetaData or annotations.
+12:09:51,089 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.converter.EnumConverter" has no MetaData or annotations.
+12:09:51,093 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.InheritanceTest" has no MetaData or annotations.
+12:09:51,098 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.Search" has been specified with JDO annotations so using those.
+12:09:51,104 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchOne" has been specified with JDO annotations so using those.
+12:09:51,105 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchThree" has been specified with JDO annotations so using those.
+12:09:51,107 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchTwo" has been specified with JDO annotations so using those.
+12:09:51,109 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Child" has been specified with JDO annotations so using those.
+12:09:51,111 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildOne" has been specified with JDO annotations so using those.
+12:09:51,113 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildTwo" has been specified with JDO annotations so using those.
+12:09:51,113 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Parent" has been specified with JDO annotations so using those.
+12:09:51,115 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ChildThree" has been specified with JDO annotations so using those.
+12:09:51,116 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeOne" has been specified with JDO annotations so using those.
+12:09:51,118 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeTwo" has been specified with JDO annotations so using those.
+12:09:51,118 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ParentThree" has been specified with JDO annotations so using those.
+12:09:51,120 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Child" has been specified with JDO annotations so using those.
+12:09:51,126 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.ChildTwo" has been specified with JDO annotations so using those.
+12:09:51,138 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoOne" has been specified with JDO annotations so using those.
+12:09:51,139 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoTwo" has been specified with JDO annotations so using those.
+12:09:51,140 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Parent" has been specified with JDO annotations so using those.
+12:09:51,141 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.DateEntity" has been specified with JDO annotations so using those.
+12:09:51,143 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject$Embedded" has been specified with JDO annotations so using those.
+12:09:51,144 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject" has been specified with JDO annotations so using those.
+12:09:51,148 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EnumEntity" has been specified with JDO annotations so using those.
+12:09:51,148 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EnumValues" has no MetaData or annotations.
+12:09:51,148 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.InvitationToken" has been specified with JDO annotations so using those.
+12:09:51,150 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.InvitedPerson" has been specified with JDO annotations so using those.
+12:09:51,151 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.Person" has been specified with JDO annotations so using those.
+12:09:51,154 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObject" has been specified with JDO annotations so using those.
+12:09:51,181 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObjectSubclass" has been specified with JDO annotations so using those.
+12:09:51,183 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.UnitData" has been specified with JDO annotations so using those.
+12:09:51,189 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.UnitDataKey" has no MetaData or annotations.
+12:09:51,192 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.CollectionTest" has no MetaData or annotations.
+12:09:51,193 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.model.Card" has been specified with JDO annotations so using those.
+12:09:51,194 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.model.Pack" has been specified with JDO annotations so using those.
+12:09:51,199 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.MapTest" has no MetaData or annotations.
+12:09:51,200 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.CardMap" has been specified with JDO annotations so using those.
+12:09:51,201 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.CardMapDate" has been specified with JDO annotations so using those.
+12:09:51,202 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.PackMap" has been specified with JDO annotations so using those.
+12:09:51,204 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.PackMapDate" has been specified with JDO annotations so using those.
+12:09:51,205 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.model.BaseEntity" has been specified with JDO annotations so using those.
+12:09:51,208 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLBasicTest" has no MetaData or annotations.
+12:09:51,211 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.CassandraUUIDGeneratorTest" has no MetaData or annotations.
+12:09:51,229 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.SerializedClass" has no MetaData or annotations.
+12:09:51,318 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/array/model/CardArray.class" with enhanced definition
+12:09:51,360 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/array/model/PackArray.class" with enhanced definition
+12:09:51,364 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casefour/Search.class" with enhanced definition
+12:09:51,367 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casefour/SearchOne.class" with enhanced definition
+12:09:51,370 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casefour/SearchThree.class" with enhanced definition
+12:09:51,374 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casefour/SearchTwo.class" with enhanced definition
+12:09:51,377 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/caseone/Child.class" with enhanced definition
+12:09:51,380 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/caseone/GrandChildOne.class" with enhanced definition
+12:09:51,382 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/caseone/GrandChildTwo.class" with enhanced definition
+12:09:51,384 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/caseone/Parent.class" with enhanced definition
+12:09:51,386 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casethree/ChildThree.class" with enhanced definition
+12:09:51,388 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casethree/GrandChildThreeOne.class" with enhanced definition
+12:09:51,390 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casethree/GrandChildThreeTwo.class" with enhanced definition
+12:09:51,392 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casethree/ParentThree.class" with enhanced definition
+12:09:51,394 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casetwo/Child.class" with enhanced definition
+12:09:51,397 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casetwo/ChildTwo.class" with enhanced definition
+12:09:51,399 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casetwo/GrandChildTwoOne.class" with enhanced definition
+12:09:51,401 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casetwo/GrandChildTwoTwo.class" with enhanced definition
+12:09:51,403 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casetwo/Parent.class" with enhanced definition
+12:09:51,420 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/DateEntity.class" with enhanced definition
+12:09:51,422 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/EmbeddedObject$Embedded.class" with enhanced definition
+12:09:51,424 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/EmbeddedObject.class" with enhanced definition
+12:09:51,426 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/EnumEntity.class" with enhanced definition
+12:09:51,430 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/InvitationToken.class" with enhanced definition
+12:09:51,432 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/InvitedPerson.class" with enhanced definition
+12:09:51,435 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/Person.class" with enhanced definition
+12:09:51,439 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/PrimitiveObject.class" with enhanced definition
+12:09:51,441 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/PrimitiveObjectSubclass.class" with enhanced definition
+12:09:51,445 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/UnitData.class" with enhanced definition
+12:09:51,446 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/collection/model/Card.class" with enhanced definition
+12:09:51,448 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/collection/model/Pack.class" with enhanced definition
+12:09:51,450 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/map/model/CardMap.class" with enhanced definition
+12:09:51,453 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/map/model/CardMapDate.class" with enhanced definition
+12:09:51,455 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/map/model/PackMap.class" with enhanced definition
+12:09:51,457 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/map/model/PackMapDate.class" with enhanced definition
+12:09:51,460 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/model/BaseEntity.class" with enhanced definition
+12:09:51,460 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 36 classes. Timings : input=488 ms, enhance=215 ms, total=703 ms. Consult the log for full details
+12:17:52,976 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer : Using ClassEnhancer "ASM" for API "JDO"
+12:17:53,121 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer : Using ClassEnhancer "ASM" for API "JDO"
+12:17:53,280 (main) INFO  [DataNucleus.Persistence] - Property datanucleus.rdbms.stringDefaultLength unknown - will be ignored
+12:17:53,282 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 2.1.0-release) : Enhancement of classes
+12:17:53,386 (main) INFO  [DataNucleus.Persistence] - Property datanucleus.rdbms.stringDefaultLength unknown - will be ignored
+12:17:53,388 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 2.1.0-release) : Enhancement of classes
+12:17:53,494 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraFetchFieldManager" has no MetaData or annotations.
+12:17:53,499 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraInsertFieldManager" has no MetaData or annotations.
+12:17:53,505 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraFetchFieldManager" has no MetaData or annotations.
+12:17:53,506 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraPersistenceHandler" has no MetaData or annotations.
+12:17:53,511 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraInsertFieldManager" has no MetaData or annotations.
+12:17:53,513 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraStoreManager" has no MetaData or annotations.
+12:17:53,518 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ColumnFamilyCreator" has no MetaData or annotations.
+12:17:53,518 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraPersistenceHandler" has no MetaData or annotations.
+12:17:53,523 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ConnectionFactoryImpl" has no MetaData or annotations.
+12:17:53,527 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraStoreManager" has no MetaData or annotations.
+12:17:53,531 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.CassandraUUIDGenerator" has no MetaData or annotations.
+12:17:53,533 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ColumnFamilyCreator" has no MetaData or annotations.
+12:17:53,535 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.DateConverter" has no MetaData or annotations.
+12:17:53,540 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ConnectionFactoryImpl" has no MetaData or annotations.
+12:17:53,541 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.UUIDConverter" has no MetaData or annotations.
+12:17:53,547 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.CassandraUUIDGenerator" has no MetaData or annotations.
+12:17:53,547 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.BatchMutationManager" has no MetaData or annotations.
+12:17:53,553 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete$Deletion" has no MetaData or annotations.
+12:17:53,553 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.DateConverter" has no MetaData or annotations.
+12:17:53,559 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.UUIDConverter" has no MetaData or annotations.
+12:17:53,559 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete" has no MetaData or annotations.
+12:17:53,564 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextMutate" has no MetaData or annotations.
+12:17:53,565 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.BatchMutationManager" has no MetaData or annotations.
+12:17:53,568 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextOp" has no MetaData or annotations.
+12:17:53,569 (main) ERROR [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$1" was not found in the CLASSPATH. Please check your specification and your CLASSPATH.
+org.datanucleus.exceptions.ClassNotResolvedException: Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$1" was not found in the CLASSPATH. Please check your specification and your CLASSPATH.
+	at org.datanucleus.JDOClassLoaderResolver.classForName(JDOClassLoaderResolver.java:247)
+	at org.datanucleus.JDOClassLoaderResolver.classForName(JDOClassLoaderResolver.java:412)
+	at org.datanucleus.metadata.MetaDataManager.loadClasses(MetaDataManager.java:436)
+	at org.datanucleus.enhancer.DataNucleusEnhancer.getFileMetadataForInput(DataNucleusEnhancer.java:791)
+	at org.datanucleus.enhancer.DataNucleusEnhancer.enhance(DataNucleusEnhancer.java:582)
+	at org.datanucleus.enhancer.DataNucleusEnhancer.main(DataNucleusEnhancer.java:1316)
+
+12:17:53,570 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete$Deletion" has no MetaData or annotations.
+12:17:53,572 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$IndexParam" has no MetaData or annotations.
+12:17:53,576 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete" has no MetaData or annotations.
+12:17:53,579 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator" has no MetaData or annotations.
+12:17:53,581 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextMutate" has no MetaData or annotations.
+12:17:53,585 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextOp" has no MetaData or annotations.
+12:17:53,586 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLQuery" has no MetaData or annotations.
+12:17:53,587 (main) ERROR [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$1" was not found in the CLASSPATH. Please check your specification and your CLASSPATH.
+org.datanucleus.exceptions.ClassNotResolvedException: Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$1" was not found in the CLASSPATH. Please check your specification and your CLASSPATH.
+	at org.datanucleus.JDOClassLoaderResolver.classForName(JDOClassLoaderResolver.java:247)
+	at org.datanucleus.JDOClassLoaderResolver.classForName(JDOClassLoaderResolver.java:412)
+	at org.datanucleus.metadata.MetaDataManager.loadClasses(MetaDataManager.java:436)
+	at org.datanucleus.enhancer.DataNucleusEnhancer.getFileMetadataForInput(DataNucleusEnhancer.java:791)
+	at org.datanucleus.enhancer.DataNucleusEnhancer.enhance(DataNucleusEnhancer.java:582)
+	at org.datanucleus.enhancer.DataNucleusEnhancer.main(DataNucleusEnhancer.java:1316)
+
+12:17:53,620 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$IndexParam" has no MetaData or annotations.
+12:17:53,620 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.AndOperand" has no MetaData or annotations.
+12:17:53,626 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Columns" has no MetaData or annotations.
+12:17:53,626 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator" has no MetaData or annotations.
+12:17:53,626 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.CompressableOperand" has no MetaData or annotations.
+12:17:53,632 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.EqualityOperand" has no MetaData or annotations.
+12:17:53,634 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLQuery" has no MetaData or annotations.
+12:17:53,637 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Operand" has no MetaData or annotations.
+12:17:53,639 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.AndOperand" has no MetaData or annotations.
+12:17:53,658 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.OrOperand" has no MetaData or annotations.
+12:17:53,661 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Columns" has no MetaData or annotations.
+12:17:53,662 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.CompressableOperand" has no MetaData or annotations.
+12:17:53,663 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.ByteConverter" has no MetaData or annotations.
+12:17:53,668 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.EqualityOperand" has no MetaData or annotations.
+12:17:53,669 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.MetaDataUtils" has no MetaData or annotations.
+12:17:53,673 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraTest" has no MetaData or annotations.
+12:17:53,674 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Operand" has no MetaData or annotations.
+12:17:53,678 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.ArrayTest" has no MetaData or annotations.
+12:17:53,680 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.OrOperand" has no MetaData or annotations.
+12:17:53,685 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.ByteConverter" has no MetaData or annotations.
+12:17:53,690 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.MetaDataUtils" has no MetaData or annotations.
+12:17:53,694 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraTest" has no MetaData or annotations.
+12:17:53,698 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.ArrayTest" has no MetaData or annotations.
+12:17:53,760 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.model.CardArray" has been specified with JDO annotations so using those.
+12:17:53,777 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.model.PackArray" has been specified with JDO annotations so using those.
+12:17:53,787 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.CascadeTest" has no MetaData or annotations.
+12:17:53,791 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.PrimitiveTest" has no MetaData or annotations.
+12:17:53,794 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.converter.EnumConverter" has no MetaData or annotations.
+12:17:53,799 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.InheritanceTest" has no MetaData or annotations.
+12:17:53,804 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.Search" has been specified with JDO annotations so using those.
+12:17:53,806 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.model.CardArray" has been specified with JDO annotations so using those.
+12:17:53,808 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchOne" has been specified with JDO annotations so using those.
+12:17:53,809 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchThree" has been specified with JDO annotations so using those.
+12:17:53,810 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchTwo" has been specified with JDO annotations so using those.
+12:17:53,812 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Child" has been specified with JDO annotations so using those.
+12:17:53,813 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildOne" has been specified with JDO annotations so using those.
+12:17:53,814 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildTwo" has been specified with JDO annotations so using those.
+12:17:53,815 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Parent" has been specified with JDO annotations so using those.
+12:17:53,818 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ChildThree" has been specified with JDO annotations so using those.
+12:17:53,820 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeOne" has been specified with JDO annotations so using those.
+12:17:53,822 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeTwo" has been specified with JDO annotations so using those.
+12:17:53,822 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ParentThree" has been specified with JDO annotations so using those.
+12:17:53,824 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Child" has been specified with JDO annotations so using those.
+12:17:53,826 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.model.PackArray" has been specified with JDO annotations so using those.
+12:17:53,830 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.ChildTwo" has been specified with JDO annotations so using those.
+12:17:53,842 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoOne" has been specified with JDO annotations so using those.
+12:17:53,843 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoTwo" has been specified with JDO annotations so using those.
+12:17:53,844 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Parent" has been specified with JDO annotations so using those.
+12:17:53,844 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.CascadeTest" has no MetaData or annotations.
+12:17:53,844 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.DateEntity" has been specified with JDO annotations so using those.
+12:17:53,847 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject$Embedded" has been specified with JDO annotations so using those.
+12:17:53,848 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject" has been specified with JDO annotations so using those.
+12:17:53,850 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.PrimitiveTest" has no MetaData or annotations.
+12:17:53,851 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EnumEntity" has been specified with JDO annotations so using those.
+12:17:53,865 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EnumValues" has no MetaData or annotations.
+12:17:53,866 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.InvitationToken" has been specified with JDO annotations so using those.
+12:17:53,870 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.InvitedPerson" has been specified with JDO annotations so using those.
+12:17:53,871 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.Person" has been specified with JDO annotations so using those.
+12:17:53,872 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.converter.EnumConverter" has no MetaData or annotations.
+12:17:53,875 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObject" has been specified with JDO annotations so using those.
+12:17:53,877 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.InheritanceTest" has no MetaData or annotations.
+12:17:53,879 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObjectSubclass" has been specified with JDO annotations so using those.
+12:17:53,880 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.UnitData" has been specified with JDO annotations so using those.
+12:17:53,884 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.UnitDataKey" has no MetaData or annotations.
+12:17:53,885 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.Search" has been specified with JDO annotations so using those.
+12:17:53,887 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.CollectionTest" has no MetaData or annotations.
+12:17:53,888 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.model.Card" has been specified with JDO annotations so using those.
+12:17:53,889 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.model.Pack" has been specified with JDO annotations so using those.
+12:17:53,890 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchOne" has been specified with JDO annotations so using those.
+12:17:53,892 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchThree" has been specified with JDO annotations so using those.
+12:17:53,893 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchTwo" has been specified with JDO annotations so using those.
+12:17:53,894 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.MapTest" has no MetaData or annotations.
+12:17:53,894 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.CardMap" has been specified with JDO annotations so using those.
+12:17:53,895 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Child" has been specified with JDO annotations so using those.
+12:17:53,896 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.CardMapDate" has been specified with JDO annotations so using those.
+12:17:53,896 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildOne" has been specified with JDO annotations so using those.
+12:17:53,897 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.PackMap" has been specified with JDO annotations so using those.
+12:17:53,897 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildTwo" has been specified with JDO annotations so using those.
+12:17:53,898 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Parent" has been specified with JDO annotations so using those.
+12:17:53,899 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.PackMapDate" has been specified with JDO annotations so using those.
+12:17:53,899 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.model.BaseEntity" has been specified with JDO annotations so using those.
+12:17:53,901 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ChildThree" has been specified with JDO annotations so using those.
+12:17:53,903 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeOne" has been specified with JDO annotations so using those.
+12:17:53,904 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLBasicTest" has no MetaData or annotations.
+12:17:53,904 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeTwo" has been specified with JDO annotations so using those.
+12:17:53,905 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ParentThree" has been specified with JDO annotations so using those.
+12:17:53,907 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.CassandraUUIDGeneratorTest" has no MetaData or annotations.
+12:17:53,907 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Child" has been specified with JDO annotations so using those.
+12:17:53,910 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.SerializedClass" has no MetaData or annotations.
+12:17:53,910 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraFetchFieldManager" has no MetaData or annotations.
+12:17:53,910 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraInsertFieldManager" has no MetaData or annotations.
+12:17:53,910 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraPersistenceHandler" has no MetaData or annotations.
+12:17:53,910 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraStoreManager" has no MetaData or annotations.
+12:17:53,910 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ColumnFamilyCreator" has no MetaData or annotations.
+12:17:53,910 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ConnectionFactoryImpl" has no MetaData or annotations.
+12:17:53,910 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.CassandraUUIDGenerator" has no MetaData or annotations.
+12:17:53,910 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.DateConverter" has no MetaData or annotations.
+12:17:53,910 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.UUIDConverter" has no MetaData or annotations.
+12:17:53,910 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.BatchMutationManager" has no MetaData or annotations.
+12:17:53,910 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete$Deletion" has no MetaData or annotations.
+12:17:53,911 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete" has no MetaData or annotations.
+12:17:53,911 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextMutate" has no MetaData or annotations.
+12:17:53,911 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextOp" has no MetaData or annotations.
+12:17:53,911 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$IndexParam" has no MetaData or annotations.
+12:17:53,911 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator" has no MetaData or annotations.
+12:17:53,911 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLQuery" has no MetaData or annotations.
+12:17:53,911 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.AndOperand" has no MetaData or annotations.
+12:17:53,911 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Columns" has no MetaData or annotations.
+12:17:53,911 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.CompressableOperand" has no MetaData or annotations.
+12:17:53,911 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.EqualityOperand" has no MetaData or annotations.
+12:17:53,911 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Operand" has no MetaData or annotations.
+12:17:53,911 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.OrOperand" has no MetaData or annotations.
+12:17:53,911 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.ByteConverter" has no MetaData or annotations.
+12:17:53,911 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.MetaDataUtils" has no MetaData or annotations.
+12:17:53,912 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraTest" has no MetaData or annotations.
+12:17:53,912 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.ArrayTest" has no MetaData or annotations.
+12:17:53,912 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.CascadeTest" has no MetaData or annotations.
+12:17:53,912 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.PrimitiveTest" has no MetaData or annotations.
+12:17:53,912 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.converter.EnumConverter" has no MetaData or annotations.
+12:17:53,912 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.InheritanceTest" has no MetaData or annotations.
+12:17:53,912 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EnumValues" has no MetaData or annotations.
+12:17:53,912 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.UnitDataKey" has no MetaData or annotations.
+12:17:53,913 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.CollectionTest" has no MetaData or annotations.
+12:17:53,913 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.MapTest" has no MetaData or annotations.
+12:17:53,913 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLBasicTest" has no MetaData or annotations.
+12:17:53,913 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.CassandraUUIDGeneratorTest" has no MetaData or annotations.
+12:17:53,913 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.SerializedClass" has no MetaData or annotations.
+12:17:53,913 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.ChildTwo" has been specified with JDO annotations so using those.
+12:17:53,944 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoOne" has been specified with JDO annotations so using those.
+12:17:53,946 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoTwo" has been specified with JDO annotations so using those.
+12:17:53,947 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Parent" has been specified with JDO annotations so using those.
+12:17:53,949 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.DateEntity" has been specified with JDO annotations so using those.
+12:17:53,954 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject$Embedded" has been specified with JDO annotations so using those.
+12:17:53,955 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject" has been specified with JDO annotations so using those.
+12:17:53,961 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EnumEntity" has been specified with JDO annotations so using those.
+12:17:53,961 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EnumValues" has no MetaData or annotations.
+12:17:53,962 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.InvitationToken" has been specified with JDO annotations so using those.
+12:17:53,966 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.InvitedPerson" has been specified with JDO annotations so using those.
+12:17:53,967 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.Person" has been specified with JDO annotations so using those.
+12:17:53,972 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObject" has been specified with JDO annotations so using those.
+12:17:53,998 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/array/model/CardArray.class" with enhanced definition
+12:17:54,001 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObjectSubclass" has been specified with JDO annotations so using those.
+12:17:54,001 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/array/model/PackArray.class" with enhanced definition
+12:17:54,003 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.UnitData" has been specified with JDO annotations so using those.
+12:17:54,007 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casefour/Search.class" with enhanced definition
+12:17:54,009 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.UnitDataKey" has no MetaData or annotations.
+12:17:54,010 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casefour/SearchOne.class" with enhanced definition
+12:17:54,013 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casefour/SearchThree.class" with enhanced definition
+12:17:54,013 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.CollectionTest" has no MetaData or annotations.
+12:17:54,013 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.model.Card" has been specified with JDO annotations so using those.
+12:17:54,015 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.model.Pack" has been specified with JDO annotations so using those.
+12:17:54,016 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casefour/SearchTwo.class" with enhanced definition
+12:17:54,019 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/caseone/Child.class" with enhanced definition
+12:17:54,021 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.MapTest" has no MetaData or annotations.
+12:17:54,022 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.CardMap" has been specified with JDO annotations so using those.
+12:17:54,022 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/caseone/GrandChildOne.class" with enhanced definition
+12:17:54,023 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.CardMapDate" has been specified with JDO annotations so using those.
+12:17:54,024 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/caseone/GrandChildTwo.class" with enhanced definition
+12:17:54,024 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.PackMap" has been specified with JDO annotations so using those.
+12:17:54,026 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/caseone/Parent.class" with enhanced definition
+12:17:54,026 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.PackMapDate" has been specified with JDO annotations so using those.
+12:17:54,027 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.model.BaseEntity" has been specified with JDO annotations so using those.
+12:17:54,029 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casethree/ChildThree.class" with enhanced definition
+12:17:54,032 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casethree/GrandChildThreeOne.class" with enhanced definition
+12:17:54,032 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLBasicTest" has no MetaData or annotations.
+12:17:54,034 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casethree/GrandChildThreeTwo.class" with enhanced definition
+12:17:54,035 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.CassandraUUIDGeneratorTest" has no MetaData or annotations.
+12:17:54,036 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casethree/ParentThree.class" with enhanced definition
+12:17:54,039 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casetwo/Child.class" with enhanced definition
+12:17:54,039 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.SerializedClass" has no MetaData or annotations.
+12:17:54,039 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraFetchFieldManager" has no MetaData or annotations.
+12:17:54,039 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraInsertFieldManager" has no MetaData or annotations.
+12:17:54,039 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraPersistenceHandler" has no MetaData or annotations.
+12:17:54,039 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraStoreManager" has no MetaData or annotations.
+12:17:54,039 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ColumnFamilyCreator" has no MetaData or annotations.
+12:17:54,039 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ConnectionFactoryImpl" has no MetaData or annotations.
+12:17:54,039 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.CassandraUUIDGenerator" has no MetaData or annotations.
+12:17:54,039 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.DateConverter" has no MetaData or annotations.
+12:17:54,040 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.UUIDConverter" has no MetaData or annotations.
+12:17:54,040 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.BatchMutationManager" has no MetaData or annotations.
+12:17:54,040 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete$Deletion" has no MetaData or annotations.
+12:17:54,040 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete" has no MetaData or annotations.
+12:17:54,040 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextMutate" has no MetaData or annotations.
+12:17:54,040 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextOp" has no MetaData or annotations.
+12:17:54,040 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$IndexParam" has no MetaData or annotations.
+12:17:54,040 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator" has no MetaData or annotations.
+12:17:54,040 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLQuery" has no MetaData or annotations.
+12:17:54,040 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.AndOperand" has no MetaData or annotations.
+12:17:54,040 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Columns" has no MetaData or annotations.
+12:17:54,041 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.CompressableOperand" has no MetaData or annotations.
+12:17:54,041 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.EqualityOperand" has no MetaData or annotations.
+12:17:54,041 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Operand" has no MetaData or annotations.
+12:17:54,041 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.OrOperand" has no MetaData or annotations.
+12:17:54,041 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.ByteConverter" has no MetaData or annotations.
+12:17:54,041 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.MetaDataUtils" has no MetaData or annotations.
+12:17:54,041 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraTest" has no MetaData or annotations.
+12:17:54,041 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.ArrayTest" has no MetaData or annotations.
+12:17:54,041 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casetwo/ChildTwo.class" with enhanced definition
+12:17:54,041 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.CascadeTest" has no MetaData or annotations.
+12:17:54,041 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.PrimitiveTest" has no MetaData or annotations.
+12:17:54,041 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.converter.EnumConverter" has no MetaData or annotations.
+12:17:54,042 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.InheritanceTest" has no MetaData or annotations.
+12:17:54,042 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EnumValues" has no MetaData or annotations.
+12:17:54,042 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.UnitDataKey" has no MetaData or annotations.
+12:17:54,042 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.CollectionTest" has no MetaData or annotations.
+12:17:54,042 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.MapTest" has no MetaData or annotations.
+12:17:54,042 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLBasicTest" has no MetaData or annotations.
+12:17:54,042 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.CassandraUUIDGeneratorTest" has no MetaData or annotations.
+12:17:54,043 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.SerializedClass" has no MetaData or annotations.
+12:17:54,044 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casetwo/GrandChildTwoOne.class" with enhanced definition
+12:17:54,046 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casetwo/GrandChildTwoTwo.class" with enhanced definition
+12:17:54,049 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/inheritance/casetwo/Parent.class" with enhanced definition
+12:17:54,083 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/DateEntity.class" with enhanced definition
+12:17:54,086 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/EmbeddedObject$Embedded.class" with enhanced definition
+12:17:54,091 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/EmbeddedObject.class" with enhanced definition
+12:17:54,097 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/EnumEntity.class" with enhanced definition
+12:17:54,106 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.array.model.CardArray" is already enhanced.
+12:17:54,106 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/InvitationToken.class" with enhanced definition
+12:17:54,108 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.array.model.PackArray" is already enhanced.
+12:17:54,111 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/InvitedPerson.class" with enhanced definition
+12:17:54,112 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.Search" is already enhanced.
+12:17:54,113 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchOne" is already enhanced.
+12:17:54,113 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchThree" is already enhanced.
+12:17:54,114 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchTwo" is already enhanced.
+12:17:54,115 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Child" is already enhanced.
+12:17:54,115 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildOne" is already enhanced.
+12:17:54,119 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/Person.class" with enhanced definition
+12:17:54,121 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildTwo" is already enhanced.
+12:17:54,123 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Parent" is already enhanced.
+12:17:54,124 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ChildThree" is already enhanced.
+12:17:54,126 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeOne" is already enhanced.
+12:17:54,126 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/PrimitiveObject.class" with enhanced definition
+12:17:54,127 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeTwo" is already enhanced.
+12:17:54,128 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ParentThree" is already enhanced.
+12:17:54,130 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/PrimitiveObjectSubclass.class" with enhanced definition
+12:17:54,130 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Child" is already enhanced.
+12:17:54,148 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/basic/model/UnitData.class" with enhanced definition
+12:17:54,149 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.ChildTwo" is already enhanced.
+12:17:54,150 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoOne" is already enhanced.
+12:17:54,151 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoTwo" is already enhanced.
+12:17:54,151 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Parent" is already enhanced.
+12:17:54,152 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/collection/model/Card.class" with enhanced definition
+12:17:54,155 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/collection/model/Pack.class" with enhanced definition
+12:17:54,158 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/map/model/CardMap.class" with enhanced definition
+12:17:54,162 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/map/model/CardMapDate.class" with enhanced definition
+12:17:54,165 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/map/model/PackMap.class" with enhanced definition
+12:17:54,169 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/map/model/PackMapDate.class" with enhanced definition
+12:17:54,172 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.DateEntity" is already enhanced.
+12:17:54,173 (main) INFO  [DataNucleus.Enhancer] - Writing class file "/home/toddnine/development/datanucleus-cassandra/target/test-classes/com/spidertracks/datanucleus/model/BaseEntity.class" with enhanced definition
+12:17:54,174 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 36 classes. Timings : input=550 ms, enhance=231 ms, total=781 ms. Consult the log for full details
+12:17:54,174 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject$Embedded" is already enhanced.
+12:17:54,175 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject" is already enhanced.
+12:17:54,176 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.EnumEntity" is already enhanced.
+12:17:54,177 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.InvitationToken" is already enhanced.
+12:17:54,178 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.InvitedPerson" is already enhanced.
+12:17:54,179 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.Person" is already enhanced.
+12:17:54,180 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObject" is already enhanced.
+12:17:54,181 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObjectSubclass" is already enhanced.
+12:17:54,183 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.UnitData" is already enhanced.
+12:17:54,184 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.collection.model.Card" is already enhanced.
+12:17:54,185 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.collection.model.Pack" is already enhanced.
+12:17:54,186 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.map.model.CardMap" is already enhanced.
+12:17:54,187 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.map.model.CardMapDate" is already enhanced.
+12:17:54,188 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.map.model.PackMap" is already enhanced.
+12:17:54,189 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.map.model.PackMapDate" is already enhanced.
+12:17:54,190 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.model.BaseEntity" is already enhanced.
+12:17:54,191 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 36 classes. Timings : input=777 ms, enhance=129 ms, total=906 ms. Consult the log for full details
+12:20:09,614 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer : Using ClassEnhancer "ASM" for API "JDO"
+12:20:09,958 (main) INFO  [DataNucleus.Persistence] - Property datanucleus.rdbms.stringDefaultLength unknown - will be ignored
+12:20:09,960 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 2.1.0-release) : Enhancement of classes
+12:20:10,063 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraFetchFieldManager" has no MetaData or annotations.
+12:20:10,068 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraInsertFieldManager" has no MetaData or annotations.
+12:20:10,105 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraPersistenceHandler" has no MetaData or annotations.
+12:20:10,112 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraStoreManager" has no MetaData or annotations.
+12:20:10,117 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ColumnFamilyCreator" has no MetaData or annotations.
+12:20:10,122 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ConnectionFactoryImpl" has no MetaData or annotations.
+12:20:10,128 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.CassandraUUIDGenerator" has no MetaData or annotations.
+12:20:10,132 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.DateConverter" has no MetaData or annotations.
+12:20:10,149 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.UUIDConverter" has no MetaData or annotations.
+12:20:10,157 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.BatchMutationManager" has no MetaData or annotations.
+12:20:10,162 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete$Deletion" has no MetaData or annotations.
+12:20:10,167 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete" has no MetaData or annotations.
+12:20:10,174 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextMutate" has no MetaData or annotations.
+12:20:10,178 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextOp" has no MetaData or annotations.
+12:20:10,179 (main) ERROR [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$1" was not found in the CLASSPATH. Please check your specification and your CLASSPATH.
+org.datanucleus.exceptions.ClassNotResolvedException: Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$1" was not found in the CLASSPATH. Please check your specification and your CLASSPATH.
+	at org.datanucleus.JDOClassLoaderResolver.classForName(JDOClassLoaderResolver.java:247)
+	at org.datanucleus.JDOClassLoaderResolver.classForName(JDOClassLoaderResolver.java:412)
+	at org.datanucleus.metadata.MetaDataManager.loadClasses(MetaDataManager.java:436)
+	at org.datanucleus.enhancer.DataNucleusEnhancer.getFileMetadataForInput(DataNucleusEnhancer.java:791)
+	at org.datanucleus.enhancer.DataNucleusEnhancer.enhance(DataNucleusEnhancer.java:582)
+	at org.datanucleus.enhancer.DataNucleusEnhancer.main(DataNucleusEnhancer.java:1316)
+
+12:20:10,185 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$IndexParam" has no MetaData or annotations.
+12:20:10,191 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator" has no MetaData or annotations.
+12:20:10,198 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLQuery" has no MetaData or annotations.
+12:20:10,204 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.AndOperand" has no MetaData or annotations.
+12:20:10,210 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Columns" has no MetaData or annotations.
+12:20:10,211 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.CompressableOperand" has no MetaData or annotations.
+12:20:10,216 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.EqualityOperand" has no MetaData or annotations.
+12:20:10,222 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Operand" has no MetaData or annotations.
+12:20:10,228 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.OrOperand" has no MetaData or annotations.
+12:20:10,233 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.ByteConverter" has no MetaData or annotations.
+12:20:10,238 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.MetaDataUtils" has no MetaData or annotations.
+12:20:10,242 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraTest" has no MetaData or annotations.
+12:20:10,247 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.ArrayTest" has no MetaData or annotations.
+12:20:10,334 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.model.CardArray" has been specified with JDO annotations so using those.
+12:20:10,351 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.model.PackArray" has been specified with JDO annotations so using those.
+12:20:10,365 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.CascadeTest" has no MetaData or annotations.
+12:20:10,370 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.PrimitiveTest" has no MetaData or annotations.
+12:20:10,390 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.converter.EnumConverter" has no MetaData or annotations.
+12:20:10,397 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.InheritanceTest" has no MetaData or annotations.
+12:20:10,403 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.Search" has been specified with JDO annotations so using those.
+12:20:10,408 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchOne" has been specified with JDO annotations so using those.
+12:20:10,410 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchThree" has been specified with JDO annotations so using those.
+12:20:10,412 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchTwo" has been specified with JDO annotations so using those.
+12:20:10,414 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Child" has been specified with JDO annotations so using those.
+12:20:10,416 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildOne" has been specified with JDO annotations so using those.
+12:20:10,417 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildTwo" has been specified with JDO annotations so using those.
+12:20:10,418 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Parent" has been specified with JDO annotations so using those.
+12:20:10,421 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ChildThree" has been specified with JDO annotations so using those.
+12:20:10,423 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeOne" has been specified with JDO annotations so using those.
+12:20:10,424 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeTwo" has been specified with JDO annotations so using those.
+12:20:10,425 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ParentThree" has been specified with JDO annotations so using those.
+12:20:10,428 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Child" has been specified with JDO annotations so using those.
+12:20:10,450 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.ChildTwo" has been specified with JDO annotations so using those.
+12:20:10,463 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoOne" has been specified with JDO annotations so using those.
+12:20:10,465 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoTwo" has been specified with JDO annotations so using those.
+12:20:10,466 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Parent" has been specified with JDO annotations so using those.
+12:20:10,467 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.DateEntity" has been specified with JDO annotations so using those.
+12:20:10,474 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject$Embedded" has been specified with JDO annotations so using those.
+12:20:10,475 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject" has been specified with JDO annotations so using those.
+12:20:10,479 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EnumEntity" has been specified with JDO annotations so using those.
+12:20:10,480 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EnumValues" has no MetaData or annotations.
+12:20:10,481 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.InvitationToken" has been specified with JDO annotations so using those.
+12:20:10,484 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.InvitedPerson" has been specified with JDO annotations so using those.
+12:20:10,485 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.Person" has been specified with JDO annotations so using those.
+12:20:10,488 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObject" has been specified with JDO annotations so using those.
+12:20:10,493 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObjectSubclass" has been specified with JDO annotations so using those.
+12:20:10,494 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.UnitData" has been specified with JDO annotations so using those.
+12:20:10,517 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.UnitDataKey" has no MetaData or annotations.
+12:20:10,522 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.CollectionTest" has no MetaData or annotations.
+12:20:10,523 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.model.Card" has been specified with JDO annotations so using those.
+12:20:10,526 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.model.Pack" has been specified with JDO annotations so using those.
+12:20:10,532 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.MapTest" has no MetaData or annotations.
+12:20:10,533 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.CardMap" has been specified with JDO annotations so using those.
+12:20:10,535 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.CardMapDate" has been specified with JDO annotations so using those.
+12:20:10,536 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.PackMap" has been specified with JDO annotations so using those.
+12:20:10,539 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.PackMapDate" has been specified with JDO annotations so using those.
+12:20:10,540 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.model.BaseEntity" has been specified with JDO annotations so using those.
+12:20:10,544 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLBasicTest" has no MetaData or annotations.
+12:20:10,547 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.CassandraUUIDGeneratorTest" has no MetaData or annotations.
+12:20:10,550 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.SerializedClass" has no MetaData or annotations.
+12:20:10,550 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraFetchFieldManager" has no MetaData or annotations.
+12:20:10,550 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraInsertFieldManager" has no MetaData or annotations.
+12:20:10,550 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraPersistenceHandler" has no MetaData or annotations.
+12:20:10,550 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraStoreManager" has no MetaData or annotations.
+12:20:10,550 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ColumnFamilyCreator" has no MetaData or annotations.
+12:20:10,550 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ConnectionFactoryImpl" has no MetaData or annotations.
+12:20:10,550 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.CassandraUUIDGenerator" has no MetaData or annotations.
+12:20:10,550 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.DateConverter" has no MetaData or annotations.
+12:20:10,550 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.UUIDConverter" has no MetaData or annotations.
+12:20:10,550 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.BatchMutationManager" has no MetaData or annotations.
+12:20:10,550 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete$Deletion" has no MetaData or annotations.
+12:20:10,551 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete" has no MetaData or annotations.
+12:20:10,551 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextMutate" has no MetaData or annotations.
+12:20:10,551 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextOp" has no MetaData or annotations.
+12:20:10,551 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$IndexParam" has no MetaData or annotations.
+12:20:10,551 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator" has no MetaData or annotations.
+12:20:10,551 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLQuery" has no MetaData or annotations.
+12:20:10,551 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.AndOperand" has no MetaData or annotations.
+12:20:10,551 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Columns" has no MetaData or annotations.
+12:20:10,551 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.CompressableOperand" has no MetaData or annotations.
+12:20:10,551 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.EqualityOperand" has no MetaData or annotations.
+12:20:10,551 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Operand" has no MetaData or annotations.
+12:20:10,551 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.OrOperand" has no MetaData or annotations.
+12:20:10,551 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.ByteConverter" has no MetaData or annotations.
+12:20:10,551 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.MetaDataUtils" has no MetaData or annotations.
+12:20:10,551 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraTest" has no MetaData or annotations.
+12:20:10,552 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.ArrayTest" has no MetaData or annotations.
+12:20:10,552 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.CascadeTest" has no MetaData or annotations.
+12:20:10,552 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.PrimitiveTest" has no MetaData or annotations.
+12:20:10,552 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.converter.EnumConverter" has no MetaData or annotations.
+12:20:10,552 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.InheritanceTest" has no MetaData or annotations.
+12:20:10,552 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EnumValues" has no MetaData or annotations.
+12:20:10,552 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.UnitDataKey" has no MetaData or annotations.
+12:20:10,552 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.CollectionTest" has no MetaData or annotations.
+12:20:10,552 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.MapTest" has no MetaData or annotations.
+12:20:10,553 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLBasicTest" has no MetaData or annotations.
+12:20:10,553 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.CassandraUUIDGeneratorTest" has no MetaData or annotations.
+12:20:10,553 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.SerializedClass" has no MetaData or annotations.
+12:20:10,604 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.array.model.CardArray" is already enhanced.
+12:20:10,604 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.array.model.PackArray" is already enhanced.
+12:20:10,606 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.Search" is already enhanced.
+12:20:10,607 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchOne" is already enhanced.
+12:20:10,608 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchThree" is already enhanced.
+12:20:10,608 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchTwo" is already enhanced.
+12:20:10,609 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Child" is already enhanced.
+12:20:10,627 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildOne" is already enhanced.
+12:20:10,628 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildTwo" is already enhanced.
+12:20:10,628 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Parent" is already enhanced.
+12:20:10,629 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ChildThree" is already enhanced.
+12:20:10,630 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeOne" is already enhanced.
+12:20:10,630 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeTwo" is already enhanced.
+12:20:10,631 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ParentThree" is already enhanced.
+12:20:10,631 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Child" is already enhanced.
+12:20:10,632 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.ChildTwo" is already enhanced.
+12:20:10,633 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoOne" is already enhanced.
+12:20:10,633 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoTwo" is already enhanced.
+12:20:10,634 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Parent" is already enhanced.
+12:20:10,672 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.DateEntity" is already enhanced.
+12:20:10,674 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject$Embedded" is already enhanced.
+12:20:10,675 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject" is already enhanced.
+12:20:10,676 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.EnumEntity" is already enhanced.
+12:20:10,677 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.InvitationToken" is already enhanced.
+12:20:10,678 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.InvitedPerson" is already enhanced.
+12:20:10,678 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.Person" is already enhanced.
+12:20:10,679 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObject" is already enhanced.
+12:20:10,680 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObjectSubclass" is already enhanced.
+12:20:10,680 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.UnitData" is already enhanced.
+12:20:10,681 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.collection.model.Card" is already enhanced.
+12:20:10,681 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.collection.model.Pack" is already enhanced.
+12:20:10,682 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.map.model.CardMap" is already enhanced.
+12:20:10,683 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.map.model.CardMapDate" is already enhanced.
+12:20:10,683 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.map.model.PackMap" is already enhanced.
+12:20:10,684 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.map.model.PackMapDate" is already enhanced.
+12:20:10,685 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.model.BaseEntity" is already enhanced.
+12:20:10,685 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 36 classes. Timings : input=628 ms, enhance=94 ms, total=722 ms. Consult the log for full details
+12:22:38,691 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer : Using ClassEnhancer "ASM" for API "JDO"
+12:22:38,969 (main) INFO  [DataNucleus.Persistence] - Property datanucleus.rdbms.stringDefaultLength unknown - will be ignored
+12:22:38,971 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 2.1.0-release) : Enhancement of classes
+12:22:39,142 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraFetchFieldManager" has no MetaData or annotations.
+12:22:39,148 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraInsertFieldManager" has no MetaData or annotations.
+12:22:39,155 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraPersistenceHandler" has no MetaData or annotations.
+12:22:39,182 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraStoreManager" has no MetaData or annotations.
+12:22:39,187 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ColumnFamilyCreator" has no MetaData or annotations.
+12:22:39,192 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ConnectionFactoryImpl" has no MetaData or annotations.
+12:22:39,198 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.CassandraUUIDGenerator" has no MetaData or annotations.
+12:22:39,202 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.DateConverter" has no MetaData or annotations.
+12:22:39,227 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.UUIDConverter" has no MetaData or annotations.
+12:22:39,235 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.BatchMutationManager" has no MetaData or annotations.
+12:22:39,242 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete$Deletion" has no MetaData or annotations.
+12:22:39,250 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete" has no MetaData or annotations.
+12:22:39,257 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextMutate" has no MetaData or annotations.
+12:22:39,264 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextOp" has no MetaData or annotations.
+12:22:39,265 (main) ERROR [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$1" was not found in the CLASSPATH. Please check your specification and your CLASSPATH.
+org.datanucleus.exceptions.ClassNotResolvedException: Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$1" was not found in the CLASSPATH. Please check your specification and your CLASSPATH.
+	at org.datanucleus.JDOClassLoaderResolver.classForName(JDOClassLoaderResolver.java:247)
+	at org.datanucleus.JDOClassLoaderResolver.classForName(JDOClassLoaderResolver.java:412)
+	at org.datanucleus.metadata.MetaDataManager.loadClasses(MetaDataManager.java:436)
+	at org.datanucleus.enhancer.DataNucleusEnhancer.getFileMetadataForInput(DataNucleusEnhancer.java:791)
+	at org.datanucleus.enhancer.DataNucleusEnhancer.enhance(DataNucleusEnhancer.java:582)
+	at org.datanucleus.enhancer.DataNucleusEnhancer.main(DataNucleusEnhancer.java:1316)
+
+12:22:39,270 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$IndexParam" has no MetaData or annotations.
+12:22:39,301 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator" has no MetaData or annotations.
+12:22:39,310 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLQuery" has no MetaData or annotations.
+12:22:39,316 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.AndOperand" has no MetaData or annotations.
+12:22:39,322 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Columns" has no MetaData or annotations.
+12:22:39,322 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.CompressableOperand" has no MetaData or annotations.
+12:22:39,328 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.EqualityOperand" has no MetaData or annotations.
+12:22:39,333 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Operand" has no MetaData or annotations.
+12:22:39,339 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.OrOperand" has no MetaData or annotations.
+12:22:39,344 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.ByteConverter" has no MetaData or annotations.
+12:22:39,349 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.MetaDataUtils" has no MetaData or annotations.
+12:22:39,353 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraTest" has no MetaData or annotations.
+12:22:39,379 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.ArrayTest" has no MetaData or annotations.
+12:22:39,465 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.model.CardArray" has been specified with JDO annotations so using those.
+12:22:39,481 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.model.PackArray" has been specified with JDO annotations so using those.
+12:22:39,494 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.CascadeTest" has no MetaData or annotations.
+12:22:39,497 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.PrimitiveTest" has no MetaData or annotations.
+12:22:39,500 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.converter.EnumConverter" has no MetaData or annotations.
+12:22:39,504 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.InheritanceTest" has no MetaData or annotations.
+12:22:39,509 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.Search" has been specified with JDO annotations so using those.
+12:22:39,514 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchOne" has been specified with JDO annotations so using those.
+12:22:39,516 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchThree" has been specified with JDO annotations so using those.
+12:22:39,518 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchTwo" has been specified with JDO annotations so using those.
+12:22:39,537 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Child" has been specified with JDO annotations so using those.
+12:22:39,541 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildOne" has been specified with JDO annotations so using those.
+12:22:39,544 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildTwo" has been specified with JDO annotations so using those.
+12:22:39,545 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Parent" has been specified with JDO annotations so using those.
+12:22:39,547 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ChildThree" has been specified with JDO annotations so using those.
+12:22:39,549 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeOne" has been specified with JDO annotations so using those.
+12:22:39,551 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeTwo" has been specified with JDO annotations so using those.
+12:22:39,552 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ParentThree" has been specified with JDO annotations so using those.
+12:22:39,555 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Child" has been specified with JDO annotations so using those.
+12:22:39,561 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.ChildTwo" has been specified with JDO annotations so using those.
+12:22:39,573 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoOne" has been specified with JDO annotations so using those.
+12:22:39,575 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoTwo" has been specified with JDO annotations so using those.
+12:22:39,576 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Parent" has been specified with JDO annotations so using those.
+12:22:39,577 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.DateEntity" has been specified with JDO annotations so using those.
+12:22:39,582 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject$Embedded" has been specified with JDO annotations so using those.
+12:22:39,595 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject" has been specified with JDO annotations so using those.
+12:22:39,602 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EnumEntity" has been specified with JDO annotations so using those.
+12:22:39,603 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EnumValues" has no MetaData or annotations.
+12:22:39,604 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.InvitationToken" has been specified with JDO annotations so using those.
+12:22:39,608 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.InvitedPerson" has been specified with JDO annotations so using those.
+12:22:39,609 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.Person" has been specified with JDO annotations so using those.
+12:22:39,612 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObject" has been specified with JDO annotations so using those.
+12:22:39,616 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObjectSubclass" has been specified with JDO annotations so using those.
+12:22:39,618 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.UnitData" has been specified with JDO annotations so using those.
+12:22:39,623 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.UnitDataKey" has no MetaData or annotations.
+12:22:39,627 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.CollectionTest" has no MetaData or annotations.
+12:22:39,628 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.model.Card" has been specified with JDO annotations so using those.
+12:22:39,630 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.model.Pack" has been specified with JDO annotations so using those.
+12:22:39,636 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.MapTest" has no MetaData or annotations.
+12:22:39,637 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.CardMap" has been specified with JDO annotations so using those.
+12:22:39,638 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.CardMapDate" has been specified with JDO annotations so using those.
+12:22:39,640 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.PackMap" has been specified with JDO annotations so using those.
+12:22:39,642 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.model.PackMapDate" has been specified with JDO annotations so using those.
+12:22:39,644 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.model.BaseEntity" has been specified with JDO annotations so using those.
+12:22:39,648 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLBasicTest" has no MetaData or annotations.
+12:22:39,651 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.CassandraUUIDGeneratorTest" has no MetaData or annotations.
+12:22:39,655 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.SerializedClass" has no MetaData or annotations.
+12:22:39,656 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraFetchFieldManager" has no MetaData or annotations.
+12:22:39,656 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraInsertFieldManager" has no MetaData or annotations.
+12:22:39,656 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraPersistenceHandler" has no MetaData or annotations.
+12:22:39,656 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraStoreManager" has no MetaData or annotations.
+12:22:39,656 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ColumnFamilyCreator" has no MetaData or annotations.
+12:22:39,656 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.ConnectionFactoryImpl" has no MetaData or annotations.
+12:22:39,656 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.CassandraUUIDGenerator" has no MetaData or annotations.
+12:22:39,656 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.DateConverter" has no MetaData or annotations.
+12:22:39,656 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.identity.UUIDConverter" has no MetaData or annotations.
+12:22:39,656 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.BatchMutationManager" has no MetaData or annotations.
+12:22:39,656 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete$Deletion" has no MetaData or annotations.
+12:22:39,656 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextDelete" has no MetaData or annotations.
+12:22:39,656 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextMutate" has no MetaData or annotations.
+12:22:39,656 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.mutate.ExecutionContextOp" has no MetaData or annotations.
+12:22:39,656 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator$IndexParam" has no MetaData or annotations.
+12:22:39,656 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator" has no MetaData or annotations.
+12:22:39,657 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLQuery" has no MetaData or annotations.
+12:22:39,657 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.AndOperand" has no MetaData or annotations.
+12:22:39,657 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Columns" has no MetaData or annotations.
+12:22:39,657 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.CompressableOperand" has no MetaData or annotations.
+12:22:39,657 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.EqualityOperand" has no MetaData or annotations.
+12:22:39,657 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.Operand" has no MetaData or annotations.
+12:22:39,657 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.runtime.OrOperand" has no MetaData or annotations.
+12:22:39,657 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.ByteConverter" has no MetaData or annotations.
+12:22:39,657 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.MetaDataUtils" has no MetaData or annotations.
+12:22:39,657 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.CassandraTest" has no MetaData or annotations.
+12:22:39,657 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.array.ArrayTest" has no MetaData or annotations.
+12:22:39,657 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.CascadeTest" has no MetaData or annotations.
+12:22:39,657 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.PrimitiveTest" has no MetaData or annotations.
+12:22:39,657 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.converter.EnumConverter" has no MetaData or annotations.
+12:22:39,657 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.inheritance.InheritanceTest" has no MetaData or annotations.
+12:22:39,658 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.EnumValues" has no MetaData or annotations.
+12:22:39,658 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.basic.model.UnitDataKey" has no MetaData or annotations.
+12:22:39,658 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.collection.CollectionTest" has no MetaData or annotations.
+12:22:39,658 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.map.MapTest" has no MetaData or annotations.
+12:22:39,658 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.query.JDOQLBasicTest" has no MetaData or annotations.
+12:22:39,658 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.CassandraUUIDGeneratorTest" has no MetaData or annotations.
+12:22:39,658 (main) INFO  [DataNucleus.MetaData] - Class "com.spidertracks.datanucleus.utils.SerializedClass" has no MetaData or annotations.
+12:22:39,688 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.array.model.CardArray" is already enhanced.
+12:22:39,689 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.array.model.PackArray" is already enhanced.
+12:22:39,691 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.Search" is already enhanced.
+12:22:39,692 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchOne" is already enhanced.
+12:22:39,693 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchThree" is already enhanced.
+12:22:39,693 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casefour.SearchTwo" is already enhanced.
+12:22:39,694 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Child" is already enhanced.
+12:22:39,694 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildOne" is already enhanced.
+12:22:39,695 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.GrandChildTwo" is already enhanced.
+12:22:39,695 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.caseone.Parent" is already enhanced.
+12:22:39,696 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ChildThree" is already enhanced.
+12:22:39,697 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeOne" is already enhanced.
+12:22:39,697 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.GrandChildThreeTwo" is already enhanced.
+12:22:39,698 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casethree.ParentThree" is already enhanced.
+12:22:39,698 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Child" is already enhanced.
+12:22:39,699 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.ChildTwo" is already enhanced.
+12:22:39,700 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoOne" is already enhanced.
+12:22:39,700 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.GrandChildTwoTwo" is already enhanced.
+12:22:39,701 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.inheritance.casetwo.Parent" is already enhanced.
+12:22:39,715 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.DateEntity" is already enhanced.
+12:22:39,716 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject$Embedded" is already enhanced.
+12:22:39,716 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.EmbeddedObject" is already enhanced.
+12:22:39,717 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.EnumEntity" is already enhanced.
+12:22:39,718 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.InvitationToken" is already enhanced.
+12:22:39,718 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.InvitedPerson" is already enhanced.
+12:22:39,719 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.Person" is already enhanced.
+12:22:39,720 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObject" is already enhanced.
+12:22:39,720 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.PrimitiveObjectSubclass" is already enhanced.
+12:22:39,721 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.basic.model.UnitData" is already enhanced.
+12:22:39,721 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.collection.model.Card" is already enhanced.
+12:22:39,722 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.collection.model.Pack" is already enhanced.
+12:22:39,722 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.map.model.CardMap" is already enhanced.
+12:22:39,723 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.map.model.CardMapDate" is already enhanced.
+12:22:39,724 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.map.model.PackMap" is already enhanced.
+12:22:39,724 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.map.model.PackMapDate" is already enhanced.
+12:22:39,725 (main) INFO  [DataNucleus.Enhancer] - Class "com.spidertracks.datanucleus.model.BaseEntity" is already enhanced.
+12:22:39,725 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 36 classes. Timings : input=700 ms, enhance=51 ms, total=751 ms. Consult the log for full details
