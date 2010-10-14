@@ -107,4 +107,9 @@ Building
 You no longer need to manually install the cassandra depdenencies when building.  They will be installed and deployed automatically by maven.
 
 
+Roadmap
+-------
+
+Change serialisation of all Serializable objects from JVM native to external library for performance increase
+
 

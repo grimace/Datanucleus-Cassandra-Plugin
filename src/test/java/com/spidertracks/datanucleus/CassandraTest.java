@@ -73,13 +73,12 @@ public abstract class CassandraTest {
 		pmf = JDOHelper.getPersistenceManagerFactory("Test");
 	}
 
-
 	@AfterClass
 	public static void teardown() throws Exception {
-		try{
-		cassandraServer.stop();
-		}catch(Exception e){
-			/*SWALLOW*/
+		try {
+			cassandraServer.stop();
+		} catch (Exception e) {
+			/* SWALLOW */
 		}
 	}
 }
