@@ -44,3 +44,19 @@ Storing the subclass in its own table requires O(n+1) reads where n is the numbe
 1. Recursively read all CFs in the inheritance structure until we find a result O(n)
 2. Read the columns and populate the object O(1) 
 
+
+BUILD NOTES:
+
+high scale lib doesn't appear to be in a repo. You can install it from the lib directory as follows
+
+#mvn install:install-file -DgroupId=high-scale-lib -DartifactId=high-scale-lib -Dversion=1.1.2 -Dpackaging=jar -Dfile=./lib/high-scale-lib.jar 
+
+
+TEST NOTES:
+
+you might need to run the following to allow the embedded cassandra to startup:
+
+
+#sudo mkdir -p /var/lib/cassandra/saved_caches
+
+
