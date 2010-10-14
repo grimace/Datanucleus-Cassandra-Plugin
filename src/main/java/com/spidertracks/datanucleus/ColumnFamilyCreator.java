@@ -116,6 +116,16 @@ public class ColumnFamilyCreator implements MetaDataListener {
 				indexColumns.add(def);
 
 			}
+			
+			//if we have a discriminator we should index it as we'll be referencing it in queries
+			String discriminatorColumn = MetaDataUtils.getDiscriminatorColumnName(cmd);
+
+			if(discriminatorColumn != null){
+				ColumnDef def = new ColumnDef(Bytes.fromUTF8(discriminatorColumn).getBytes(),  ColumnFamilyManager.CFDEF_COMPARATOR_UTF8);
+				def.setIndex_name(discriminatorColumn+"_index");
+				def.setIndex_type(IndexType.KEYS);
+				indexColumns.add(def);
+			}
 
 			columnFamily.setColumn_metadata(indexColumns);
 			

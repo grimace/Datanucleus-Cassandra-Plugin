@@ -20,6 +20,7 @@ package com.spidertracks.datanucleus.query;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnName;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
@@ -62,7 +63,7 @@ public class CassandraQueryExpressionEvaluator extends
 	private static final Logger logger = LoggerFactory
 			.getLogger(CassandraQueryExpressionEvaluator.class);
 
-	private static final int MAX = 1000;
+	public static final int MAX = 1000;
 
 	private Stack<IndexParam> indexKeys = new Stack<IndexParam>();
 	private Stack<Operand> operationStack = new Stack<Operand>();
@@ -78,6 +79,7 @@ public class CassandraQueryExpressionEvaluator extends
 	private Map<String, Object> parameterValues;
 
 	private ExecutionContext ec;
+	
 
 	/**
 	 * Constructor for an in-memory evaluator.
@@ -99,14 +101,14 @@ public class CassandraQueryExpressionEvaluator extends
 			Map<String, Object> params, ClassLoaderResolver clr,
 			Class<?> destinationClass) {
 		this.ec = ec;
-		metaData = ec.getMetaDataManager().getMetaDataForClass(
-				destinationClass, clr);
+		metaData = ec.getMetaDataManager().getMetaDataForClass(destinationClass, clr);
 		this.parameterValues = (params != null ? params
 				: new HashMap<String, Object>());
 		// this.state = state;
 		// this.imports = imports;
 
 		inMemoryRequired = false;
+
 
 		// assume only one identity field
 
@@ -130,6 +132,7 @@ public class CassandraQueryExpressionEvaluator extends
 		// efficiency
 		if (left instanceof CompressableOperand
 				&& right instanceof CompressableOperand) {
+			
 			EqualityOperand op = new EqualityOperand(MAX);
 
 			op.addAll(((CompressableOperand) left).getIndexClause()

@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.jdo.JDODataStoreException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.jdo.Transaction;
@@ -39,6 +40,7 @@ import org.junit.Test;
 import com.spidertracks.datanucleus.CassandraTest;
 import com.spidertracks.datanucleus.basic.inheritance.casefour.Search;
 import com.spidertracks.datanucleus.basic.inheritance.casefour.SearchOne;
+import com.spidertracks.datanucleus.basic.inheritance.casefour.SearchThree;
 import com.spidertracks.datanucleus.basic.inheritance.casefour.SearchTwo;
 import com.spidertracks.datanucleus.basic.model.InvitationToken;
 import com.spidertracks.datanucleus.basic.model.Person;
@@ -303,8 +305,10 @@ public class JDOQLBasicTest extends CassandraTest {
 		try {
 			List<InvitationToken> results = (List<InvitationToken>) pm
 					.newQuery(InvitationToken.class).execute();
-		} catch (NucleusDataStoreException ndse) {
-			return;
+		} catch (JDODataStoreException ndse) {
+			if (ndse.getCause() instanceof NucleusDataStoreException) {
+				return;
+			}
 		}
 
 		fail("Should have thrown an exception.  You can't query without a == clause");
@@ -432,7 +436,8 @@ public class JDOQLBasicTest extends CassandraTest {
 		query.setFilter("lastLogin > :loginDate && lastName == :secondName");
 
 		// should be p4 and p5
-		List<Person> results = (List<Person>) query.execute(p3.getLastLogin(), "secondName2");
+		List<Person> results = (List<Person>) query.execute(p3.getLastLogin(),
+				"secondName2");
 
 		assertEquals(1, results.size());
 
@@ -516,9 +521,6 @@ public class JDOQLBasicTest extends CassandraTest {
 
 	}
 
-	
-
-
 	/**
 	 * Tests that when a field is common on 2 subclasses, the correct subclass
 	 * is returned
@@ -536,10 +538,15 @@ public class JDOQLBasicTest extends CassandraTest {
 
 		SearchTwo two = new SearchTwo();
 		two.setSearchField("search");
-		two.setSearchTwo("searchTwo");
+		two.setSearchTwo("searchThree");
+		
+		SearchThree three = new SearchThree();
+		three.setSearchField("search");
+		three.setSearchThree("searchThree");
 
 		pm.makePersistent(one);
 		pm.makePersistent(two);
+		pm.makePersistent(three);
 
 		trans.commit();
 		pm.close();
@@ -567,6 +574,20 @@ public class JDOQLBasicTest extends CassandraTest {
 		assertEquals(1, resultsTwo.size());
 
 		assertTrue(resultsTwo.contains(two));
+		
+		
+		query = pm.newQuery(SearchThree.class);
+		query.setFilter("searchField == :search");
+		query.setIgnoreCache(true);
+
+		// now query on the subclass
+		List<SearchThree> resultsThree = (List<SearchThree>) query.execute("search");
+
+		assertEquals(1, resultsTwo.size());
+
+		assertTrue(resultsThree.contains(three));
+		
+		//query for all subclasses
 
 		query = pm.newQuery(Search.class);
 		query.setFilter("searchField == :search");
@@ -578,10 +599,12 @@ public class JDOQLBasicTest extends CassandraTest {
 
 		// check we got p1, p2 and p3 and p5
 
-		assertEquals(2, results.size());
+		assertEquals(3, results.size());
 
 		assertTrue(results.contains(one));
 		assertTrue(results.contains(two));
+		assertTrue(results.contains(three));
+
 
 	}
 

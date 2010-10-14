@@ -29,7 +29,7 @@ import javax.jdo.annotations.Persistent;
  *
  */
 @PersistenceCapable
-@Inheritance(strategy=InheritanceStrategy.SUBCLASS_TABLE)
+@Inheritance(strategy=InheritanceStrategy.SUPERCLASS_TABLE)
 @Discriminator(strategy=DiscriminatorStrategy.VALUE_MAP, value="SearchTwo")
 public class SearchTwo extends Search {
 

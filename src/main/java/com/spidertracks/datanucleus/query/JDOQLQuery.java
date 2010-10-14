@@ -17,6 +17,8 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.query;
 
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.getDiscriminatorColumnName;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,6 +31,7 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.metadata.AbstractClassMetaData;
+import org.datanucleus.metadata.DiscriminatorMetaData;
 import org.datanucleus.query.evaluator.JDOQLEvaluator;
 import org.datanucleus.query.evaluator.JavaQueryEvaluator;
 import org.datanucleus.query.expression.Expression;
@@ -39,6 +42,7 @@ import org.datanucleus.util.NucleusLogger;
 import org.scale7.cassandra.pelops.Bytes;
 
 import com.spidertracks.datanucleus.CassandraStoreManager;
+import com.spidertracks.datanucleus.query.runtime.Columns;
 import com.spidertracks.datanucleus.query.runtime.Operand;
 import com.spidertracks.datanucleus.utils.ByteConverter;
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
@@ -93,7 +97,6 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 	public JDOQLQuery(ExecutionContext ec, String query) {
 		super(ec, query);
 	}
-	
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -110,7 +113,6 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 		boolean evaluteInMemory = true;
 
-		
 		String poolName = ((CassandraStoreManager) ec.getStoreManager())
 				.getPoolName();
 
@@ -124,12 +126,16 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 		if (filter == null) {
 			throw new NucleusDataStoreException(
-					"You cannot invoke a query without an expression against Cassandra.");
+					"You cannot invoke a query without an expression against Cassandra. In a real environment the result set would be too large to process");
 		}
 
-		
 		ClassLoaderResolver clr = ec.getClassLoaderResolver();
-		
+
+		String descriminiatorCol = null;
+		DiscriminatorMetaData discriminator = null;
+
+		String[] selectColumns = new String[] { identityCol };
+
 		CassandraQueryExpressionEvaluator evaluator = new CassandraQueryExpressionEvaluator(
 				ec, parameters, clr, candidateClass);
 
@@ -137,12 +143,34 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 		evaluteInMemory = evaluator.isInMemoryRequired();
 
-		opTree.performQuery(poolName, columnFamily, identityCol,
+		Bytes idColumnBytes = Bytes.fromUTF8(identityCol);
+		Bytes descriminatorBytes = null;
+
+		if (acmd.hasDiscriminatorStrategy()) {
+			discriminator = acmd.getDiscriminatorMetaData();
+
+			descriminiatorCol = getDiscriminatorColumnName(discriminator);
+
+			descriminatorBytes = Bytes.fromUTF8(descriminiatorCol);
+
+			List<String> descriminatorValues = MetaDataUtils
+					.getDescriminatorValues(acmd.getFullClassName(), clr, ec);
+
+			opTree = opTree.optimizeDescriminator(descriminiatorCol, descriminatorValues);
+
+			selectColumns = new String[] { identityCol, descriminiatorCol };
+		}
+
+		// perform a query rewrite to take into account descriminator values
+
+		// TODO, reconstruct query if there is a descriminator
+		opTree.performQuery(poolName, columnFamily, selectColumns,
 				ConsistencyLevel.ONE);
 
-		Set<Bytes> candidateKeys = opTree.getCandidateKeys();
+		Set<Columns> candidateKeys = opTree.getCandidateKeys();
 
-		Collection<?> results = getObjectsOfCandidateType(candidateKeys, subclasses, clr);
+		Collection<?> results = getObjectsOfCandidateType(candidateKeys, acmd,
+				clr, subclasses, idColumnBytes, descriminatorBytes);
 
 		if (evaluteInMemory) {
 
@@ -175,7 +203,10 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 	 * @param startKey
 	 * @return
 	 */
-	public List<?> getObjectsOfCandidateType(Set<Bytes> keys, boolean subclasses, ClassLoaderResolver clr) {
+	public List<?> getObjectsOfCandidateType(Set<Columns> keys,
+			AbstractClassMetaData acmd, ClassLoaderResolver clr,
+			boolean subclasses, Bytes identityColumn,
+			Bytes descriminatorColumn) {
 
 		// final ClassLoaderResolver clr = ec.getClassLoaderResolver();
 		// final AbstractClassMetaData acmd =
@@ -184,11 +215,25 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		List<Object> results = new ArrayList<Object>(keys.size());
 		// String tempKey = null;
 
-		for (Bytes idBytes : keys) {
+		for (Columns idBytes : keys) {
 
-			Object identity = MetaDataUtils.getObjectIdentity(ec,
-					candidateClass, idBytes.getBytes());
-			
+			Class<?> targetClass = candidateClass;
+
+			if (descriminatorColumn != null) {
+
+				String descriminatorValue = idBytes.getColumnValue(descriminatorColumn).toUTF8();
+
+				String className = org.datanucleus.metadata.MetaDataUtils
+						.getClassNameFromDiscriminatorValue(descriminatorValue,
+								acmd.getDiscriminatorMetaData(), ec);
+
+				targetClass = clr.classForName(className);
+
+			}
+
+			Object identity = MetaDataUtils.getObjectIdentity(ec, targetClass,
+					idBytes.getColumnValue(identityColumn).getBytes());
+
 			// Not a valid subclass, don't return it as a candidate
 			if (!(identity instanceof SingleFieldIdentity)) {
 				throw new NucleusDataStoreException(

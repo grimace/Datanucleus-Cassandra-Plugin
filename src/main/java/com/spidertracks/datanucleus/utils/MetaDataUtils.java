@@ -17,7 +17,11 @@ Contributors : Todd Nine
  ***********************************************************************/
 package com.spidertracks.datanucleus.utils;
 
+import static com.spidertracks.datanucleus.utils.MetaDataUtils.getDiscriminatorColumnName;
+
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -38,6 +42,7 @@ import org.datanucleus.metadata.DiscriminatorMetaData;
 import org.datanucleus.metadata.IndexMetaData;
 import org.datanucleus.metadata.InheritanceMetaData;
 import org.datanucleus.metadata.InheritanceStrategy;
+import org.datanucleus.metadata.MetaDataManager;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.mapped.exceptions.DatastoreFieldDefinitionException;
@@ -72,9 +77,11 @@ public class MetaDataUtils {
 	private static ConcurrentMap<String, String> classToCfNames = new ConcurrentHashMap<String, String>();
 
 	private static ConcurrentMap<AbstractMemberMetaData, String> fieldToColumnNames = new ConcurrentHashMap<AbstractMemberMetaData, String>();
-	
+
 	private static ConcurrentMap<AbstractMemberMetaData, String> fieldToIndexNames = new ConcurrentHashMap<AbstractMemberMetaData, String>();
-	
+
+	private static ConcurrentMap<String, List<String>> classToSubclasses = new ConcurrentHashMap<String, List<String>>();
+
 	//
 	/**
 	 * Convenience method to find an object given a string form of its identity,
@@ -302,7 +309,6 @@ public class MetaDataUtils {
 
 	}
 
-
 	/**
 	 * Get the column metadata for the class and fieldname
 	 * 
@@ -352,6 +358,24 @@ public class MetaDataUtils {
 	}
 
 	/**
+	 * Get the column name from the meta data, if it's not specified the default
+	 * name of "classtype" is returned
+	 * 
+	 * @param acmd
+	 * @return
+	 */
+	public static String getDiscriminatorColumnName(AbstractClassMetaData acmd) {
+		DiscriminatorMetaData meta = acmd.getDiscriminatorMetaData();
+
+		if (meta == null) {
+			return null;
+		}
+
+		return getDiscriminatorColumnName(meta);
+
+	}
+
+	/**
 	 * Get the name of the index. Will return null if no index is defined. If
 	 * one is, it takes the name assigned by the user, otherwise it will create
 	 * an index in the format of <TableName>_<FieldName>
@@ -392,8 +416,6 @@ public class MetaDataUtils {
 		return name;
 
 	}
-
-	
 
 	/**
 	 * Get the byte value of the column names
@@ -493,6 +515,55 @@ public class MetaDataUtils {
 
 		return cfName;
 
+	}
+
+	/**
+	 * Get all descriminators as strings for this class and all possible
+	 * subclasses. Will return at a minimum the descriminator for the passed
+	 * class
+	 * 
+	 * @param className
+	 * @param clr
+	 * @param ec
+	 * @return
+	 */
+	public static List<String> getDescriminatorValues(String className,
+			ClassLoaderResolver clr, ExecutionContext ec) {
+
+		List<String> descriminators = classToSubclasses.get(className);
+
+		if (descriminators != null) {
+			return descriminators;
+		}
+
+		descriminators = new ArrayList<String>();
+
+		MetaDataManager mdm = ec.getMetaDataManager();
+
+		AbstractClassMetaData metaData = mdm
+				.getMetaDataForClass(className, clr);
+
+		DiscriminatorMetaData discriminator = metaData
+				.getDiscriminatorMetaData();
+
+		descriminators.add(discriminator.getValue());
+
+		String[] subClasses = mdm.getSubclassesForClass(className, true);
+
+		if (subClasses != null) {
+
+			for (String subclassName : subClasses) {
+				metaData = mdm.getMetaDataForClass(subclassName, clr);
+
+				discriminator = metaData.getDiscriminatorMetaData();
+
+				descriminators.add(discriminator.getValue());
+			}
+		}
+
+		classToSubclasses.putIfAbsent(className, descriminators);
+
+		return descriminators;
 	}
 
 	/**

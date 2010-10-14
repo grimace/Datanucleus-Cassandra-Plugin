@@ -17,6 +17,8 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.query.runtime;
 
+import java.util.List;
+
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexClause;
 
@@ -50,10 +52,20 @@ public class AndOperand extends Operand {
 
 	@Override
 	public void performQuery(String poolName, String cfName,
-			 String identityColumnName, ConsistencyLevel consistency) {
+			String[] columns, ConsistencyLevel consistency) {
 		
-		left.performQuery(poolName, cfName, identityColumnName, consistency);
-		right.performQuery(poolName, cfName, identityColumnName, consistency);
+		left.performQuery(poolName, cfName, columns, consistency);
+		right.performQuery(poolName, cfName, columns, consistency);
+		
+	}
+	
+	@Override
+	public Operand optimizeDescriminator(String descriminatorColumnValue,
+			List<String> possibleValues) {
+		setLeft(left.optimizeDescriminator(descriminatorColumnValue, possibleValues));
+		setRight(right.optimizeDescriminator(descriminatorColumnValue, possibleValues));
+		
+		return this;
 		
 	}
 

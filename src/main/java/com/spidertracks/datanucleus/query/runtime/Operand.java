@@ -17,68 +17,74 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.query.runtime;
 
+import java.util.List;
 import java.util.Set;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.scale7.cassandra.pelops.Bytes;
 
 /**
- * Class that represents an || or && operation.  Each will have a left and a right.  This is used to
- * Thread && queries to allow for more efficient unions of results sets with && and || ops
+ * Class that represents an || or && operation. Each will have a left and a
+ * right. This is used to Thread && queries to allow for more efficient unions
+ * of results sets with && and || ops
+ * 
  * @author Todd Nine
- *
+ * 
  */
 public abstract class Operand {
-	
+
 	protected Operand parent;
-	
+
 	protected Operand left;
-	
+
 	protected Operand right;
-	
-	protected Set<Bytes> candidateKeys;
-	
-	
-	
-	
+
+	protected Set<Columns> candidateKeys;
+
 	/**
-	 * Called by the child when it has completed it's operation to signal to the parent it is done
+	 * Called by the child when it has completed it's operation to signal to the
+	 * parent it is done
+	 * 
 	 * @param child
 	 */
 	public abstract void complete(Operand child);
-	
+
 	/**
-	 * Will run the query.  
+	 * Will run the query.
 	 */
-	public abstract void performQuery(String poolName, String cfName, String identityColumnName, ConsistencyLevel consistency);
+	public abstract void performQuery(String poolName, String cfName,
+			 String[] columns, ConsistencyLevel consistency);
 
+	/**
+	 * Optimize the query tree for CFS that have descriminators
+	 * 
+	 * @param descriminatorColumnValue
+	 * @param possibleValues
+	 */
+	public abstract Operand optimizeDescriminator(String descriminatorColumnValue,
+			List<String> possibleValues);
 
-	public Set<Bytes> getCandidateKeys() {
+	public Set<Columns> getCandidateKeys() {
 		return candidateKeys;
 	}
-
 
 	public void setParent(Operand parent) {
 		this.parent = parent;
 	}
 
-
 	public void setLeft(Operand left) {
 		this.left = left;
-		if(left != null){
+		if (left != null) {
 			left.setParent(this);
 		}
 	}
 
-
 	public void setRight(Operand right) {
 		this.right = right;
-		
-		if(right != null){
+
+		if (right != null) {
 			right.setParent(this);
 		}
 	}
-	
-	
 
 }

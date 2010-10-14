@@ -27,6 +27,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.jdo.annotations.Discriminator;
+
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.datanucleus.ClassLoaderResolver;
@@ -285,9 +287,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
 
 		String descriminatorValue = Bytes.toUTF8(columns.get(0).getValue());
 
-		String className = org.datanucleus.metadata.MetaDataUtils
-				.getClassNameFromDiscriminatorValue(descriminatorValue,
-						metaData.getDiscriminatorMetaData(), ec);
+		String className = org.datanucleus.metadata.MetaDataUtils.getClassNameFromDiscriminatorValue(descriminatorValue, metaData.getDiscriminatorMetaData(), ec);
 
 		// now recursively load the search for our class
 
