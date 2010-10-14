@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.spidertracks.datanucleus</groupId>
 	<artifactId>cassandra</artifactId>
-	<version>0.5.5-SNAPSHOT</version>
+	<version>0.7.0-rc1-SNAPSHOT</version>
 	<properties>
 		<datanucleus.version>2.1.1</datanucleus.version>
 		<datanucleus.plugin.version>2.1.0-release</datanucleus.plugin.version>
@@ -12,6 +12,7 @@
 		<pelops.version>0.906-0.7.0-st-SNAPSHOT</pelops.version>
 		<slf4j.version>1.6.1</slf4j.version>
 		<avro.version>1.4.0-fixes</avro.version>
+		<high.scale.version>1.1.2</high.scale.version>
 		<st.deploy.dir>file://${basedir}/../mvnrepo</st.deploy.dir>
 	</properties>
 	<repositories>
@@ -89,6 +90,17 @@
 			<version>${cassandra.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
 
 
 		<!-- test dependencies -->
@@ -127,9 +139,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>high-scale-lib</groupId>
+			<groupId>org.cliffc</groupId>
 			<artifactId>high-scale-lib</artifactId>
-			<version>1.1.2</version>
+			<version>${high.scale.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -172,18 +184,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j.version}</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>${slf4j.version}</version>
-			<type>jar</type>
-		</dependency>
+
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -313,7 +314,9 @@
 				<!-- do not remove this configuration! Required to fork each test in 
 					it's own thread otherwise the embedded cassandra causes the tests to hang -->
 				<configuration>
+					<argLine>-Xms256m -Xmx512m -ea</argLine>
 					<forkMode>always</forkMode>
+
 				</configuration>
 			</plugin>
 
@@ -364,12 +367,32 @@
 							<file>${basedir}/lib/avro-${avro.version}.jar</file>
 						</configuration>
 					</execution>
+					<execution>
+						<id>install high scale</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<packaging>jar</packaging>
+							<groupId>org.cliffc</groupId>
+							<artifactId>high-scale-lib</artifactId>
+							<version>${high.scale.version}</version>
+							<file>${basedir}/lib/high-scale-lib-${high.scale.version}.jar</file>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
-			<!-- deploy the thrift binarie -->
+			<!-- deploy the thrift binaries -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<updateReleaseInfo>true</updateReleaseInfo>
+					<repositoryId>maven.spidertracks.com.local</repositoryId>
+					<url>${st.deploy.dir}</url>
+				</configuration>
+
 				<executions>
 					<execution>
 						<id>deploy libthrift</id>
@@ -383,6 +406,7 @@
 							<artifactId>libthrift</artifactId>
 							<version>${thrift.version}</version>
 							<file>${basedir}/lib/libthrift-r${thrift.version}.jar</file>
+
 						</configuration>
 					</execution>
 					<execution>
@@ -413,18 +437,35 @@
 							<file>${basedir}/lib/avro-${avro.version}.jar</file>
 						</configuration>
 					</execution>
+					<execution>
+						<id>deploy high scale</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy-file</goal>
+						</goals>
+						<configuration>
+							<packaging>jar</packaging>
+							<groupId>org.cliffc</groupId>
+							<artifactId>high-scale-lib</artifactId>
+							<version>${high.scale.version}</version>
+							<file>${basedir}/lib/high-scale-lib-${high.scale.version}.jar</file>
+						</configuration>
+					</execution>
 				</executions>
+
+
 			</plugin>
 		</plugins>
 	</build>
 
+
 	<distributionManagement>
 		<repository>
-			<id>maven.st.org.local</id>
+			<id>maven.spidertracks.com.local</id>
 			<name>Deployment Staging Area</name>
-			<!-- The ${scale7.deploy.dir} is defined in your ~/.m2/settings.xml file 
-				and it should point to the directory that contains the clone of http://github.com/s7/mvnrepo. 
-				e.g. file:///Users/dan/Development/Projects/scale7/mvnrepo -->
+			<!-- The ${st.deploy.dir} is defined in your ~/.m2/settings.xml file and 
+				it should point to the directory that contains the clone of http://github.com/tnine/mvnrepo. 
+				e.g. file:///home/todd/development/m2repo -->
 			<url>${st.deploy.dir}</url>
 			<layout>default</layout>
 		</repository>

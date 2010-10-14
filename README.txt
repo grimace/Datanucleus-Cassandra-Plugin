@@ -1,38 +1,93 @@
-This plugin supports the following operations.
+Cassandra Datanucleus Plugin
+============================
+
+Features
+--------
 
 * Basic CRUD
 * Graph persistence of all loaded objects
-* Cascading deletes of all depdendent objects
+* Cascading deletes of all dependent objects
 * Subclass retrieval and persistence
 * Basic secondary indexing with simple terms.  && || < <= > >= and == are supported.
+* In memory ordering and paging.  Paging is not supporting without an ordering clause
 
 
 See all unit/integration tests for details on how to annotate objects, as well as correctly query them.
 
-IMPLEMENTATION NOTES:
+Defining repositories
+---------------------
 
-Currently secondary indexing requires a Column Family per index.  Lucandra was initially used as it allowed
-greater query functionality.  However this implementation cannot be used on numeric fields due to this bug.
+Add the following repository to your pom.xml
 
-https://issues.apache.org/jira/browse/CASSANDRA-1235
+  <repository>
+        <id>maven.spidertracks.com</id>
+        <name>Scale7 Maven Repo</name>
+        <url>http://github.com/tnine/m2repo/raw/master</url>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+  </repository>
+    
+    
+Add this dependency for the latest release build
 
-Secondary indexing with Lucandra will be implemented after this issue is resolved and released.
+	<dependency>
+		<groupId>com.spidertracks.datanucleus</groupId>
+		<artifactId>cassandra</artifactId>
+		<version>0.7.0-rc1</version>
+	</dependency>
 
-BUILDING:
 
-Building is currently not a tivial task.  We depend on Pelops, which can be downloaded here.
 
-http://code.google.com/p/pelops/
 
-Currently version 0.804 is supported.
 
-You will also need to manually install the cassandra depdenencies.  The next release will manually install all
-required jars during the build process.  I have uploaded our custom build of Pelops.  The current version on github
-has changed significantly. This plugin will be refactored in the next release to use the new client.
+Usage
+=====
 
-USAGE:
+Developing Unit/Integeration Tests
+----------------------------------
 
-All inheritance requires a descriminator strategy if there more than 1 concrete class is in the inheritance tree.
+Include the "test-jar" in your test depdency scope.  Extend or duplicate com.spidertracks.datanucleus.CassandraTest to create an embedded test.
+Copy log4j.properties and cassandra.yaml from src/test/resources to your project's test resources.
+
+
+Keyspace and CF creation
+------------------------
+
+Currently secondary indexing is automatically created for the columns of field that are annotated with the @Index annotation
+if the auto table create is enabled in your dn configuration.  See the src/test/resources/META-INF/jdoconfig.xml for an example.
+Note that in a production environment you SHOULD NOT set datanucleus.autoCreateSchema="true".  This uses the simple replication
+strategy with a replication factor of 1.  This is ideal for rapid development on a local machine, but not for a production enironment.
+
+
+
+Querying
+--------
+
+All queries must contain at least one == operand.  For instance, this is a valid query.
+
+	"follower == :email && lastupdate > :max use"
+
+This is not
+
+	"follower == :email || follower == :email2"
+
+Currently as of 0.7.0, Cassandra cannot support OR operations.  As a result all subtrees of OR ops in a query AST are performed independently
+and the candidate results are unioned.
+
+Ordering and Paging
+-------------------
+
+Currently in memory ordering and paging are supported.  Since cassandra will return results in any order when using an || operand in your query
+you cannot guarantee order.  Therefore ordering must be used when paging is used.  Be aware that all values from 0 to your defined start index
+are loaded and sorted before being ignored.  This can be quite memory intensive.  You may get better performance by modifying the range your
+query runs over.
+
+
+Inheritance
+-----------
+
+All inheritance requires a discriminator strategy if there more than 1 concrete class is in the inheritance tree.
 This is due to a limitation of the plugin.  Note that a CF per concrete class is much less efficient than
 storing all subclasses in the parent CF.  
 
@@ -45,18 +100,11 @@ Storing the subclass in its own table requires O(n+1) reads where n is the numbe
 2. Read the columns and populate the object O(1) 
 
 
-BUILD NOTES:
 
-high scale lib doesn't appear to be in a repo. You can install it from the lib directory as follows
+Building
+--------
 
-#mvn install:install-file -DgroupId=high-scale-lib -DartifactId=high-scale-lib -Dversion=1.1.2 -Dpackaging=jar -Dfile=./lib/high-scale-lib.jar 
+You no longer need to manually install the cassandra depdenencies when building.  They will be installed and deployed automatically by maven.
 
-
-TEST NOTES:
-
-you might need to run the following to allow the embedded cassandra to startup:
-
-
-#sudo mkdir -p /var/lib/cassandra/saved_caches
 
 

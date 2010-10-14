@@ -76,7 +76,10 @@ public abstract class CassandraTest {
 
 	@AfterClass
 	public static void teardown() throws Exception {
-		// no shutdown for now
+		try{
 		cassandraServer.stop();
+		}catch(Exception e){
+			/*SWALLOW*/
+		}
 	}
 }
