@@ -451,7 +451,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 */
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testRetrieveGreaterLessThanEqual() {
+	public void testRetrieveLessThanEqual() {
 
 		// now perform our select. We want everyone with firstname =
 		// "firstName1"
@@ -471,6 +471,99 @@ public class JDOQLBasicTest extends CassandraTest {
 		assertTrue(results.contains(p1));
 		assertTrue(results.contains(p2));
 		assertTrue(results.contains(p3));
+
+	}
+
+	/**
+	 * Query returning an object with relation fields, testing the contents of
+	 * the relation fields.
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testRetrieveLessThanEqualOrder() {
+
+		// now perform our select. We want everyone with firstname =
+		// "firstName1"
+		PersistenceManager pm = pmf.getPersistenceManager();
+
+		Query query = pm.newQuery(Person.class);
+		query.setFilter("lastLogin <= :loginDate && firstName == :fName");
+		query.setOrdering("lastLogin DESC");
+
+		// should be p1 p2 p3
+		List<Person> results = (List<Person>) query.execute(p3.getLastLogin(),
+				"firstName1");
+
+		// check we got p1, p2 and p3
+
+		assertEquals(3, results.size());
+
+		assertTrue(results.get(0).equals(p3));
+		assertTrue(results.get(1).equals(p2));
+		assertTrue(results.get(2).equals(p1));
+
+	}
+
+	/**
+	 * Query returning an object with relation fields, testing the contents of
+	 * the relation fields.
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testRetrieveLessThanEqualOrderRange() {
+
+		// now perform our select. We want everyone with firstname =
+		// "firstName1"
+		PersistenceManager pm = pmf.getPersistenceManager();
+
+		Query query = pm.newQuery(Person.class);
+		query.setFilter("lastLogin <= :loginDate && firstName == :fName");
+		query.setOrdering("lastLogin DESC");
+		query.setRange(1, 3);
+
+		// should be p1 p2 p3
+		List<Person> results = (List<Person>) query.execute(p3.getLastLogin(),
+				"firstName1");
+
+		// check we got p1, p2 and p3
+
+		assertEquals(2, results.size());
+
+		assertTrue(results.get(0).equals(p2));
+		assertTrue(results.get(1).equals(p1));
+
+	}
+
+	/**
+	 * Query returning an object with relation fields, testing the contents of
+	 * the relation fields.
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testRetrieveGreaterLessThanEqualNoOrderRange() {
+
+		// now perform our select. We want everyone with firstname =
+		// "firstName1"
+		PersistenceManager pm = pmf.getPersistenceManager();
+
+		Query query = pm.newQuery(Person.class);
+		query.setFilter("lastLogin <= :loginDate && firstName == :fName");
+		query.setRange(1, 3);
+
+		// should be p1 p2 p3
+		try {
+			List<Person> results = (List<Person>) query.execute(
+					p3.getLastLogin(), "firstName1");
+
+		} catch (JDODataStoreException ndse) {
+			if (ndse.getCause() instanceof NucleusDataStoreException) {
+				return;
+			}
+		}
+
+		fail("Should have thrown an exception.  You can't perform ranges without ordering");
+
+		// check we got p1, p2 and p3
 
 	}
 
@@ -539,7 +632,7 @@ public class JDOQLBasicTest extends CassandraTest {
 		SearchTwo two = new SearchTwo();
 		two.setSearchField("search");
 		two.setSearchTwo("searchThree");
-		
+
 		SearchThree three = new SearchThree();
 		three.setSearchField("search");
 		three.setSearchThree("searchThree");
@@ -574,20 +667,20 @@ public class JDOQLBasicTest extends CassandraTest {
 		assertEquals(1, resultsTwo.size());
 
 		assertTrue(resultsTwo.contains(two));
-		
-		
+
 		query = pm.newQuery(SearchThree.class);
 		query.setFilter("searchField == :search");
 		query.setIgnoreCache(true);
 
 		// now query on the subclass
-		List<SearchThree> resultsThree = (List<SearchThree>) query.execute("search");
+		List<SearchThree> resultsThree = (List<SearchThree>) query
+				.execute("search");
 
 		assertEquals(1, resultsTwo.size());
 
 		assertTrue(resultsThree.contains(three));
-		
-		//query for all subclasses
+
+		// query for all subclasses
 
 		query = pm.newQuery(Search.class);
 		query.setFilter("searchField == :search");
@@ -604,7 +697,6 @@ public class JDOQLBasicTest extends CassandraTest {
 		assertTrue(results.contains(one));
 		assertTrue(results.contains(two));
 		assertTrue(results.contains(three));
-
 
 	}
 

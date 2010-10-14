@@ -160,8 +160,7 @@ public class EqualityOperand extends Operand implements CompressableOperand {
 				orOps.push(orOp);
 			}
 
-			EqualityOperand subClass = new EqualityOperand(
-					CassandraQueryExpressionEvaluator.MAX);
+			EqualityOperand subClass = new EqualityOperand(clause.getCount());
 
 			// add the existing clause
 			subClass.addAll(this.getIndexClause().getExpressions());

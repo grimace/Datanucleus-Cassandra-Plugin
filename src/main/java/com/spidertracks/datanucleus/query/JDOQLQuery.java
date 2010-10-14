@@ -53,6 +53,8 @@ import com.spidertracks.datanucleus.utils.MetaDataUtils;
  */
 public class JDOQLQuery extends AbstractJDOQLQuery {
 
+	private static int DEFAULT_MAX = 1000;
+	
 	/**
 	 * 
 	 */
@@ -111,7 +113,6 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 		Expression filter = this.getCompilation().getExprFilter();
 
-		boolean evaluteInMemory = true;
 
 		String poolName = ((CassandraStoreManager) ec.getStoreManager())
 				.getPoolName();
@@ -135,14 +136,25 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		DiscriminatorMetaData discriminator = null;
 
 		String[] selectColumns = new String[] { identityCol };
+		
+		int range = DEFAULT_MAX;
+		
+		if(this.getRange() != null){
+			range = (int) this.getRangeToExcl();
+			
+			if(this.getOrdering() == null){
+				throw new NucleusDataStoreException(
+				"You cannot invoke a without an ordering expression against Cassandra. Results will be randomly ordered from Cassnadra and need order to page");
+
+			}
+		}
 
 		CassandraQueryExpressionEvaluator evaluator = new CassandraQueryExpressionEvaluator(
-				ec, parameters, clr, candidateClass);
+				ec, parameters, clr, candidateClass, range );
 
 		Operand opTree = (Operand) filter.evaluate(evaluator);
 
-		evaluteInMemory = evaluator.isInMemoryRequired();
-
+	
 		Bytes idColumnBytes = Bytes.fromUTF8(identityCol);
 		Bytes descriminatorBytes = null;
 
@@ -172,7 +184,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		Collection<?> results = getObjectsOfCandidateType(candidateKeys, acmd,
 				clr, subclasses, idColumnBytes, descriminatorBytes);
 
-		if (evaluteInMemory) {
+		if (this.getOrdering() != null || this.getGrouping() != null) {
 
 			// Apply any result restrictions to the results
 			JavaQueryEvaluator resultMapper = new JDOQLEvaluator(this, results,

@@ -20,7 +20,6 @@ package com.spidertracks.datanucleus.query;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnName;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
@@ -63,22 +62,17 @@ public class CassandraQueryExpressionEvaluator extends
 	private static final Logger logger = LoggerFactory
 			.getLogger(CassandraQueryExpressionEvaluator.class);
 
-	public static final int MAX = 1000;
-
 	private Stack<IndexParam> indexKeys = new Stack<IndexParam>();
 	private Stack<Operand> operationStack = new Stack<Operand>();
 
 	private AbstractClassMetaData metaData;
 
-	// Flag that marks an operation we can't support has been performed. We need
-	// to then run result set
-	// through the memory scanner
-	private boolean inMemoryRequired;
-
 	/** Map of input parameter values, keyed by their name. */
 	private Map<String, Object> parameterValues;
 
 	private ExecutionContext ec;
+	
+	private int maxSize;
 	
 
 	/**
@@ -99,18 +93,13 @@ public class CassandraQueryExpressionEvaluator extends
 	 */
 	public CassandraQueryExpressionEvaluator(ExecutionContext ec,
 			Map<String, Object> params, ClassLoaderResolver clr,
-			Class<?> destinationClass) {
+			Class<?> destinationClass, int maxSize) {
 		this.ec = ec;
 		metaData = ec.getMetaDataManager().getMetaDataForClass(destinationClass, clr);
 		this.parameterValues = (params != null ? params
 				: new HashMap<String, Object>());
-		// this.state = state;
-		// this.imports = imports;
-
-		inMemoryRequired = false;
-
-
-		// assume only one identity field
+		
+		this.maxSize = maxSize;
 
 	}
 
@@ -133,7 +122,7 @@ public class CassandraQueryExpressionEvaluator extends
 		if (left instanceof CompressableOperand
 				&& right instanceof CompressableOperand) {
 			
-			EqualityOperand op = new EqualityOperand(MAX);
+			EqualityOperand op = new EqualityOperand(maxSize);
 
 			op.addAll(((CompressableOperand) left).getIndexClause()
 					.getExpressions());
@@ -170,7 +159,7 @@ public class CassandraQueryExpressionEvaluator extends
 				indexKey.getIndexName(), IndexOperator.EQ,
 				indexKey.getIndexValue());
 
-		EqualityOperand op = new EqualityOperand(MAX);
+		EqualityOperand op = new EqualityOperand(maxSize);
 		op.addExpression(expression);
 
 		return this.operationStack.push(op);
@@ -192,7 +181,7 @@ public class CassandraQueryExpressionEvaluator extends
 				indexKey.getIndexName(), IndexOperator.GTE,
 				indexKey.getIndexValue());
 
-		EqualityOperand op = new EqualityOperand(MAX);
+		EqualityOperand op = new EqualityOperand(maxSize);
 		op.addExpression(expression);
 
 		return this.operationStack.push(op);
@@ -213,7 +202,7 @@ public class CassandraQueryExpressionEvaluator extends
 				indexKey.getIndexName(), IndexOperator.GT,
 				indexKey.getIndexValue());
 
-		EqualityOperand op = new EqualityOperand(MAX);
+		EqualityOperand op = new EqualityOperand(maxSize);
 		op.addExpression(expression);
 
 		return this.operationStack.push(op);
@@ -234,7 +223,7 @@ public class CassandraQueryExpressionEvaluator extends
 				indexKey.getIndexName(), IndexOperator.LTE,
 				indexKey.getIndexValue());
 
-		EqualityOperand op = new EqualityOperand(MAX);
+		EqualityOperand op = new EqualityOperand(maxSize);
 		op.addExpression(expression);
 
 		return this.operationStack.push(op);
@@ -255,7 +244,7 @@ public class CassandraQueryExpressionEvaluator extends
 				indexKey.getIndexName(), IndexOperator.LT,
 				indexKey.getIndexValue());
 
-		EqualityOperand op = new EqualityOperand(MAX);
+		EqualityOperand op = new EqualityOperand(maxSize);
 		op.addExpression(expression);
 
 		return this.operationStack.push(op);
@@ -359,12 +348,7 @@ public class CassandraQueryExpressionEvaluator extends
 		return param;
 	}
 
-	/**
-	 * @return the inMemoryRequired
-	 */
-	public boolean isInMemoryRequired() {
-		return inMemoryRequired;
-	}
+
 
 	/**
 	 * Get the index value off the stack. Will only pop if the stack sizes are

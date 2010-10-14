@@ -49,10 +49,6 @@ public abstract class CassandraTest {
 
 	public static final String KEYSPACE = "TestingKeyspace";
 
-	private static Cluster cluster = new Cluster(RPC_LISTEN_ADDRESS, RPC_PORT);
-
-	private static List<CfDef> colFamilyDefs;
-
 	protected static EmbeddedCassandraServer cassandraServer;
 	protected static PersistenceManagerFactory pmf;
 
