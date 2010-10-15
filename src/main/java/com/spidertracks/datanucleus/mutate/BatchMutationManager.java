@@ -66,7 +66,7 @@ public class BatchMutationManager {
 	 * @return
 	 * @throws Exception
 	 */
-	public void endDelete(ExecutionContext context, ConsistencyLevel consistency)
+	public void endDelete(ExecutionContext context)
 			throws Exception {
 		// not our root instance, don't create a batch mutation
 		if (!getDeletions(context).popInstance()) {
@@ -75,7 +75,7 @@ public class BatchMutationManager {
 
 		// it is our root instance, create the batch mutation.
 
-		getDeletions(context).execute(consistency);
+		getDeletions(context).execute();
 		contextDeletions.remove(context);
 
 	}
@@ -89,7 +89,7 @@ public class BatchMutationManager {
 	 * @return
 	 * @throws Exception
 	 */
-	public void endWrite(ExecutionContext context, ConsistencyLevel consistency)
+	public void endWrite(ExecutionContext context)
 			throws Exception {
 		// not our root instance, don't create a batch mutation
 		if (!getMutations(context).popInstance()) {
@@ -98,7 +98,7 @@ public class BatchMutationManager {
 
 		// it is our root instance, create the batch mutation.
 
-		getMutations(context).execute(consistency);
+		getMutations(context).execute();
 		contextMutations.remove(context);
 
 	}

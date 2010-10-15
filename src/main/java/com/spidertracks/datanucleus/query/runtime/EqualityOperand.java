@@ -24,7 +24,6 @@ import java.util.Map.Entry;
 import java.util.Stack;
 
 import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
@@ -33,7 +32,7 @@ import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
 
-import com.spidertracks.datanucleus.query.CassandraQueryExpressionEvaluator;
+import com.spidertracks.datanucleus.client.Consistency;
 
 /**
  * @author Todd Nine
@@ -89,13 +88,12 @@ public class EqualityOperand extends Operand implements CompressableOperand {
 	}
 
 	@Override
-	public void performQuery(String poolName, String cfName, String[] columns,
-			ConsistencyLevel consistency) {
+	public void performQuery(String poolName, String cfName, String[] columns) {
 
 		try {
 			Map<Bytes, List<Column>> results = Pelops.createSelector(poolName)
 					.getIndexedColumns(cfName, clause,
-							Selector.newColumnsPredicate(columns), consistency);
+							Selector.newColumnsPredicate(columns), Consistency.get());
 			Columns cols;
 
 			for (Entry<Bytes, List<Column>> entry : results.entrySet()) {

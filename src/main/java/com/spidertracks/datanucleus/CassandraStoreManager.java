@@ -18,7 +18,6 @@ Contributors : Pedro Gomes and Universidade do Minho.
  ***********************************************************************/
 package com.spidertracks.datanucleus;
 
-import static com.spidertracks.datanucleus.utils.MetaDataUtils.DEFAULT;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnFamily;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getDescriminatorColumn;
 
@@ -42,6 +41,7 @@ import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
 
+import com.spidertracks.datanucleus.client.Consistency;
 import com.spidertracks.datanucleus.serialization.JavaSerializer;
 import com.spidertracks.datanucleus.serialization.Serializer;
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
@@ -266,7 +266,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
 		try {
 
 			columns = selector.getColumnsFromRow(getColumnFamily(metaData),
-					key, getDescriminatorColumn(metaData), DEFAULT);
+					key, getDescriminatorColumn(metaData), Consistency.get());
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);

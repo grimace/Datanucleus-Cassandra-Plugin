@@ -19,8 +19,6 @@ package com.spidertracks.datanucleus.query.runtime;
 
 import java.util.List;
 
-import org.apache.cassandra.thrift.ConsistencyLevel;
-
 /**
  * @author Todd Nine
  *
@@ -50,10 +48,10 @@ public class OrOperand extends Operand {
 	}
 
 	@Override
-	public void performQuery(String poolName, String cfName, String[] columns, ConsistencyLevel consistency) {
+	public void performQuery(String poolName, String cfName, String[] columns) {
 		
-		left.performQuery(poolName, cfName, columns, consistency);
-		right.performQuery(poolName, cfName, columns, consistency);
+		left.performQuery(poolName, cfName, columns);
+		right.performQuery(poolName, cfName, columns);
 		
 	}
 

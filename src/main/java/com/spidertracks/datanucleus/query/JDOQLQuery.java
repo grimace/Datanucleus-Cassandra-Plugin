@@ -27,7 +27,6 @@ import java.util.Set;
 
 import javax.jdo.identity.SingleFieldIdentity;
 
-import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.metadata.AbstractClassMetaData;
@@ -45,7 +44,6 @@ import com.spidertracks.datanucleus.CassandraStoreManager;
 import com.spidertracks.datanucleus.query.runtime.Columns;
 import com.spidertracks.datanucleus.query.runtime.Operand;
 import com.spidertracks.datanucleus.serialization.Serializer;
-import com.spidertracks.datanucleus.utils.ByteConverter;
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 /**
@@ -180,8 +178,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		// perform a query rewrite to take into account descriminator values
 
 		// TODO, reconstruct query if there is a descriminator
-		opTree.performQuery(poolName, columnFamily, selectColumns,
-				ConsistencyLevel.ONE);
+		opTree.performQuery(poolName, columnFamily, selectColumns);
 
 		Set<Columns> candidateKeys = opTree.getCandidateKeys();
 

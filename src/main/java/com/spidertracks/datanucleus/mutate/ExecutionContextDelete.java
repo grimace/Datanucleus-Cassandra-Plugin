@@ -25,6 +25,8 @@ import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
 import org.scale7.cassandra.pelops.RowDeletor;
 
+import com.spidertracks.datanucleus.client.Consistency;
+
 /**
  * Holds all mutations for the current execution context
  * 
@@ -72,9 +74,9 @@ public class ExecutionContextDelete extends ExecutionContextOp {
 
 
 
-	public void execute(ConsistencyLevel consistency) throws Exception {
+	public void execute() throws Exception {
 		for (Deletion deletion : mutations) {
-			deletor.deleteRow(deletion.columnFamily, deletion.rowKey, consistency);
+			deletor.deleteRow(deletion.columnFamily, deletion.rowKey, Consistency.get());
 		}
 	}
 	

@@ -20,9 +20,6 @@ package com.spidertracks.datanucleus.query.runtime;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.scale7.cassandra.pelops.Bytes;
-
 /**
  * Class that represents an || or && operation. Each will have a left and a
  * right. This is used to Thread && queries to allow for more efficient unions
@@ -53,7 +50,7 @@ public abstract class Operand {
 	 * Will run the query.
 	 */
 	public abstract void performQuery(String poolName, String cfName,
-			 String[] columns, ConsistencyLevel consistency);
+			 String[] columns);
 
 	/**
 	 * Optimize the query tree for CFS that have descriminators

@@ -17,7 +17,6 @@ Contributors : Pedro Gomes and Universidade do Minho.
  ***********************************************************************/
 package com.spidertracks.datanucleus;
 
-import static com.spidertracks.datanucleus.utils.MetaDataUtils.DEFAULT;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnFamily;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getDiscriminatorColumnName;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getFetchColumnList;
@@ -44,6 +43,7 @@ import org.scale7.cassandra.pelops.Mutator;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
 
+import com.spidertracks.datanucleus.client.Consistency;
 import com.spidertracks.datanucleus.mutate.BatchMutationManager;
 import com.spidertracks.datanucleus.mutate.ExecutionContextDelete;
 
@@ -177,7 +177,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 			}
 
-			this.batchManager.endDelete(ec, DEFAULT);
+			this.batchManager.endDelete(ec);
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -195,7 +195,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 			List<Column> columns = selector.getColumnsFromRow(
 					getColumnFamily(metaData), key,
-					getFetchColumnList(metaData, fieldNumbers), DEFAULT);
+					getFetchColumnList(metaData, fieldNumbers), Consistency.get());
 
 			// nothing to do
 			if (columns == null || columns.size() == 0) {
@@ -294,7 +294,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 		try {
 
-			this.batchManager.endWrite(ec, DEFAULT);
+			this.batchManager.endWrite(ec);
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);

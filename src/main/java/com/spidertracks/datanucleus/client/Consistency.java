@@ -12,41 +12,54 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Contributors : Todd Nine
+Contributors :
+    ...
  ***********************************************************************/
-package com.spidertracks.datanucleus.mutate;
+package com.spidertracks.datanucleus.client;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.datanucleus.store.ExecutionContext;
-import org.scale7.cassandra.pelops.Mutator;
-
-import com.spidertracks.datanucleus.client.Consistency;
 
 /**
- * Holds all mutations for the current execution context
+ * Class that is used similar to a transaction to set the consistency level for
+ * a given operation. If none is set on the thread, ConsistencyLevel.ONE is used as the default
+ * 
  * 
  * @author Todd Nine
  * 
  */
-public class ExecutionContextMutate extends ExecutionContextOp {
+public class Consistency {
 
-	// operations of mutations to perform
-	private Mutator mutator;
+	private static final ThreadLocal<ConsistencyLevel> level = new ThreadLocal<ConsistencyLevel>();
 
-	public ExecutionContextMutate(ExecutionContext ctx, Mutator mutator) {
-		super(ctx);
-		this.mutator = mutator;
-	}
-
-	public void execute() throws Exception {
-		mutator.execute(Consistency.get());
+	/**
+	 * Set the consistency level for this thread
+	 * 
+	 * @param c
+	 */
+	public static void set(ConsistencyLevel c) {
+		level.set(c);
 	}
 
 	/**
-	 * @return the mutator
+	 * Convenience wrapper for set(ConsistencyLevel.ONE)
 	 */
-	public Mutator getMutator() {
-		return mutator;
+	public static void remove() {
+		set(ConsistencyLevel.ONE);
+	}
+
+	/**
+	 * Get the currently set consistency level;
+	 * 
+	 * @return
+	 */
+	public static ConsistencyLevel get() {
+		ConsistencyLevel l = level.get();
+
+		if (l == null) {
+			return ConsistencyLevel.ONE;
+		}
+
+		return l;
 	}
 
 }

@@ -28,7 +28,6 @@ import javax.jdo.identity.SingleFieldIdentity;
 
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
-import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.api.ApiAdapter;
@@ -65,8 +64,7 @@ import com.spidertracks.datanucleus.serialization.Serializer;
 public class MetaDataUtils {
 
 	//TODO Remove this and get consistency from the currently executing transaction
-	public static final ConsistencyLevel DEFAULT = ConsistencyLevel.ONE;
-
+	
 	public static final Charset UTF8 = Charset.forName("UTF-8");
 
 	//A null place holder for the cached values
