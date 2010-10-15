@@ -41,7 +41,7 @@ import org.datanucleus.store.types.ObjectStringConverter;
 import org.datanucleus.store.types.sco.SCOUtils;
 import org.scale7.cassandra.pelops.Bytes;
 
-import com.spidertracks.datanucleus.utils.ByteConverter;
+import com.spidertracks.datanucleus.serialization.Serializer;
 
 /**
  * @author Todd Nine
@@ -49,6 +49,7 @@ import com.spidertracks.datanucleus.utils.ByteConverter;
  */
 public class CassandraFetchFieldManager extends AbstractFieldManager {
 
+	private Serializer serializer;
 	private Map<String, Column> columns;
 	private AbstractClassMetaData metaData;
 	private ObjectProvider objectProvider;
@@ -68,6 +69,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 		this.metaData = op.getClassMetaData();
 		this.context = op.getExecutionContext();
 		this.clr = this.context.getClassLoaderResolver();
+		this.serializer = ((CassandraStoreManager)context.getStoreManager()).getSerializer();
 
 		// rather than iterate over every field call for O(n) it's faster to
 		// take our O(n) hit up front then perform an O(1) lookup. Sorting and
@@ -257,7 +259,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 							"Embedded objects are currently unimplemented.");
 				}
 
-				Object key = ByteConverter.getObject(column.getValue());
+				Object key = serializer.getObject(column.getValue());
 
 				Object object = context.findObject(key, false, false,
 						fieldMetaData.getTypeName());
@@ -287,7 +289,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 					// get our list of Strings
 
-					List<Object> serializedIdList = ByteConverter.getObject(columns.get(
+					List<Object> serializedIdList = serializer.getObject(columns.get(
 							columnName).getValue());
 
 					for (Object key : serializedIdList) {
@@ -316,7 +318,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 					ApiAdapter adapter = objectProvider.getExecutionContext()
 							.getApiAdapter();
 
-					Map<Object, Object> serializedMap = ByteConverter.getObject(columns.get(
+					Map<Object, Object> serializedMap = serializer.getObject(columns.get(
 							columnName).getValue());
 
 					Class keyClass = clr.classForName(fieldMetaData.getMap()
@@ -353,7 +355,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 				} else if (fieldMetaData.getType().isArray()) {
 
-					List<Object> keys = ByteConverter.getObject(columns.get(columnName)
+					List<Object> keys = serializer.getObject(columns.get(columnName)
 							.getValue());
 
 					Object array = Array.newInstance(fieldMetaData.getType()
@@ -387,7 +389,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 				return converter.toObject(Bytes.toUTF8(column.getValue()));
 			}
 
-			return ByteConverter.getObject(column.value);
+			return serializer.getObject(column.value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);

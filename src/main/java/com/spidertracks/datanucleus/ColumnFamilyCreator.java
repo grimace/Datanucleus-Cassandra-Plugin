@@ -1,10 +1,8 @@
 package com.spidertracks.datanucleus;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.cassandra.thrift.CfDef;
@@ -32,15 +30,18 @@ public class ColumnFamilyCreator implements MetaDataListener {
 
 	private Set<String> existingCfs = new HashSet<String>();
 	private Set<String> visitedCfs = new HashSet<String>();
-	
+
 	private StoreManager storeManager;
 
 	private Object mutex = new Object();
+	private boolean createColumns;
 
-	public ColumnFamilyCreator(StoreManager storeManager, Cluster cluster, String keyspace) {
+	public ColumnFamilyCreator(StoreManager storeManager, Cluster cluster,
+			String keyspace, boolean createColumns) {
 		this.storeManager = storeManager;
 		this.cluster = cluster;
 		this.keyspace = keyspace;
+		this.createColumns = createColumns;
 
 		KeyspaceManager manager = Pelops.createKeyspaceManager(cluster);
 
@@ -67,14 +68,14 @@ public class ColumnFamilyCreator implements MetaDataListener {
 		if (cfName == null) {
 			return;
 		}
-		
-		if(visitedCfs.contains(cfName)){
+
+		if (visitedCfs.contains(cfName)) {
 			return;
 		}
 
 		synchronized (mutex) {
-			//could be the second into the mutex
-			if(visitedCfs.contains(cfName)){
+			// could be the second into the mutex
+			if (visitedCfs.contains(cfName)) {
 				return;
 			}
 
@@ -86,50 +87,58 @@ public class ColumnFamilyCreator implements MetaDataListener {
 
 			// now go through the corresponding fields and create our indexes
 
-			List<ColumnDef> indexColumns = new ArrayList<ColumnDef>(
-					cmd.getAllMemberPositions().length);
-			
+			if (createColumns) {
+				
+				List<ColumnDef> indexColumns = new ArrayList<ColumnDef>(
+						cmd.getAllMemberPositions().length);
 
-			TypeManager typeManager = storeManager.getOMFContext().getTypeManager();
-			
-			for (int field : cmd.getAllMemberPositions()) {
-				AbstractMemberMetaData memberData = cmd
-						.getMetaDataForManagedMemberAtAbsolutePosition(field);
+				TypeManager typeManager = storeManager.getOMFContext()
+						.getTypeManager();
 
-				String indexName = MetaDataUtils.getIndexName(cmd, memberData);
+				for (int field : cmd.getAllMemberPositions()) {
+					AbstractMemberMetaData memberData = cmd
+							.getMetaDataForManagedMemberAtAbsolutePosition(field);
 
-				if (indexName == null) {
-					continue;
+					String indexName = MetaDataUtils.getIndexName(cmd,
+							memberData);
+
+					if (indexName == null) {
+						continue;
+					}
+
+					String columnName = MetaDataUtils.getColumnName(cmd, field);
+
+					String validationClass = MetaDataUtils.getValidationClass(
+							memberData.getType(), typeManager);
+
+					ColumnDef def = new ColumnDef(Bytes.fromUTF8(columnName)
+							.getBytes(), validationClass);
+
+					def.setIndex_name(indexName);
+					def.setIndex_type(IndexType.KEYS);
+
+					indexColumns.add(def);
+
 				}
 
-				String columnName = MetaDataUtils.getColumnName(cmd, field);
-				
-			
-				String validationClass = MetaDataUtils.getValidationClass(memberData.getType(), typeManager);
+				// if we have a discriminator we should index it as we'll be
+				// referencing it in queries
+				String discriminatorColumn = MetaDataUtils
+						.getDiscriminatorColumnName(cmd);
 
-				ColumnDef def = new ColumnDef(Bytes.fromUTF8(columnName)
-						.getBytes(), validationClass);
+				if (discriminatorColumn != null) {
+					ColumnDef def = new ColumnDef(Bytes.fromUTF8(
+							discriminatorColumn).getBytes(),
+							ColumnFamilyManager.CFDEF_COMPARATOR_UTF8);
+					def.setIndex_name(discriminatorColumn + "_index");
+					def.setIndex_type(IndexType.KEYS);
+					indexColumns.add(def);
+				}
 
-				def.setIndex_name(indexName);
-				def.setIndex_type(IndexType.KEYS);
-
-				indexColumns.add(def);
+				columnFamily.setColumn_metadata(indexColumns);
 
 			}
-			
-			//if we have a discriminator we should index it as we'll be referencing it in queries
-			String discriminatorColumn = MetaDataUtils.getDiscriminatorColumnName(cmd);
 
-			if(discriminatorColumn != null){
-				ColumnDef def = new ColumnDef(Bytes.fromUTF8(discriminatorColumn).getBytes(),  ColumnFamilyManager.CFDEF_COMPARATOR_UTF8);
-				def.setIndex_name(discriminatorColumn+"_index");
-				def.setIndex_type(IndexType.KEYS);
-				indexColumns.add(def);
-			}
-
-			columnFamily.setColumn_metadata(indexColumns);
-			
-			
 			try {
 				if (existingCfs.contains(cfName)) {
 					manager.updateColumnFamily(columnFamily);

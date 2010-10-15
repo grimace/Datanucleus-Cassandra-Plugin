@@ -148,9 +148,9 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 	 * 
 	 * @param createSchema
 	 */
-	public void cfComplete(boolean createColumnFamilies) {
+	public void cfComplete(boolean createColumnFamilies, boolean createColumns) {
 		if(createColumnFamilies){
-			manager.getMetaDataManager().registerListener(new ColumnFamilyCreator(manager, cluster, keyspace ));
+			manager.getMetaDataManager().registerListener(new ColumnFamilyCreator(manager, cluster, keyspace, createColumns));
 		}
 	}
 

@@ -27,8 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.jdo.annotations.Discriminator;
-
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.datanucleus.ClassLoaderResolver;
@@ -37,7 +35,6 @@ import org.datanucleus.PersistenceConfiguration;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.InheritanceStrategy;
-import org.datanucleus.metadata.MetaDataListener;
 import org.datanucleus.store.AbstractStoreManager;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.NucleusConnection;
@@ -45,12 +42,20 @@ import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
 
+import com.spidertracks.datanucleus.serialization.JavaSerializer;
+import com.spidertracks.datanucleus.serialization.Serializer;
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 public class CassandraStoreManager extends AbstractStoreManager {
 
 	// MetaDataListener metadataListener;
 
+	private static final String EVICTION_IDLE = "datanucleus.connectionPool.minEvictableIdleTimeMillis";
+	private static final String EVICTION_TIME = "datanucleus.connectionPool.timeBetweenEvictionRunsMillis";
+	private static final String CREATE_COLUMNS = "datanucleus.autoCreateColumns";
+	private static final String CREATE_TABLES = "datanucleus.autoCreateTables";
+	private static final String CREATE_SCHEMA = "datanucleus.autoCreateSchema";
+	private static final String SERIALIZER = "com.spidertracks.cassandra.serializer";
 	private boolean autoCreateSchema = false;
 	private boolean autoCreateTables = false;
 	private boolean autoCreateColumns = false;
@@ -59,6 +64,8 @@ public class CassandraStoreManager extends AbstractStoreManager {
 	private int poolMinEvictableIdleTimeMillis;
 
 	private ConnectionFactoryImpl connectionFactory;
+
+	private Serializer serializer;
 
 	/**
 	 * Constructor.
@@ -77,8 +84,24 @@ public class CassandraStoreManager extends AbstractStoreManager {
 		PersistenceConfiguration conf = omfContext
 				.getPersistenceConfiguration();
 
+		String serializerClass = conf
+				.getStringProperty(SERIALIZER);
+
+		if (serializerClass == null) {
+			serializer = new JavaSerializer();
+		} else {
+			try {
+				serializer = (Serializer) Class.forName(serializerClass)
+						.newInstance();
+			} catch (Exception e) {
+				throw new NucleusDataStoreException(String.format(
+						"Could not create serializer for class name %s",
+						serializerClass));
+			}
+		}
+
 		autoCreateSchema = conf
-				.getBooleanProperty("datanucleus.autoCreateSchema");
+				.getBooleanProperty(CREATE_SCHEMA);
 
 		if (autoCreateSchema) {
 			autoCreateTables = true;
@@ -86,13 +109,13 @@ public class CassandraStoreManager extends AbstractStoreManager {
 
 		} else {
 			autoCreateTables = conf
-					.getBooleanProperty("datanucleus.autoCreateTables");
+					.getBooleanProperty(CREATE_TABLES);
 			autoCreateColumns = conf
-					.getBooleanProperty("datanucleus.autoCreateColumns");
+					.getBooleanProperty(CREATE_COLUMNS);
 		}
 		// how often should the evictor run
 		poolTimeBetweenEvictionRunsMillis = conf
-				.getIntProperty("datanucleus.connectionPool.timeBetweenEvictionRunsMillis");
+				.getIntProperty(EVICTION_TIME);
 
 		if (poolTimeBetweenEvictionRunsMillis == 0) {
 			poolTimeBetweenEvictionRunsMillis = 15 * 1000; // default, 15 secs
@@ -101,7 +124,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
 		// how long may a connection sit idle in the pool before it may be
 		// evicted
 		poolMinEvictableIdleTimeMillis = conf
-				.getIntProperty("datanucleus.connectionPool.minEvictableIdleTimeMillis");
+				.getIntProperty(EVICTION_IDLE);
 
 		if (poolMinEvictableIdleTimeMillis == 0) {
 			poolMinEvictableIdleTimeMillis = 30 * 1000; // default, 30 secs
@@ -109,8 +132,8 @@ public class CassandraStoreManager extends AbstractStoreManager {
 
 		connectionFactory.keyspaceComplete(autoCreateSchema);
 
-		if (autoCreateTables) {
-			connectionFactory.cfComplete(autoCreateTables);
+		if (autoCreateTables || autoCreateColumns) {
+			connectionFactory.cfComplete(autoCreateTables, autoCreateColumns);
 		}
 
 		logConfiguration();
@@ -168,6 +191,14 @@ public class CassandraStoreManager extends AbstractStoreManager {
 	 */
 	public String getKeyspace() {
 		return connectionFactory.getKeyspace();
+	}
+	
+	/**
+	 * Return the configured object serializer
+	 * @return
+	 */
+	public Serializer getSerializer(){
+		return serializer;
 	}
 
 	/**
@@ -287,7 +318,9 @@ public class CassandraStoreManager extends AbstractStoreManager {
 
 		String descriminatorValue = Bytes.toUTF8(columns.get(0).getValue());
 
-		String className = org.datanucleus.metadata.MetaDataUtils.getClassNameFromDiscriminatorValue(descriminatorValue, metaData.getDiscriminatorMetaData(), ec);
+		String className = org.datanucleus.metadata.MetaDataUtils
+				.getClassNameFromDiscriminatorValue(descriminatorValue,
+						metaData.getDiscriminatorMetaData(), ec);
 
 		// now recursively load the search for our class
 

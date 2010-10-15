@@ -48,11 +48,11 @@ public class CollectionTest extends CassandraTest {
 
 		Card aceSpades = new Card();
 		aceSpades.setName("Ace of Spades");
-		pack.AddCard(aceSpades);
+		pack.addCard(aceSpades);
 
 		Card jackHearts = new Card();
 		jackHearts.setName("Jack of Hearts");
-		pack.AddCard(jackHearts);
+		pack.addCard(jackHearts);
 
 		pmf.getPersistenceManager().makePersistent(pack);
 
@@ -77,11 +77,11 @@ public class CollectionTest extends CassandraTest {
 
 		Card aceSpades = new Card();
 		aceSpades.setName("Ace of Spades");
-		pack.AddCard(aceSpades);
+		pack.addCard(aceSpades);
 
 		Card jackHearts = new Card();
 		jackHearts.setName("Jack of Hearts");
-		pack.AddCard(jackHearts);
+		pack.addCard(jackHearts);
 
 		pmf.getPersistenceManager().makePersistent(pack);
 
@@ -116,11 +116,11 @@ public class CollectionTest extends CassandraTest {
 
 		Card aceSpades = new Card();
 		aceSpades.setName("Ace of Spades");
-		pack.AddCard(aceSpades);
+		pack.addCard(aceSpades);
 
 		Card jackHearts = new Card();
 		jackHearts.setName("Jack of Hearts");
-		pack.AddCard(jackHearts);
+		pack.addCard(jackHearts);
 
 		PersistenceManager pm = pmf.getPersistenceManager();
 
@@ -184,11 +184,11 @@ public class CollectionTest extends CassandraTest {
 
 		Card aceSpades = new Card();
 		aceSpades.setName("Ace of Spades");
-		pack.AddCard(aceSpades);
+		pack.addCard(aceSpades);
 
 		Card jackHearts = new Card();
 		jackHearts.setName("Jack of Hearts");
-		pack.AddCard(jackHearts);
+		pack.addCard(jackHearts);
 
 		pmf.getPersistenceManager().makePersistent(pack);
 

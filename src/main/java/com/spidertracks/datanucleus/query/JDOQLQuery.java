@@ -44,6 +44,7 @@ import org.scale7.cassandra.pelops.Bytes;
 import com.spidertracks.datanucleus.CassandraStoreManager;
 import com.spidertracks.datanucleus.query.runtime.Columns;
 import com.spidertracks.datanucleus.query.runtime.Operand;
+import com.spidertracks.datanucleus.serialization.Serializer;
 import com.spidertracks.datanucleus.utils.ByteConverter;
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
@@ -117,6 +118,9 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		String poolName = ((CassandraStoreManager) ec.getStoreManager())
 				.getPoolName();
 
+		
+		Serializer serializer = ((CassandraStoreManager) ec.getStoreManager()).getSerializer();
+		
 		AbstractClassMetaData acmd = ec.getMetaDataManager()
 				.getMetaDataForClass(candidateClass.getName(),
 						ec.getClassLoaderResolver());
@@ -182,7 +186,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		Set<Columns> candidateKeys = opTree.getCandidateKeys();
 
 		Collection<?> results = getObjectsOfCandidateType(candidateKeys, acmd,
-				clr, subclasses, idColumnBytes, descriminatorBytes);
+				clr, subclasses, idColumnBytes, descriminatorBytes, serializer);
 
 		if (this.getOrdering() != null || this.getGrouping() != null) {
 
@@ -218,7 +222,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 	public List<?> getObjectsOfCandidateType(Set<Columns> keys,
 			AbstractClassMetaData acmd, ClassLoaderResolver clr,
 			boolean subclasses, Bytes identityColumn,
-			Bytes descriminatorColumn) {
+			Bytes descriminatorColumn, Serializer serializer) {
 
 		// final ClassLoaderResolver clr = ec.getClassLoaderResolver();
 		// final AbstractClassMetaData acmd =
@@ -244,7 +248,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 			}
 
 			Object identity = MetaDataUtils.getObjectIdentity(ec, targetClass,
-					idBytes.getColumnValue(identityColumn).getBytes());
+					idBytes.getColumnValue(identityColumn).getBytes(), serializer);
 
 			// Not a valid subclass, don't return it as a candidate
 			if (!(identity instanceof SingleFieldIdentity)) {

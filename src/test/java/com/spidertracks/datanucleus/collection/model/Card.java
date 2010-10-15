@@ -17,6 +17,8 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.collection.model;
 
+import java.io.Serializable;
+
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.Inheritance;
 import javax.jdo.annotations.InheritanceStrategy;
@@ -32,9 +34,14 @@ import com.spidertracks.datanucleus.model.BaseEntity;
  */
 @PersistenceCapable(table = "Card", identityType = IdentityType.APPLICATION)
 @Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
-public class Card extends BaseEntity {
+public class Card extends BaseEntity  implements Serializable{
 
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Persistent
 	private Pack pack;
 	

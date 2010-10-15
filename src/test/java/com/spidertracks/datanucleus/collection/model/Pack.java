@@ -17,6 +17,7 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.collection.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +36,13 @@ import com.spidertracks.datanucleus.model.BaseEntity;
  */
 @PersistenceCapable(table = "Pack", identityType = IdentityType.APPLICATION)
 @Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
-public class Pack extends BaseEntity {
+public class Pack extends BaseEntity implements Serializable {
+	
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	
 	
 	@Persistent(mappedBy="pack")
@@ -53,7 +60,7 @@ public class Pack extends BaseEntity {
 		return cards;
 	}
 	
-	public void AddCard(Card card){
+	public void addCard(Card card){
 		if(this.cards == null){
 			cards = new ArrayList<Card>();
 		}

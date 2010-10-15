@@ -42,6 +42,7 @@ import org.datanucleus.store.types.ObjectStringConverter;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Mutator;
 
+import com.spidertracks.datanucleus.serialization.Serializer;
 import com.spidertracks.datanucleus.utils.ByteConverter;
 
 /**
@@ -50,6 +51,7 @@ import com.spidertracks.datanucleus.utils.ByteConverter;
  */
 public class CassandraInsertFieldManager extends AbstractFieldManager {
 
+	private Serializer serializer;
 	private ExecutionContext context;
 	private Mutator mutator;
 	private AbstractClassMetaData metaData;
@@ -69,6 +71,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 		this.objectProvider = op;
 		this.metaData = op.getClassMetaData();
 		this.context = op.getExecutionContext();
+		this.serializer = ((CassandraStoreManager)context.getStoreManager()).getSerializer();
 		this.columnFamily = columnFamily;
 		this.key = key;
 
@@ -228,7 +231,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 						columnFamily,
 						key,
 						mutator.newColumn(columnName,
-								new Bytes(ByteConverter.getBytes(objectPk))));
+								new Bytes(serializer.getBytes(objectPk))));
 
 				return;
 			}
@@ -260,7 +263,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 					mutator.writeColumn(columnFamily, key, mutator.newColumn(
 							columnName,
-							new Bytes(ByteConverter.getBytes(serializedKeys))));
+							new Bytes(serializer.getBytes(serializedKeys))));
 
 					return;
 
@@ -322,7 +325,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 					mutator.writeColumn(columnFamily, key, mutator.newColumn(
 							columnName,
-							new Bytes(ByteConverter.getBytes(serializedMap))));
+							new Bytes(serializer.getBytes(serializedMap))));
 
 					return;
 
@@ -348,7 +351,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 					mutator.writeColumn(columnFamily, key, mutator.newColumn(
 							columnName,
-							new Bytes(ByteConverter.getBytes(serializedKeys))));
+							new Bytes(serializer.getBytes(serializedKeys))));
 
 				}
 
@@ -387,7 +390,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 					columnFamily,
 					key,
 					mutator.newColumn(columnName,
-							new Bytes(ByteConverter.getBytes(value))));
+							new Bytes(serializer.getBytes(value))));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);

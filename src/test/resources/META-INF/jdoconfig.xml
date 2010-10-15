@@ -14,6 +14,10 @@
 		<property name="datanucleus.autoCreateSchema" value="true" />
 		
 		<property name="datanucleus.autoCreateTables" value="true"/>
+		
+		<property name="datanucleus.autoCreateColumns" value="true"/>
+			
+		<property name="com.spidertracks.cassandra.serializer" value="com.spidertracks.datanucleus.serialization.JavaSerializer"/>
 
 	</persistence-manager-factory>
 

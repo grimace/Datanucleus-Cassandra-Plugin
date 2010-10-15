@@ -17,8 +17,6 @@ Contributors : Todd Nine
  ***********************************************************************/
 package com.spidertracks.datanucleus.utils;
 
-import static com.spidertracks.datanucleus.utils.MetaDataUtils.getDiscriminatorColumnName;
-
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +52,7 @@ import org.scale7.cassandra.pelops.ColumnFamilyManager;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.eaio.uuid.UUID;
+import com.spidertracks.datanucleus.serialization.Serializer;
 
 /**
  * Utility class to convert instance data to Cassandra columns and data types
@@ -65,13 +64,12 @@ import com.eaio.uuid.UUID;
  */
 public class MetaDataUtils {
 
+	//TODO Remove this and get consistency from the currently executing transaction
 	public static final ConsistencyLevel DEFAULT = ConsistencyLevel.ONE;
 
 	public static final Charset UTF8 = Charset.forName("UTF-8");
 
-	public static final String INDEX_LONG = "LongIndex";
-	public static final String INDEX_STRING = "StringIndex";
-
+	//A null place holder for the cached values
 	private static final String NULL = "\uffff\uffff";
 
 	private static ConcurrentMap<String, String> classToCfNames = new ConcurrentHashMap<String, String>();
@@ -193,7 +191,7 @@ public class MetaDataUtils {
 	 * @return
 	 */
 	public static Object getObjectIdentity(ExecutionContext ec,
-			Class<?> candidateClass, byte[] value) {
+			Class<?> candidateClass, byte[] value, Serializer serializer) {
 
 		ApiAdapter adapter = ec.getApiAdapter();
 
@@ -268,7 +266,7 @@ public class MetaDataUtils {
 				return ec.newObjectId(candidateClass, bytes.toUTF8());
 			}
 
-			return ByteConverter.getObject(bytes.getBytes());
+			return serializer.getObject(bytes.getBytes());
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(
 					"Unable to serialize bytes to object identity.  Please make sure it has the same SerializationId, long or string converter is was stored with. ");

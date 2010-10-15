@@ -110,56 +110,6 @@ public class ByteConverter {
 				"Could not convert object to byte.  Object types must be of any primitive, a UTF8 String, or com.eaio.uuid.UUID/java.util.UUID");
 	}
 
-	/**
-	 * Write to byte array
-	 * 
-	 * @param value
-	 * @return
-	 * @throws IOException
-	 */
-	public static byte[] getBytes(Object value) {
-		try {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeObject(value);
-			oos.flush();
 
-			byte[] bytes = bos.toByteArray();
-
-			oos.close();
-			bos.close();
-
-			return bytes;
-		} catch (Exception e) {
-			throw new RuntimeException("Unable to serialize to object", e);
-		}
-	}
-
-	/**
-	 * Read byte array to boolean
-	 * 
-	 * @param bytes
-	 * @return
-	 * @throws IOException
-	 * @throws ClassNotFoundException
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T getObject(byte[] bytes) {
-		try {
-			ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-			ObjectInputStream ois;
-
-			ois = new ObjectInputStream(bis);
-
-			T serialized = (T) ois.readObject();
-			ois.close();
-			bis.close();
-
-			return serialized;
-		} catch (Exception e) {
-			throw new RuntimeException("Unable to de-serialize to object", e);
-		}
-	}
-	
 	
 }
