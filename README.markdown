@@ -1,4 +1,4 @@
-	Cassandra Datanucleus Plugin
+Cassandra Datanucleus Plugin
 ============================
 
 Features
@@ -86,6 +86,18 @@ Currently in memory ordering and paging are supported.  Since cassandra will ret
 you cannot guarantee order.  Therefore ordering must be used when paging is used.  Be aware that all values from 0 to your defined start index
 are loaded and sorted before being ignored.  This can be quite memory intensive.  You may get better performance by modifying the range your
 query runs over.
+
+Consistency
+-----------
+
+Currently no mechanism exists for attaching additional properties to JDO transaction.  As a workaround, you use a ThreadLocal resource to define the Consistency level. 
+This is done the following way.
+
+	Consistency.set(ConsistencyLevel.QUORUM)
+	
+Every operation that communicates with Cassandra will use this consistency level.  This class will not reset when the transaction completes.  As such you should be when
+using it to set the Consistency level for the operation you're about to perform.  Otherwise a thread in a threadpool could reuse a consistency level from a previous operation.
+	
 
 
 Inheritance
