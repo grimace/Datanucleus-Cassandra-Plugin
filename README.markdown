@@ -34,7 +34,7 @@ Add this dependency for the latest release build
 	<dependency>
 		<groupId>com.spidertracks.datanucleus</groupId>
 		<artifactId>cassandra</artifactId>
-		<version>0.7.0-rc1</version>
+		<version>0.7.0-rc2</version>
 	</dependency>
 
 
@@ -66,14 +66,18 @@ Querying
 
 All queries must contain at least one == operand.  For instance, this is a valid query.
 
-	"follower == :email && lastupdate > :max use"
+	"follower == :email && lastupdate > :maxUse"
 
-This is not
+This is valid as well
 
 	"follower == :email || follower == :email2"
+	
+This is an invalid query
 
-Currently as of 0.7.0, Cassandra cannot support OR operations.  As a result all subtrees of OR ops in a query AST are performed independently
-and the candidate results are unioned.
+    "follower == :email || lastUpdate > :maxUse"
+
+Currently as of 0.7.0, Cassandra cannot support OR operations.  As a result all left and right expressions of OR ops in a query are performed independently
+and the candidate results are unioned into a single result set.
 
 Ordering and Paging
 -------------------
