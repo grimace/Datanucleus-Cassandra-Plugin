@@ -1,4 +1,4 @@
-Cassandra Datanucleus Plugin
+	Cassandra Datanucleus Plugin
 ============================
 
 Features
@@ -19,14 +19,14 @@ Defining repositories
 
 Add the following repository to your pom.xml
 
-  <repository>
+    <repository>
         <id>maven.spidertracks.com</id>
         <name>Scale7 Maven Repo</name>
         <url>http://github.com/tnine/m2repo/raw/master</url>
         <snapshots>
             <enabled>true</enabled>
         </snapshots>
-  </repository>
+    </repository>
     
     
 Add this dependency for the latest release build
