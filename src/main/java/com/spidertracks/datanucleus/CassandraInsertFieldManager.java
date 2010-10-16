@@ -43,7 +43,6 @@ import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Mutator;
 
 import com.spidertracks.datanucleus.serialization.Serializer;
-import com.spidertracks.datanucleus.utils.ByteConverter;
 
 /**
  * @author Todd Nine

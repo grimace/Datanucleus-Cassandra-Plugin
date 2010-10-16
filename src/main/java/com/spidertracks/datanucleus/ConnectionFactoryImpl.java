@@ -173,6 +173,8 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 		throw new NucleusDataStoreException("Not supported");
 
 	}
+	
+	
 
 	/**
 	 * @return the cluster
@@ -195,4 +197,5 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 		return poolName;
 	}
 
+	
 }

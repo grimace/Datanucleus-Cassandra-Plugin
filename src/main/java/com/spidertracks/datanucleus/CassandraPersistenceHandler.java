@@ -47,6 +47,12 @@ import com.spidertracks.datanucleus.client.Consistency;
 import com.spidertracks.datanucleus.mutate.BatchMutationManager;
 import com.spidertracks.datanucleus.mutate.ExecutionContextDelete;
 
+/**
+ * Persistence handler for our DN plugin
+ * 
+ * @author Todd Nine
+ *
+ */
 public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 	private CassandraStoreManager manager;
@@ -260,7 +266,6 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 	@Override
 	public void updateObject(ObjectProvider op, int[] fieldNumbers) {
-
 		this.manager.assertReadOnlyForUpdateOfObject(op);
 
 		AbstractClassMetaData metaData = op.getClassMetaData();

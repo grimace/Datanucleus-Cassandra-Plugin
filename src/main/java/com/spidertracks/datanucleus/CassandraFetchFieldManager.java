@@ -321,9 +321,9 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 					Map<Object, Object> serializedMap = serializer.getObject(columns.get(
 							columnName).getValue());
 
-					Class keyClass = clr.classForName(fieldMetaData.getMap()
+					Class<?> keyClass = clr.classForName(fieldMetaData.getMap()
 							.getKeyType());
-					Class valueClass = clr.classForName(fieldMetaData.getMap()
+					Class<?> valueClass = clr.classForName(fieldMetaData.getMap()
 							.getValueType());
 
 					for (Object mapKey : serializedMap.keySet()) {

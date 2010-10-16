@@ -20,7 +20,6 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Stack;
 
-import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
 import org.scale7.cassandra.pelops.RowDeletor;

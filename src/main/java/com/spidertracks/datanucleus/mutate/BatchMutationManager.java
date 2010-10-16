@@ -19,7 +19,6 @@ package com.spidertracks.datanucleus.mutate;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
 import org.scale7.cassandra.pelops.Pelops;

@@ -160,7 +160,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
 	/**
 	 * Accessor for the supported options in string form
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Collection getSupportedOptions() {
 		Set set = new HashSet();
 		set.add("ApplicationIdentity");

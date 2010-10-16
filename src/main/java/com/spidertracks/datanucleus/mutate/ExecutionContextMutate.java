@@ -16,7 +16,6 @@ Contributors : Todd Nine
  ***********************************************************************/
 package com.spidertracks.datanucleus.mutate;
 
-import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.datanucleus.store.ExecutionContext;
 import org.scale7.cassandra.pelops.Mutator;
 

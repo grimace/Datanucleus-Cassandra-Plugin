@@ -99,7 +99,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		super(ec, query);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	protected Object performExecute(Map parameters) {
 
