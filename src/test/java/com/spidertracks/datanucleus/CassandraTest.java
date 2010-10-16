@@ -17,22 +17,11 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManagerFactory;
 
-import org.apache.cassandra.thrift.CfDef;
-import org.apache.cassandra.thrift.KsDef;
-import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
-import org.scale7.cassandra.pelops.Cluster;
-import org.scale7.cassandra.pelops.ColumnFamilyManager;
-import org.scale7.cassandra.pelops.KeyspaceManager;
 import org.scale7.cassandra.pelops.support.EmbeddedCassandraServer;
 
 /**
@@ -77,7 +66,7 @@ public abstract class CassandraTest {
 	public static void teardown() throws Exception {
 		try {
 			cassandraServer.stop();
-		} catch (Exception e) {
+		} catch (Error e) {
 			/* SWALLOW */
 		}
 	}
