@@ -2,18 +2,16 @@ package com.spidertracks.datanucleus.serialization;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.spidertracks.datanucleus.collection.model.Card;
 import com.spidertracks.datanucleus.collection.model.Pack;
 
-@Ignore("Waiting on response from mailing list before finishing")
-public class JacksonSerializerTest {
+public class XStreamSerializerTest {
 
 	@Test
 	public void testConvert() {
-		JacksonSerializer serializer = new JacksonSerializer();
+		XStreamSerializer serializer = new XStreamSerializer();
 		
 		Pack pack = new Pack();
 

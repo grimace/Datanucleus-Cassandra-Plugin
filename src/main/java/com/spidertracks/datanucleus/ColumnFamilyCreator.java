@@ -23,6 +23,12 @@ import org.scale7.cassandra.pelops.Pelops;
 
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
+/**
+ * Create column families and index columns if they do not exist when a class is loaded the first time.
+ * 
+ * @author Todd Nine
+ *
+ */
 public class ColumnFamilyCreator implements MetaDataListener {
 
 	private Cluster cluster = null;

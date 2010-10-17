@@ -17,7 +17,7 @@
 		
 		<property name="datanucleus.autoCreateColumns" value="true"/>
 			
-		<property name="com.spidertracks.cassandra.serializer" value="com.spidertracks.datanucleus.serialization.JavaSerializer"/>
+		<property name="com.spidertracks.cassandra.serializer" value="com.spidertracks.datanucleus.serialization.XStreamSerializer"/>
 
 	</persistence-manager-factory>
 

@@ -135,7 +135,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
 		if (autoCreateTables || autoCreateColumns) {
 			connectionFactory.cfComplete(autoCreateTables, autoCreateColumns);
 		}
-
+		
 		logConfiguration();
 
 	}

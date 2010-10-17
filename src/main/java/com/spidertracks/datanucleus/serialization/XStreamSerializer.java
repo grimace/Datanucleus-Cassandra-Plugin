@@ -20,21 +20,21 @@ package com.spidertracks.datanucleus.serialization;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig.Feature;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 
 /**
  * Serializer that serializes objects to JSON
  * 
- * TODO finish me, this doesn't work
- * 
  * @author Todd Nine
  * 
  */
-public class JacksonSerializer implements Serializer {
+public class XStreamSerializer implements Serializer {
 
-	public JacksonSerializer() {
+	public XStreamSerializer() {
 
 	}
 
@@ -49,16 +49,23 @@ public class JacksonSerializer implements Serializer {
 	public byte[] getBytes(Object value) {
 		try {
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
-
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.getSerializationConfig().set(Feature.WRAP_ROOT_VALUE, true);
 			
-			mapper.writeValue(output, value);
+			XStream xstream = new XStream(new JettisonMappedXmlDriver());
 
+			ObjectOutputStream oos = xstream.createObjectOutputStream(output);
+			
+			oos.writeObject(value);
+			oos.flush();
+			oos.close();
+			
+			
 			output.flush();
-			output.close();
 
-			return output.toByteArray();
+			byte[] result  = output.toByteArray();
+			
+			output.close();
+			
+			return result;
 		} catch (IOException e) {
 			throw new RuntimeException("Unable to serialize to json", e);
 		}
@@ -76,12 +83,22 @@ public class JacksonSerializer implements Serializer {
 	public <T> T getObject(byte[] bytes) {
 
 		try {
+			
 			ByteArrayInputStream input = new ByteArrayInputStream(bytes);
 			
-			ObjectMapper om = new ObjectMapper();
-			return (T) om.readValue(input, Object.class);
+			XStream xstream = new XStream(new JettisonMappedXmlDriver());
 
-		} catch (IOException e) {
+			ObjectInputStream ois = xstream.createObjectInputStream(input);
+			
+			
+			T result =  (T) ois.readObject();
+			
+			input.close();
+			ois.close();
+			
+			return result;
+			
+		} catch (Exception e) {
 			throw new RuntimeException("Unable to de-serialize to json", e);
 		}
 
