@@ -122,7 +122,7 @@ Spring Integration
 ------------------
 
 I have created a utility project to enable easier integration with spring using Cassandra's ConsistencyLevel and annotations.  You utilize this functionality by including
-this project as a dependency and following the example.  http://github.com/tnine/Datanucleus-Cassandra-Spring
+this project as a dependency and following the example.  <http://github.com/tnine/Datanucleus-Cassandra-Spring>
 
 Building
 --------
