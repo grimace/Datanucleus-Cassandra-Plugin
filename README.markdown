@@ -133,6 +133,15 @@ You no longer need to manually install the cassandra dependencies when building.
 Roadmap
 -------
 
-Change serialisation of all Serializable objects from JVM native to external library for performance increase
+1. Upgrade when latest datanucleus 2.2 stable is release.
+2. Upgrade as Pelops client improves
+
+Special Thanks
+--------------
+
+Thanks to Dominic and Dan of s7 for making [Pelops]("http://http://github.com/s7/scale7-pelops") and rapidly responding to pull notifications and feature improvements.  Without their
+elegant client, developing this plugin would have been significantly more difficult.
+
+
 
 
