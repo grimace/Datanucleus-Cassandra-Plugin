@@ -122,7 +122,7 @@ Storing the subclass in its own table requires O(n+1) reads where n is the numbe
 Building
 --------
 
-You no longer need to manually install the cassandra depdenencies when building.  They will be installed and deployed automatically by maven.
+You no longer need to manually install the cassandra dependencies when building.  They will be installed and deployed automatically by maven.
 
 
 Roadmap
