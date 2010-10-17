@@ -97,6 +97,7 @@ This is done the following way.
 	
 Every operation that communicates with Cassandra will use this consistency level.  This class will not reset when the transaction completes.  As such you should be when
 using it to set the Consistency level for the operation you're about to perform.  Otherwise a thread in a threadpool could reuse a consistency level from a previous operation.
+See the Spring Integration section for utilities that make this easier if you are a user of the Spring framework.
 	
 
 
