@@ -118,6 +118,11 @@ Storing the subclass in its own table requires O(n+1) reads where n is the numbe
 2. Read the columns and populate the object O(1) 
 
 
+Spring Integration
+------------------
+
+I have created a utility project to enable easier integration with spring using Cassandra's ConsistencyLevel and annotations.  You utilize this functionality by including
+this project as a dependency and following the example.  http://github.com/tnine/Datanucleus-Cassandra-Spring
 
 Building
 --------
