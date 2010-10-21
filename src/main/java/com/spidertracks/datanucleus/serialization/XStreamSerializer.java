@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import org.datanucleus.store.types.sco.SCO;
+
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver;
 
@@ -48,17 +50,19 @@ public class XStreamSerializer implements Serializer {
 	@Override
 	public byte[] getBytes(Object value) {
 		try {
+			
+			//we have to unwrap SCO instances, otherwise serialization blows up
+			if(value instanceof SCO){
+				value = ((SCO)value).getValue();
+			}
+			
+			
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			
 			XStream xstream = new XStream();
 
-			ObjectOutputStream oos = xstream.createObjectOutputStream(output);
-			
-			oos.writeObject(value);
-			oos.flush();
-			oos.close();
-			
-			
+			xstream.toXML(value, output);
+					
 			output.flush();
 
 			byte[] result  = output.toByteArray();
@@ -88,14 +92,11 @@ public class XStreamSerializer implements Serializer {
 			
 			XStream xstream = new XStream();
 
-			ObjectInputStream ois = xstream.createObjectInputStream(input);
-			
-			
-			T result =  (T) ois.readObject();
+
+			T result = (T) xstream.fromXML(input);
 			
 			input.close();
-			ois.close();
-			
+	
 			return result;
 			
 		} catch (Exception e) {

@@ -24,17 +24,17 @@ import org.scale7.cassandra.pelops.Pelops;
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 /**
- * Create column families and index columns if they do not exist when a class is loaded the first time.
+ * Create column families and index columns if they do not exist when a class is
+ * loaded the first time.
  * 
  * @author Todd Nine
- *
+ * 
  */
 public class ColumnFamilyCreator implements MetaDataListener {
 
 	private Cluster cluster = null;
 	private String keyspace;
 
-	private Set<String> existingCfs = new HashSet<String>();
 	private Set<String> visitedCfs = new HashSet<String>();
 
 	private StoreManager storeManager;
@@ -48,20 +48,6 @@ public class ColumnFamilyCreator implements MetaDataListener {
 		this.cluster = cluster;
 		this.keyspace = keyspace;
 		this.createColumns = createColumns;
-
-		KeyspaceManager manager = Pelops.createKeyspaceManager(cluster);
-
-		try {
-			KsDef schema = manager.getKeyspaceSchema(keyspace);
-
-			for (CfDef cf : schema.getCf_defs()) {
-				existingCfs.add(cf.getName());
-			}
-
-		} catch (Exception e) {
-			throw new NucleusDataStoreException(
-					"Could not retrieve schema meta data", e);
-		}
 
 	}
 
@@ -85,18 +71,43 @@ public class ColumnFamilyCreator implements MetaDataListener {
 				return;
 			}
 
+			KeyspaceManager keyspaceManager = Pelops
+					.createKeyspaceManager(cluster);
+			KsDef schema = null;
+
+			try {
+				schema = keyspaceManager.getKeyspaceSchema(keyspace);
+			} catch (Exception e) {
+				throw new NucleusDataStoreException(
+						"Could not retrieve schema meta data", e);
+			}
+
 			ColumnFamilyManager manager = Pelops.createColumnFamilyManager(
 					cluster, keyspace);
 
-			CfDef columnFamily = new CfDef(keyspace, cfName);
-			columnFamily.setComparator_type("UTF8Type");
+			CfDef columnFamily = getDefinition(cfName, schema);
+
+			boolean existingCf = true;
+
+			// no column family, define one
+			if (columnFamily == null) {
+				columnFamily = new CfDef(keyspace, cfName);
+				columnFamily.setComparator_type("UTF8Type");
+				existingCf = false;
+			}
 
 			// now go through the corresponding fields and create our indexes
 
+			int previousColumnCount = 0;
+			int newColumnCount = 0;
+
 			if (createColumns) {
-				
-				List<ColumnDef> indexColumns = new ArrayList<ColumnDef>(
-						cmd.getAllMemberPositions().length);
+
+				List<ColumnDef> indexColumns = columnFamily
+						.isSetColumn_metadata() ? columnFamily
+						.getColumn_metadata() : new ArrayList<ColumnDef>();
+
+				previousColumnCount = indexColumns.size();
 
 				TypeManager typeManager = storeManager.getOMFContext()
 						.getTypeManager();
@@ -113,6 +124,11 @@ public class ColumnFamilyCreator implements MetaDataListener {
 					}
 
 					String columnName = MetaDataUtils.getColumnName(cmd, field);
+
+					// already defined
+					if (hasColumn(columnName, columnFamily)) {
+						continue;
+					}
 
 					String validationClass = MetaDataUtils.getValidationClass(
 							memberData.getType(), typeManager);
@@ -132,7 +148,8 @@ public class ColumnFamilyCreator implements MetaDataListener {
 				String discriminatorColumn = MetaDataUtils
 						.getDiscriminatorColumnName(cmd);
 
-				if (discriminatorColumn != null) {
+				if (discriminatorColumn != null
+						&& !hasColumn(discriminatorColumn, columnFamily)) {
 					ColumnDef def = new ColumnDef(Bytes.fromUTF8(
 							discriminatorColumn).getBytes(),
 							ColumnFamilyManager.CFDEF_COMPARATOR_UTF8);
@@ -143,11 +160,15 @@ public class ColumnFamilyCreator implements MetaDataListener {
 
 				columnFamily.setColumn_metadata(indexColumns);
 
+				newColumnCount = indexColumns.size();
+
 			}
 
 			try {
-				if (existingCfs.contains(cfName)) {
-					manager.updateColumnFamily(columnFamily);
+				if (existingCf) {
+					if (previousColumnCount != newColumnCount) {
+						manager.updateColumnFamily(columnFamily);
+					}
 				} else {
 					manager.addColumnFamily(columnFamily);
 				}
@@ -160,6 +181,46 @@ public class ColumnFamilyCreator implements MetaDataListener {
 
 		}
 
+	}
+
+	/**
+	 * Return the cf definition if it exists. If not null is returned
+	 * 
+	 * @param cfName
+	 * @param keyspace
+	 * @return
+	 */
+	private CfDef getDefinition(String cfName, KsDef keyspace) {
+		for (CfDef cf : keyspace.getCf_defs()) {
+			if (cfName.equals(cf.getName())) {
+				return cf;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns true if the column exists, false otherwise
+	 * 
+	 * @param cfName
+	 * @param cf
+	 * @return
+	 */
+	private boolean hasColumn(String cfName, CfDef cf) {
+		if (!cf.isSetColumn_metadata()) {
+			return false;
+		}
+
+		Bytes colName = Bytes.fromUTF8(cfName);
+
+		for (ColumnDef col : cf.getColumn_metadata()) {
+			if (colName.equals(new Bytes(col.getName()))) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }
