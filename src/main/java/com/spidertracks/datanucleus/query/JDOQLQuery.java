@@ -21,14 +21,19 @@ import static com.spidertracks.datanucleus.utils.MetaDataUtils.getDiscriminatorC
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.jdo.identity.SingleFieldIdentity;
 
+import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.KeyRange;
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.exceptions.NucleusDataStoreException;
+import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.DiscriminatorMetaData;
 import org.datanucleus.query.evaluator.JDOQLEvaluator;
@@ -39,8 +44,11 @@ import org.datanucleus.store.query.AbstractJDOQLQuery;
 import org.datanucleus.util.ClassUtils;
 import org.datanucleus.util.NucleusLogger;
 import org.scale7.cassandra.pelops.Bytes;
+import org.scale7.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.Selector;
 
 import com.spidertracks.datanucleus.CassandraStoreManager;
+import com.spidertracks.datanucleus.client.Consistency;
 import com.spidertracks.datanucleus.query.runtime.Columns;
 import com.spidertracks.datanucleus.query.runtime.Operand;
 import com.spidertracks.datanucleus.serialization.Serializer;
@@ -53,7 +61,7 @@ import com.spidertracks.datanucleus.utils.MetaDataUtils;
 public class JDOQLQuery extends AbstractJDOQLQuery {
 
 	private static int DEFAULT_MAX = 1000;
-	
+
 	/**
 	 * 
 	 */
@@ -112,13 +120,12 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 		Expression filter = this.getCompilation().getExprFilter();
 
-
 		String poolName = ((CassandraStoreManager) ec.getStoreManager())
 				.getPoolName();
 
-		
-		Serializer serializer = ((CassandraStoreManager) ec.getStoreManager()).getSerializer();
-		
+		Serializer serializer = ((CassandraStoreManager) ec.getStoreManager())
+				.getSerializer();
+
 		AbstractClassMetaData acmd = ec.getMetaDataManager()
 				.getMetaDataForClass(candidateClass.getName(),
 						ec.getClassLoaderResolver());
@@ -127,60 +134,63 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 		String identityCol = MetaDataUtils.getIdentityColumn(acmd);
 
-		if (filter == null) {
-			throw new NucleusDataStoreException(
-					"You cannot invoke a query without an expression against Cassandra. In a real environment the result set would be too large to process");
-		}
+		Set<Columns> candidateKeys = null;
 
-		ClassLoaderResolver clr = ec.getClassLoaderResolver();
-
-		String descriminiatorCol = null;
-		DiscriminatorMetaData discriminator = null;
-
-		String[] selectColumns = new String[] { identityCol };
-		
-		int range = DEFAULT_MAX;
-		
-		if(this.getRange() != null){
-			range = (int) this.getRangeToExcl();
-			
-			if(this.getOrdering() == null){
-				throw new NucleusDataStoreException(
-				"You cannot invoke a without an ordering expression against Cassandra. Results will be randomly ordered from Cassnadra and need order to page");
-
-			}
-		}
-
-		CassandraQueryExpressionEvaluator evaluator = new CassandraQueryExpressionEvaluator(
-				ec, parameters, clr, candidateClass, range );
-
-		Operand opTree = (Operand) filter.evaluate(evaluator);
-
-	
 		Bytes idColumnBytes = Bytes.fromUTF8(identityCol);
 		Bytes descriminatorBytes = null;
+		String descriminiatorCol = null;
+		DiscriminatorMetaData discriminator = null;
+		String[] selectColumns = new String[] { identityCol };
+		ClassLoaderResolver clr = ec.getClassLoaderResolver();
 
 		if (acmd.hasDiscriminatorStrategy()) {
+
 			discriminator = acmd.getDiscriminatorMetaData();
 
 			descriminiatorCol = getDiscriminatorColumnName(discriminator);
 
 			descriminatorBytes = Bytes.fromUTF8(descriminiatorCol);
 
-			List<String> descriminatorValues = MetaDataUtils
-					.getDescriminatorValues(acmd.getFullClassName(), clr, ec);
-
-			opTree = opTree.optimizeDescriminator(descriminiatorCol, descriminatorValues);
-
 			selectColumns = new String[] { identityCol, descriminiatorCol };
 		}
 
-		// perform a query rewrite to take into account descriminator values
+		int range = DEFAULT_MAX;
 
-		// TODO, reconstruct query if there is a descriminator
-		opTree.performQuery(poolName, columnFamily, selectColumns);
+		if (this.getRange() != null) {
+			range = (int) this.getRangeToExcl();
 
-		Set<Columns> candidateKeys = opTree.getCandidateKeys();
+			if (this.getOrdering() == null) {
+				throw new NucleusDataStoreException(
+						"You cannot invoke a without an ordering expression against Cassandra. Results will be randomly ordered from Cassnadra and need order to page");
+
+			}
+		}
+
+		// a query was specified, perform a filter with secondary cassandra
+		// indexes
+		if (filter != null) {
+
+			CassandraQueryExpressionEvaluator evaluator = new CassandraQueryExpressionEvaluator(
+					ec, parameters, clr, candidateClass, range);
+
+			Operand opTree = (Operand) filter.evaluate(evaluator);
+
+			// there's a discriminator so be sure to include it
+			if (acmd.hasDiscriminatorStrategy()) {
+				List<String> descriminatorValues = MetaDataUtils
+						.getDescriminatorValues(acmd.getFullClassName(), clr,
+								ec);
+
+				opTree = opTree.optimizeDescriminator(descriminiatorCol,
+						descriminatorValues);
+			}
+			// perform a query rewrite to take into account descriminator values
+			opTree.performQuery(poolName, columnFamily, selectColumns);
+
+			candidateKeys = opTree.getCandidateKeys();
+		} else {
+			candidateKeys = getAll(poolName, columnFamily, selectColumns, range);
+		}
 
 		Collection<?> results = getObjectsOfCandidateType(candidateKeys, acmd,
 				clr, subclasses, idColumnBytes, descriminatorBytes, serializer);
@@ -234,7 +244,8 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 			if (descriminatorColumn != null) {
 
-				String descriminatorValue = idBytes.getColumnValue(descriminatorColumn).toUTF8();
+				String descriminatorValue = idBytes.getColumnValue(
+						descriminatorColumn).toUTF8();
 
 				String className = org.datanucleus.metadata.MetaDataUtils
 						.getClassNameFromDiscriminatorValue(descriminatorValue,
@@ -245,7 +256,8 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 			}
 
 			Object identity = MetaDataUtils.getObjectIdentity(ec, targetClass,
-					idBytes.getColumnValue(identityColumn).getBytes(), serializer);
+					idBytes.getColumnValue(identityColumn).getBytes(),
+					serializer);
 
 			// Not a valid subclass, don't return it as a candidate
 			if (!(identity instanceof SingleFieldIdentity)) {
@@ -268,5 +280,56 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 		return results;
 
+	}
+
+	/**
+	 * Get all keys from a given column family. Used ranges to set the max
+	 * amount
+	 * 
+	 * @param poolName
+	 * @param cfName
+	 * @param selectColumns
+	 * @return
+	 * @throws Exception
+	 */
+	private Set<Columns> getAll(String poolName, String cfName,
+			String[] selectColumns, int maxSize) {
+
+		Set<Columns> candidateKeys = new HashSet<Columns>();
+
+		KeyRange range = new KeyRange();
+		range.setStart_key(new byte[] {});
+		range.setEnd_key(new byte[] {});
+		range.setCount(maxSize);
+
+		Map<Bytes, List<Column>> results;
+		
+		try {
+			results = Pelops.createSelector(poolName).getColumnsFromRows(
+					cfName, range, Selector.newColumnsPredicate(selectColumns),
+					Consistency.get());
+		} catch (Exception e) {
+			throw new NucleusException("Error scanning rows", e);
+		}
+		
+		Columns cols;
+
+		for (Entry<Bytes, List<Column>> entry : results.entrySet()) {
+
+			if (entry.getValue().size() == 0) {
+				continue;
+			}
+
+			cols = new Columns(entry.getKey());
+
+			for (Column currentCol : entry.getValue()) {
+
+				cols.addResult(currentCol);
+			}
+
+			candidateKeys.add(cols);
+		}
+
+		return candidateKeys;
 	}
 }

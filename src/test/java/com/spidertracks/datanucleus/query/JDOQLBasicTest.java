@@ -18,6 +18,7 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.query;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -181,6 +182,32 @@ public class JDOQLBasicTest extends CassandraTest {
 	}
 
 	/**
+	 * Runs basic query extent
+	 */
+	@Test
+	public void testExtent() {
+		PersistenceManager pm = pmf.getPersistenceManager();
+		Transaction tx = pm.currentTransaction();
+		try {
+			tx.begin();
+			Iterator it = pm.getExtent(PrimitiveObject.class).iterator();
+			assertTrue(it.hasNext());
+			it.next();
+			assertTrue(it.hasNext());
+			it.next();
+			assertTrue(it.hasNext());
+			it.next();
+			assertFalse(it.hasNext());
+			tx.commit();
+		} finally {
+			if (tx.isActive()) {
+				tx.rollback();
+			}
+			pm.close();
+		}
+	}
+
+	/**
 	 * Runs basic query
 	 */
 	public void testBasicQuery() {
@@ -193,6 +220,32 @@ public class JDOQLBasicTest extends CassandraTest {
 			assertEquals(3, c.size());
 			tx.commit();
 
+		} finally {
+			if (tx.isActive()) {
+				tx.rollback();
+			}
+			pm.close();
+		}
+	}
+
+	/**
+	 * ordering
+	 */
+	@Test
+	public void testOrdering() {
+		PersistenceManager pm = pmf.getPersistenceManager();
+		Transaction tx = pm.currentTransaction();
+		try {
+			tx.begin();
+			Query q = pm.newQuery(PrimitiveObject.class);
+			q.setOrdering("testString DESC, testDouble");
+			Collection c = (Collection) q.execute();
+			assertEquals(3, c.size());
+			Iterator it = c.iterator();
+			assertEquals("two", ((PrimitiveObject) it.next()).getTestString());
+			assertEquals("three", ((PrimitiveObject) it.next()).getTestString());
+			assertEquals("one", ((PrimitiveObject) it.next()).getTestString());
+			tx.commit();
 		} finally {
 			if (tx.isActive()) {
 				tx.rollback();
@@ -302,16 +355,11 @@ public class JDOQLBasicTest extends CassandraTest {
 
 		trans.commit();
 
-		try {
-			List<InvitationToken> results = (List<InvitationToken>) pm
-					.newQuery(InvitationToken.class).execute();
-		} catch (JDODataStoreException ndse) {
-			if (ndse.getCause() instanceof NucleusDataStoreException) {
-				return;
-			}
-		}
+		List<InvitationToken> results = (List<InvitationToken>) pm.newQuery(
+				InvitationToken.class).execute();
+		
+		assertTrue(results.contains(token));
 
-		fail("Should have thrown an exception.  You can't query without a == clause");
 	}
 
 	/**
