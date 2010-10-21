@@ -46,7 +46,7 @@ authority: org.apache.cassandra.auth.AllowAllAuthority
 # org.apache.cassandra.dht.CollatingOrderPreservingPartitioner.
 # (CollatingOPP colates according to EN,US rules, not naive byte
 # ordering.  Use this as an example if you need locale-aware collation.)
-partitioner: org.apache.cassandra.dht.RandomPartitioner
+partitioner: org.apache.cassandra.dht.ByteOrderedPartitioner
 
 # directories where Cassandra should store data on disk.
 data_file_directories:

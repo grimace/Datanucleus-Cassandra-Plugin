@@ -50,7 +50,7 @@ public class XStreamSerializer implements Serializer {
 		try {
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			
-			XStream xstream = new XStream(new JettisonMappedXmlDriver());
+			XStream xstream = new XStream();
 
 			ObjectOutputStream oos = xstream.createObjectOutputStream(output);
 			
@@ -86,7 +86,7 @@ public class XStreamSerializer implements Serializer {
 			
 			ByteArrayInputStream input = new ByteArrayInputStream(bytes);
 			
-			XStream xstream = new XStream(new JettisonMappedXmlDriver());
+			XStream xstream = new XStream();
 
 			ObjectInputStream ois = xstream.createObjectInputStream(input);
 			
