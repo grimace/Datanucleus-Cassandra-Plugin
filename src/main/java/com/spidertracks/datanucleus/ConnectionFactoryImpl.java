@@ -49,7 +49,7 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 	private String keyspace;
 
 	private String poolName;
-	
+
 	private CassandraStoreManager manager;
 
 	/**
@@ -92,8 +92,7 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 
 		cluster = new Cluster(hosts, defaultPort);
 
-		manager = (CassandraStoreManager) omfContext
-				.getStoreManager();
+		manager = (CassandraStoreManager) omfContext.getStoreManager();
 
 		manager.setConnectionFactory(this);
 
@@ -140,7 +139,9 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 
 		}
 
-		Pelops.addPool(poolName, cluster, keyspace);
+		if (Pelops.getDbConnPool(poolName) == null) {
+			Pelops.addPool(poolName, cluster, keyspace);
+		}
 	}
 
 	/**
@@ -149,8 +150,10 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 	 * @param createSchema
 	 */
 	public void cfComplete(boolean createColumnFamilies, boolean createColumns) {
-		if(createColumnFamilies){
-			manager.getMetaDataManager().registerListener(new ColumnFamilyCreator(manager, cluster, keyspace, createColumns));
+		if (createColumnFamilies) {
+			manager.getMetaDataManager().registerListener(
+					new ColumnFamilyCreator(manager, cluster, keyspace,
+							createColumns));
 		}
 	}
 
@@ -173,8 +176,6 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 		throw new NucleusDataStoreException("Not supported");
 
 	}
-	
-	
 
 	/**
 	 * @return the cluster
@@ -197,5 +198,4 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 		return poolName;
 	}
 
-	
 }
