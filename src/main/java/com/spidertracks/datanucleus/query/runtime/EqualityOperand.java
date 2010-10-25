@@ -17,6 +17,7 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.query.runtime;
 
+import java.nio.ByteBuffer;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -93,7 +94,8 @@ public class EqualityOperand extends Operand implements CompressableOperand {
 		try {
 			Map<Bytes, List<Column>> results = Pelops.createSelector(poolName)
 					.getIndexedColumns(cfName, clause,
-							Selector.newColumnsPredicate(columns), Consistency.get());
+							Selector.newColumnsPredicate(columns),
+							Consistency.get());
 			Columns cols;
 
 			for (Entry<Bytes, List<Column>> entry : results.entrySet()) {
@@ -130,9 +132,17 @@ public class EqualityOperand extends Operand implements CompressableOperand {
 		// the equality node is always a leaf, so we don't need to recurse
 
 		if (possibleValues.size() == 1) {
-			addExpression(new IndexExpression(Bytes.fromUTF8(
-					descriminatorColumnValue).getBytes(), IndexOperator.EQ,
-					Bytes.fromUTF8(possibleValues.get(0)).getBytes()));
+
+			IndexExpression leaf = new IndexExpression();
+
+			leaf.setColumn_name(Bytes.fromUTF8(descriminatorColumnValue)
+					.getBytes());
+
+			leaf.setValue(Bytes.fromUTF8(possibleValues.get(0)).getBytes());
+
+			leaf.setOp(IndexOperator.EQ);
+			
+			addExpression(leaf);
 
 			return this;
 		}
@@ -163,10 +173,17 @@ public class EqualityOperand extends Operand implements CompressableOperand {
 			// add the existing clause
 			subClass.addAll(this.getIndexClause().getExpressions());
 
+			IndexExpression expression = new IndexExpression();
+
+			expression.setColumn_name(Bytes.fromUTF8(descriminatorColumnValue)
+					.getBytes());
+
+			expression.setValue(Bytes.fromUTF8(value).getBytes());
+
+			expression.setOp(IndexOperator.EQ);
+
 			// now add the discriminator
-			subClass.addExpression(new IndexExpression(Bytes.fromUTF8(
-					descriminatorColumnValue).getBytes(), IndexOperator.EQ,
-					Bytes.fromUTF8(value).getBytes()));
+			subClass.addExpression(expression);
 
 			// push onto the stack
 			eqOps.push(subClass);

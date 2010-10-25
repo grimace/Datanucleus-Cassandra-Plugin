@@ -133,8 +133,10 @@ public class ColumnFamilyCreator implements MetaDataListener {
 					String validationClass = MetaDataUtils.getValidationClass(
 							memberData.getType(), typeManager);
 
-					ColumnDef def = new ColumnDef(Bytes.fromUTF8(columnName)
-							.getBytes(), validationClass);
+					ColumnDef def = new ColumnDef();
+					
+					def.setName(Bytes.fromUTF8(columnName).getBytes());
+					def.setValidation_class(validationClass);
 
 					def.setIndex_name(indexName);
 					def.setIndex_type(IndexType.KEYS);
@@ -150,9 +152,12 @@ public class ColumnFamilyCreator implements MetaDataListener {
 
 				if (discriminatorColumn != null
 						&& !hasColumn(discriminatorColumn, columnFamily)) {
-					ColumnDef def = new ColumnDef(Bytes.fromUTF8(
-							discriminatorColumn).getBytes(),
-							ColumnFamilyManager.CFDEF_COMPARATOR_UTF8);
+					ColumnDef def = new ColumnDef();
+					
+					def.setName(Bytes.fromUTF8(
+							discriminatorColumn).getBytes());
+					def.setValidation_class(ColumnFamilyManager.CFDEF_COMPARATOR_UTF8);
+					
 					def.setIndex_name(discriminatorColumn + "_index");
 					def.setIndex_type(IndexType.KEYS);
 					indexColumns.add(def);

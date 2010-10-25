@@ -7,9 +7,9 @@
 	<properties>
 		<datanucleus.version>2.1.1</datanucleus.version>
 		<datanucleus.plugin.version>2.1.0-release</datanucleus.plugin.version>
-		<cassandra.version>0.7.0-beta2-SNAPSHOT-aeb0d5467d24b8b6c844de7566bfb5c58ddc5e27</cassandra.version>
-		<thrift.version>r959516</thrift.version>
-		<pelops.version>0.908-0.7.0-SNAPSHOT</pelops.version>
+		<cassandra.version>0.7.0-rc1-SNAPSHOT-trunk-0-gacbba44</cassandra.version>
+		<thrift.version>0.5</thrift.version>
+		<pelops.version>0.907-0.7.0-st-SNAPSHOT</pelops.version>
 		<slf4j.version>1.6.1</slf4j.version>
 		<avro.version>1.4.0-fixes</avro.version>
 		<high.scale.version>1.1.2</high.scale.version>

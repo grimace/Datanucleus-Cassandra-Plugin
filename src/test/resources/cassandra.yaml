@@ -381,6 +381,9 @@ keyspaces:
           rows_cached: 1000
           row_cache_save_period_in_seconds: 0
           key_cache_save_period_in_seconds: 3600
+          memtable_flush_after_mins: 59
+          memtable_throughput_in_mb: 255
+          memtable_operations_in_millions: 0.29
 
         - name: Standard2
           compare_with: UTF8Type
@@ -401,7 +404,6 @@ keyspaces:
         - name: Super2
           column_type: Super
           compare_subcolumns_with: UTF8Type
-          preload_row_cache: true
           rows_cached: 10000
           keys_cached: 50
           comment: 'A column family with supercolumns, whose column and subcolumn names are UTF8 strings'
