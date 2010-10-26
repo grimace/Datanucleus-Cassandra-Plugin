@@ -7,7 +7,7 @@
 	<properties>
 		<datanucleus.version>2.1.1</datanucleus.version>
 		<datanucleus.plugin.version>2.1.0-release</datanucleus.plugin.version>
-		<cassandra.version>0.7.0-rc1-SNAPSHOT-trunk-0-gacbba44</cassandra.version>
+		<cassandra.version>2010-10-25_12-57-56</cassandra.version>
 		<thrift.version>0.5</thrift.version>
 		<pelops.version>0.907-0.7.0-st-SNAPSHOT</pelops.version>
 		<slf4j.version>1.6.1</slf4j.version>
