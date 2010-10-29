@@ -33,8 +33,8 @@ Add this dependency for the latest release build
 
 	<dependency>
 		<groupId>com.spidertracks.datanucleus</groupId>
-		<artifactId>cassandra</artifactId>
-		<version>0.7.0-rc2</version>
+		<artifactId>cassandra-jdo</artifactId>
+		<version>0.7.0-rc3-SNAPSHOT</version>
 	</dependency>
 
 
