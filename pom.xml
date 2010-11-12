@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.spidertracks.datanucleus</groupId>
 	<artifactId>cassandra-jdo</artifactId>
-	<version>1.0.0-0.7.0-beta3</version>
+	<version>1.0.1-0.7.0-beta3</version>
 	<properties>
 		<datanucleus.version>2.1.1</datanucleus.version>
 		<datanucleus.plugin.version>2.1.0-release</datanucleus.plugin.version>
