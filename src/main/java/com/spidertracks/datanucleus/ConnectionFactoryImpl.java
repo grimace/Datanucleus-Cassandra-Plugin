@@ -85,7 +85,7 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 		// grab our port
 		int defaultPort = Integer.parseInt(hostMatcher.group(3));
 
-		String[] hosts = hostMatcher.group(4).split(",");
+		String hosts = hostMatcher.group(4);
 
 		// by default we won't discover other nodes we're not explicitly
 		// connected to. May change in future

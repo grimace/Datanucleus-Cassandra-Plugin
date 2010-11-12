@@ -16,7 +16,7 @@ public class ConsistencyTest {
 	public void testSet() throws InterruptedException{
 		Thread one = new Thread(new TestThread(100, ConsistencyLevel.ONE));
 		
-		Thread two = new Thread(new TestThread(100, ConsistencyLevel.DCQUORUMSYNC));
+		Thread two = new Thread(new TestThread(100, ConsistencyLevel.LOCAL_QUORUM));
 		
 		Thread three = new Thread(new TestThread(100, ConsistencyLevel.ALL));
 		

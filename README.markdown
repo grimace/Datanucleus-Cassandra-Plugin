@@ -22,7 +22,7 @@ Add the following repository to your pom.xml
     <repository>
         <id>maven.spidertracks.com</id>
         <name>Scale7 Maven Repo</name>
-        <url>http://github.com/tnine/m2repo/raw/master</url>
+        <url>https://github.com/tnine/m2repo/raw/master</url>
         <snapshots>
             <enabled>true</enabled>
         </snapshots>
@@ -34,7 +34,7 @@ Add this dependency for the latest release build
 	<dependency>
 		<groupId>com.spidertracks.datanucleus</groupId>
 		<artifactId>cassandra-jdo</artifactId>
-		<version>0.7.0-rc3-SNAPSHOT</version>
+		<version>0.7.0-beta3</version>
 	</dependency>
 
 
