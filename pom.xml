@@ -1,14 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.spidertracks.datanucleus</groupId>
 	<artifactId>cassandra-jdo</artifactId>
-	<version>1.0.1-0.7.0-beta3</version>
+	<version>1.0.1-0.7.0-beta3-SNAPSHOT</version>
 	<properties>
 		<datanucleus.version>2.1.1</datanucleus.version>
 		<datanucleus.plugin.version>2.1.0-release</datanucleus.plugin.version>
 		<cassandra.version>0.7.0-beta3</cassandra.version>
 		<thrift.version>0.5</thrift.version>
-		<pelops.version>0.908-0.7.0-beta3-st</pelops.version>
+		<pelops.version>0.909-0.7.0-beta3-st</pelops.version>
 		<slf4j.version>1.6.1</slf4j.version>
 		<avro.version>1.4.0-fixes</avro.version>
 		<high.scale.version>1.1.2</high.scale.version>
@@ -49,7 +50,6 @@
 			<url>http://mvn.riptano.com/content/repositories/public</url>
 		</repository>
 
-
 	</repositories>
 
 	<dependencies>
@@ -82,7 +82,7 @@
 
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
-			<artifactId>cassandra</artifactId>
+			<artifactId>apache-cassandra</artifactId>
 			<version>${cassandra.version}</version>
 		</dependency>
 
