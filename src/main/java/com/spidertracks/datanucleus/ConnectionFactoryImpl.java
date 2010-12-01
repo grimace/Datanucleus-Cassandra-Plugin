@@ -42,7 +42,7 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 	// cassandra:<poolname>:<keyspace>:<connectionport>:host1, host2, host3...
 	// etc
 	private static final Pattern URL = Pattern
-			.compile("cassandra:(\\w+):(\\w+):(\\d+):(\\s*\\w+[.\\w+]*[\\s*,\\s*\\w+[.\\w+]*]*)");
+			.compile("cassandra:(\\w+):(\\w+):(\\d+):(\\s*\\S+[.\\S+]*[\\s*,\\s*\\S+[.\\S+]*]*)");
 
 	private Cluster cluster;
 
