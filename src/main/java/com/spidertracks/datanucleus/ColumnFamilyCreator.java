@@ -21,6 +21,7 @@ import org.scale7.cassandra.pelops.ColumnFamilyManager;
 import org.scale7.cassandra.pelops.KeyspaceManager;
 import org.scale7.cassandra.pelops.Pelops;
 
+import com.spidertracks.datanucleus.utils.ClusterUtils;
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 /**
@@ -71,8 +72,10 @@ public class ColumnFamilyCreator implements MetaDataListener {
 				return;
 			}
 
+			Cluster migrationCluster = ClusterUtils.getFirstAvailableNode(cluster);
+			
 			KeyspaceManager keyspaceManager = Pelops
-					.createKeyspaceManager(cluster);
+					.createKeyspaceManager(migrationCluster);
 			KsDef schema = null;
 
 			try {
@@ -83,7 +86,7 @@ public class ColumnFamilyCreator implements MetaDataListener {
 			}
 
 			ColumnFamilyManager manager = Pelops.createColumnFamilyManager(
-					cluster, keyspace);
+					migrationCluster, keyspace);
 
 			CfDef columnFamily = getDefinition(cfName, schema);
 
@@ -134,7 +137,7 @@ public class ColumnFamilyCreator implements MetaDataListener {
 							memberData.getType(), typeManager);
 
 					ColumnDef def = new ColumnDef();
-					
+
 					def.setName(Bytes.fromUTF8(columnName).getBytes());
 					def.setValidation_class(validationClass);
 
@@ -153,11 +156,10 @@ public class ColumnFamilyCreator implements MetaDataListener {
 				if (discriminatorColumn != null
 						&& !hasColumn(discriminatorColumn, columnFamily)) {
 					ColumnDef def = new ColumnDef();
-					
-					def.setName(Bytes.fromUTF8(
-							discriminatorColumn).getBytes());
+
+					def.setName(Bytes.fromUTF8(discriminatorColumn).getBytes());
 					def.setValidation_class(ColumnFamilyManager.CFDEF_COMPARATOR_UTF8);
-					
+
 					def.setIndex_name(discriminatorColumn + "_index");
 					def.setIndex_type(IndexType.KEYS);
 					indexColumns.add(def);
@@ -187,6 +189,8 @@ public class ColumnFamilyCreator implements MetaDataListener {
 		}
 
 	}
+
+	
 
 	/**
 	 * Return the cf definition if it exists. If not null is returned

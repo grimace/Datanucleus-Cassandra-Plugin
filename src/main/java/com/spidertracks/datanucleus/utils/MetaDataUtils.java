@@ -264,7 +264,7 @@ public class MetaDataUtils {
 				return ec.newObjectId(candidateClass, bytes.toUTF8());
 			}
 
-			return serializer.getObject(bytes.toBytes());
+			return serializer.getObject(bytes.toByteArray());
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(
 					"Unable to serialize bytes to object identity.  Please make sure it has the same SerializationId, long or string converter is was stored with. ");

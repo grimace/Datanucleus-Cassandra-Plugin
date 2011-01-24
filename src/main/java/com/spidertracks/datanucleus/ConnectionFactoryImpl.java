@@ -30,8 +30,13 @@ import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.store.connection.AbstractConnectionFactory;
 import org.datanucleus.store.connection.ManagedConnection;
 import org.scale7.cassandra.pelops.Cluster;
+import org.scale7.cassandra.pelops.IConnection.Config;
 import org.scale7.cassandra.pelops.KeyspaceManager;
+import org.scale7.cassandra.pelops.OperandPolicy;
 import org.scale7.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
+
+import com.spidertracks.datanucleus.utils.ClusterUtils;
 
 /**
  * Implementation of a ConnectionFactory for HBase.
@@ -42,7 +47,7 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 	// cassandra:<poolname>:<keyspace>:<connectionport>:host1, host2, host3...
 	// etc
 	private static final Pattern URL = Pattern
-			.compile("cassandra:(\\w+):(\\w+):(\\d+):(\\s*\\S+[.\\S+]*[\\s*,\\s*\\S+[.\\S+]*]*)");
+			.compile("cassandra:(\\w+):(true|false):(true|false):(\\d+):(\\w+):(\\d+):(\\s*\\S+[.\\S+]*[\\s*,\\s*\\S+[.\\S+]*]*)");
 
 	private Cluster cluster;
 
@@ -73,24 +78,33 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 
 		if (!hostMatcher.matches()) {
 			throw new UnsupportedOperationException(
-					"Your URL must be in the format of cassandra:poolname:keyspace:port:host1[,hostN");
+					"Your URL must be in the format of cassandra:poolname:<true|false, framed transport>:<true|false, dynamic node discovery>:<timeout in ms>:keyspace:port:host1[,hostN]");
 		}
 
 		// pool name
 		poolName = hostMatcher.group(1);
 
+		// set framed
+		boolean framed = Boolean.parseBoolean(hostMatcher.group(2));
+		
+		boolean discover = Boolean.parseBoolean(hostMatcher.group(3));
+		
+		int timeout = Integer.parseInt(hostMatcher.group(4));
+
 		// set our keyspace
-		keyspace = hostMatcher.group(2);
+		keyspace = hostMatcher.group(5);
 
 		// grab our port
-		int defaultPort = Integer.parseInt(hostMatcher.group(3));
+		int defaultPort = Integer.parseInt(hostMatcher.group(6));
 
-		String hosts = hostMatcher.group(4);
+		String hosts = hostMatcher.group(7);
 
 		// by default we won't discover other nodes we're not explicitly
 		// connected to. May change in future
 
-		cluster = new Cluster(hosts, defaultPort);
+		Config config = new Config(defaultPort, framed, timeout);
+
+		cluster = new Cluster(hosts, config, discover);
 
 		manager = (CassandraStoreManager) omfContext.getStoreManager();
 
@@ -108,7 +122,8 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 			return;
 		}
 
-		KeyspaceManager keyspaceManager = new KeyspaceManager(cluster);
+		KeyspaceManager keyspaceManager = new KeyspaceManager(
+				ClusterUtils.getFirstAvailableNode(cluster));
 
 		List<KsDef> keyspaces;
 		try {
@@ -140,7 +155,13 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory {
 		}
 
 		if (Pelops.getDbConnPool(poolName) == null) {
-			Pelops.addPool(poolName, cluster, keyspace);
+			OperandPolicy opPolicy = new OperandPolicy();
+			opPolicy.setMaxOpRetries(3);
+			opPolicy.setDeleteIfNull(true);
+			
+			Policy policy = new Policy();
+			
+			Pelops.addPool(poolName, cluster, keyspace, policy, opPolicy);
 		}
 	}
 

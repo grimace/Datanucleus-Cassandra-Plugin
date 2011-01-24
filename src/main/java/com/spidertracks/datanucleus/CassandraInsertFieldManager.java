@@ -402,11 +402,11 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 			String columnName = getColumnName(metaData, fieldNumber);
 
-			if (value == null) {
-				mutator.deleteColumn(columnFamily, key, columnName);
-
-				return;
-			}
+//			if (value == null) {
+//				mutator.deleteColumn(columnFamily, key, columnName);
+//
+//				return;
+//			}
 			mutator.writeColumn(columnFamily, key,
 					mutator.newColumn(columnName, Bytes.fromUTF8(value)));
 

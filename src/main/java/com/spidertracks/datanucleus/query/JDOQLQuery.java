@@ -256,7 +256,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 			}
 
 			Object identity = MetaDataUtils.getObjectIdentity(ec, targetClass,
-					idBytes.getColumnValue(identityColumn).toBytes(),
+					idBytes.getColumnValue(identityColumn).toByteArray(),
 					serializer);
 
 			// Not a valid subclass, don't return it as a candidate
