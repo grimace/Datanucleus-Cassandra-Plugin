@@ -158,6 +158,12 @@ Building
 You no longer need to manually install the cassandra dependencies when building.  They will be installed and deployed automatically by maven.
 
 
+Reporting Bugs
+--------------
+
+If you find a bug.  Please fork the code, create a test case, and submit a pull request with the issue.  This will allow me to quickly determine the cause and resolve the issue.
+
+
 Roadmap
 -------
 
