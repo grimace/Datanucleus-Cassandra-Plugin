@@ -29,7 +29,6 @@ import com.spidertracks.datanucleus.model.BaseEntity;
  *
  */
 @PersistenceCapable
-
 public abstract class Parent extends BaseEntity {
 
 	@Persistent

@@ -22,6 +22,7 @@ import java.util.Stack;
 
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
+import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.RowDeletor;
 
 import com.spidertracks.datanucleus.client.Consistency;
@@ -58,7 +59,7 @@ public class ExecutionContextDelete extends ExecutionContextOp {
 	 * @param columnFamily The CF to dele
 	 * @return True if this is the first visit to the object.  False otherwise
 	 */
-	public boolean addDeletion(ObjectProvider op, String key, String columnFamily) {
+	public boolean addDeletion(ObjectProvider op, Bytes key, String columnFamily) {
 		
 		if(visited.containsKey(op)){
 			return false;
@@ -81,13 +82,13 @@ public class ExecutionContextDelete extends ExecutionContextOp {
 	
 	private class Deletion{
 		
-		public Deletion(String rowKey, String columnFamily) {
+		public Deletion(Bytes rowKey, String columnFamily) {
 			super();
 			this.rowKey = rowKey;
 			this.columnFamily = columnFamily;
 		}
 		
-		private String rowKey;
+		private Bytes rowKey;
 		private String columnFamily;
 	}
 

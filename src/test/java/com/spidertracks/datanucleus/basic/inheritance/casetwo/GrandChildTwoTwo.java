@@ -24,8 +24,6 @@ import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 
-import com.spidertracks.datanucleus.basic.inheritance.caseone.Child;
-
 /**
  * Should persist in it's own table
  * 

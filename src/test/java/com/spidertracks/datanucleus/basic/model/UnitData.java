@@ -18,8 +18,7 @@ Contributors :
 package com.spidertracks.datanucleus.basic.model;
 
 
-import java.util.Date;
-
+import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
@@ -28,20 +27,22 @@ import javax.jdo.annotations.PrimaryKey;
  * @author Todd Nine
  *
  */
-@PersistenceCapable(table="UnitData", objectIdClass = UnitDataKey.class )
+@PersistenceCapable(table="UnitData", identityType= IdentityType.APPLICATION )
 public class UnitData {
 
 	@PrimaryKey
-	@Persistent
-	private Date createdDate;
-	
-	@PrimaryKey
-	@Persistent
-	private String unitId;
+	private UnitDataKey key;
 	
 	@Persistent
 	private byte[] data;
 	
+	
+	public UnitDataKey getKey() {
+		return key;
+	}
+	public void setKey(UnitDataKey key) {
+		this.key = key;
+	}
 	
 	public byte[] getData() {
 		return data;
@@ -49,34 +50,13 @@ public class UnitData {
 	public void setData(byte[] data) {
 		this.data = data;
 	}
-	
-	
-	
-	public String getUnitId() {
-		return unitId;
-	}
-	public Date getCreatedDate() {
-		return createdDate;
-	}
-	
-	public void setCreatedDate(Date createdDate) {
-		this.createdDate = createdDate;
-	}
-	public void setUnitId(String unitId) {
-		this.unitId = unitId;
-	}
-	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((createdDate == null) ? 0 : createdDate.hashCode());
-		result = prime * result + ((unitId == null) ? 0 : unitId.hashCode());
+		result = prime * result + ((key == null) ? 0 : key.hashCode());
 		return result;
 	}
-	
-	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -86,18 +66,14 @@ public class UnitData {
 		if (getClass() != obj.getClass())
 			return false;
 		UnitData other = (UnitData) obj;
-		if (createdDate == null) {
-			if (other.createdDate != null)
+		if (key == null) {
+			if (other.key != null)
 				return false;
-		} else if (!createdDate.equals(other.createdDate))
-			return false;
-		if (unitId == null) {
-			if (other.unitId != null)
-				return false;
-		} else if (!unitId.equals(other.unitId))
+		} else if (!key.equals(other.key))
 			return false;
 		return true;
 	}
+	
 	
 	
 

@@ -316,7 +316,7 @@ public class CassandraQueryExpressionEvaluator extends
 		AbstractMemberMetaData member = metaData.getMetaDataForMember(expr
 				.getSymbol().getQualifiedName());
 
-		String columnName = getColumnName(metaData,
+		Bytes columnName = getColumnName(metaData,
 				member.getAbsoluteFieldNumber());
 
 		IndexParam param = new IndexParam(columnName, null);
@@ -373,10 +373,10 @@ public class CassandraQueryExpressionEvaluator extends
 	 * 
 	 */
 	private class IndexParam {
-		private String indexName;
+		private Bytes indexName;
 		private Bytes indexValue;
 
-		private IndexParam(String indexName, Bytes indexValue) {
+		private IndexParam(Bytes indexName, Bytes indexValue) {
 			super();
 			this.indexName = indexName;
 			this.indexValue = indexValue;
@@ -385,7 +385,7 @@ public class CassandraQueryExpressionEvaluator extends
 		/**
 		 * @return the indexName
 		 */
-		public String getIndexName() {
+		public Bytes getIndexName() {
 			return indexName;
 		}
 

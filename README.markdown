@@ -10,6 +10,8 @@ Features
 * Subclass retrieval and persistence
 * Basic secondary indexing with simple terms.  && || < <= > >= and == are supported.
 * In memory ordering and paging.  Paging is not supporting without an ordering clause
+* Custom conversions of your own classes via either an interface or a conversion
+* Automatic creation of column families and indexes based on annotations and JDO configuration
 
 
 See all unit/integration tests for details on how to annotate objects, as well as correctly query them.
@@ -34,7 +36,7 @@ Add this dependency for the latest release build
 	<dependency>
 		<groupId>com.spidertracks.datanucleus</groupId>
 		<artifactId>cassandra-jdo</artifactId>
-		<version>0.7.0-beta3</version>
+		<version>1.1.0-0.7.0</version>
 	</dependency>
 
 
@@ -44,10 +46,10 @@ Add this dependency for the latest release build
 Usage
 =====
 
-Developing Unit/Integeration Tests
+Developing Unit/Integration Tests
 ----------------------------------
 
-Include the "test-jar" in your test depdency scope.  Extend or duplicate com.spidertracks.datanucleus.CassandraTest to create an embedded test.
+Include the "test-jar" in your test dependency scope.  Extend or duplicate com.spidertracks.datanucleus.CassandraTest to create an embedded test.
 Copy log4j.properties and cassandra.yaml from src/test/resources to your project's test resources.
 
 
@@ -57,7 +59,7 @@ Keyspace and CF creation
 Currently secondary indexing is automatically created for the columns of field that are annotated with the @Index annotation
 if the auto table create is enabled in your dn configuration.  See the src/test/resources/META-INF/jdoconfig.xml for an example.
 Note that in a production environment you SHOULD NOT set datanucleus.autoCreateSchema="true".  This uses the simple replication
-strategy with a replication factor of 1.  This is ideal for rapid development on a local machine, but not for a production enironment.
+strategy with a replication factor of 1.  This is ideal for rapid development on a local machine, but not for a production environment.
 
 
 
@@ -96,7 +98,7 @@ This is done the following way.
 	Consistency.set(ConsistencyLevel.QUORUM)
 	
 Every operation that communicates with Cassandra will use this consistency level.  This class will not reset when the transaction completes.  As such you should be when
-using it to set the Consistency level for the operation you're about to perform.  Otherwise a thread in a threadpool could reuse a consistency level from a previous operation.
+using it to set the Consistency level for the operation you're about to perform.  Otherwise a thread in a thread pool could reuse a consistency level from a previous operation.
 See the Spring Integration section for utilities that make this easier if you are a user of the Spring framework.
 	
 
@@ -119,6 +121,31 @@ Storing the subclass in its own table requires O(n+1) reads where n is the numbe
 2. Read the columns and populate the object O(1) 
 
 
+Byte Mapping
+-----------
+
+All conversion to bytes for storage is now performed by called the com.spidertracks.datanucleus.convert.ByteConverterContext.  All fields including row keys are converted via this method.  
+See the javadoc for details.  There are 2 options to map types to bytes.
+
+ByteConverter:
+
+If you wish to de-couple your entities from how they are persisted, you may implement your own byte converter and add it to the conversion properties file.  This file will be loaded on startup,
+and will override any defaults.  By default all Java primitives are supported as well as java.util.UUID and com.eaio.uuid.UUID.  
+
+ByteAware:
+
+If implement this interface in an object that will be written to a column, the appropriate methods are invoked for creating a ByteBuffer that represents the underlying object.  Take care when writing
+to the Buffer that rewind() is invoked before returning.  Otherwise no bytes will be written.  See com.spidertracks.datanucleus.basic.model.UnitDataKey in the test sources for an example.
+
+Byte conversions are determined in the following order, then cached for future use.
+
+1. Lookup an existing ByteConverter.  If one exists, use it.
+2. Check if the class implements ByteAware.  If so, instantiate a wrapper ByteConverter for the class type and cache it for future use.
+3. Check if the class has a Datanucleus ObjectLong converter. If so, wrap it with an ObjectLongWrapperConverter which will convert the object to a Long, then use the Long's ByteConverter
+4. Check if the class has a Datanucleus ObjectString converter. If so, wrap it with an ObjectStringWrapperConverter which will convert the object to a String, then use the String's ByteConverter
+5. If none of the above apply.  Use the serializer defined in the JDO config to serialize the object to bytes.
+
+
 Spring Integration
 ------------------
 
@@ -134,8 +161,11 @@ You no longer need to manually install the cassandra dependencies when building.
 Roadmap
 -------
 
-1. Upgrade when latest datanucleus 2.2 stable is release.
+1. Upgrade when latest Datanucleus 2.2 after this release
 2. Upgrade as Pelops client improves
+3. Make inheritance when querying perform more efficiently
+4. Make paging/iteration possible on large associative sets.  Will require a significant change to the way associations are stored in Cassandra, but should allow n to n sets in the order
+of thousands without loading them all into memory.
 
 Special Thanks
 --------------

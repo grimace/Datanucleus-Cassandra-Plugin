@@ -19,9 +19,8 @@ package com.spidertracks.datanucleus.utils;
 
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.scale7.cassandra.pelops.Cluster;
-import org.scale7.cassandra.pelops.IConnection.Config;
-import org.scale7.cassandra.pelops.KeyspaceManager;
 import org.scale7.cassandra.pelops.Cluster.Node;
+import org.scale7.cassandra.pelops.KeyspaceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

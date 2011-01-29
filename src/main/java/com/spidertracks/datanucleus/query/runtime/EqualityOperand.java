@@ -17,7 +17,6 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.query.runtime;
 
-import java.nio.ByteBuffer;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +88,7 @@ public class EqualityOperand extends Operand implements CompressableOperand {
 	}
 
 	@Override
-	public void performQuery(String poolName, String cfName, String[] columns) {
+	public void performQuery(String poolName, String cfName, Bytes[] columns) {
 
 		try {
 			Map<Bytes, List<Column>> results = Pelops.createSelector(poolName)
@@ -126,8 +125,8 @@ public class EqualityOperand extends Operand implements CompressableOperand {
 	}
 
 	@Override
-	public Operand optimizeDescriminator(String descriminatorColumnValue,
-			List<String> possibleValues) {
+	public Operand optimizeDescriminator(Bytes descriminatorColumnValue,
+			List<Bytes> possibleValues) {
 
 		// the equality node is always a leaf, so we don't need to recurse
 
@@ -135,10 +134,9 @@ public class EqualityOperand extends Operand implements CompressableOperand {
 
 			IndexExpression leaf = new IndexExpression();
 
-			leaf.setColumn_name(Bytes.fromUTF8(descriminatorColumnValue)
-					.getBytes());
+			leaf.setColumn_name(descriminatorColumnValue.getBytes());
 
-			leaf.setValue(Bytes.fromUTF8(possibleValues.get(0)).getBytes());
+			leaf.setValue(possibleValues.get(0).toByteArray());
 
 			leaf.setOp(IndexOperator.EQ);
 			
@@ -151,7 +149,7 @@ public class EqualityOperand extends Operand implements CompressableOperand {
 
 		Stack<OrOperand> orOps = new Stack<OrOperand>();
 
-		for (String value : possibleValues) {
+		for (Bytes value : possibleValues) {
 
 			if (orOps.size() == 2) {
 				OrOperand orOp = new OrOperand();
@@ -175,10 +173,9 @@ public class EqualityOperand extends Operand implements CompressableOperand {
 
 			IndexExpression expression = new IndexExpression();
 
-			expression.setColumn_name(Bytes.fromUTF8(descriminatorColumnValue)
-					.getBytes());
+			expression.setColumn_name(descriminatorColumnValue.getBytes());
 
-			expression.setValue(Bytes.fromUTF8(value).getBytes());
+			expression.setValue(value.getBytes());
 
 			expression.setOp(IndexOperator.EQ);
 

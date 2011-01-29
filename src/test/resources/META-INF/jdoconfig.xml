@@ -18,6 +18,8 @@
 		<property name="datanucleus.autoCreateColumns" value="true"/>
 			
 		<property name="com.spidertracks.cassandra.serializer" value="com.spidertracks.datanucleus.serialization.XStreamSerializer"/>
+		
+		<property name="com.spidertracks.cassandra.bytemapper" value="cassandraByteCoverters.properties"/>
 
 	</persistence-manager-factory>
 

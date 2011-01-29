@@ -36,12 +36,10 @@ import org.datanucleus.metadata.Relation;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
-import org.datanucleus.store.types.ObjectLongConverter;
-import org.datanucleus.store.types.ObjectStringConverter;
 import org.datanucleus.store.types.sco.SCOUtils;
 import org.scale7.cassandra.pelops.Bytes;
 
-import com.spidertracks.datanucleus.serialization.Serializer;
+import com.spidertracks.datanucleus.convert.ByteConverterContext;
 
 /**
  * @author Todd Nine
@@ -49,10 +47,10 @@ import com.spidertracks.datanucleus.serialization.Serializer;
  */
 public class CassandraFetchFieldManager extends AbstractFieldManager {
 
-	private Serializer serializer;
-	private Map<String, Column> columns;
+	private Map<Bytes, Bytes> columns;
 	private AbstractClassMetaData metaData;
 	private ObjectProvider objectProvider;
+	private ByteConverterContext byteContext;
 	private ExecutionContext context;
 	private ClassLoaderResolver clr;
 	
@@ -69,15 +67,16 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 		this.metaData = op.getClassMetaData();
 		this.context = op.getExecutionContext();
 		this.clr = this.context.getClassLoaderResolver();
-		this.serializer = ((CassandraStoreManager)context.getStoreManager()).getSerializer();
+		this.byteContext =  ((CassandraStoreManager)context.getStoreManager()).getByteConverterContext();
+		
 
 		// rather than iterate over every field call for O(n) it's faster to
 		// take our O(n) hit up front then perform an O(1) lookup. Sorting and
 		// searching is O(n log (n)) sort plus log n search
-		this.columns = new HashMap<String, Column>();
+		this.columns = new HashMap<Bytes, Bytes>();
 
 		for (Column column : columns) {
-			this.columns.put(Bytes.toUTF8(column.getName()), column);
+			this.columns.put(Bytes.fromBytes(column.getName()), Bytes.fromBytes(column.getValue()));
 		}
 
 		
@@ -89,17 +88,12 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 		try {
 
-			String columnName = getColumnName(metaData, fieldNumber);
-			Column column = this.columns.get(columnName);
+			Bytes columnName = getColumnName(metaData, fieldNumber);
+			Bytes value = this.columns.get(columnName);
 
-			// if there's no column defined, this record could be an older
-			// record, and this is a new field just return the java default
-			// value
-			if (column == null) {
-				return false;
-			}
+		
 
-			return new Bytes(column.getValue()).toBoolean();
+			return (Boolean) byteContext.getBooleanConverter().getObject(value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -110,17 +104,12 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 	public byte fetchByteField(int fieldNumber) {
 		try {
 
-			String columnName = getColumnName(metaData, fieldNumber);
-			Column column = this.columns.get(columnName);
+			Bytes columnName = getColumnName(metaData, fieldNumber);
+			Bytes value = this.columns.get(columnName);
 
-			// if there's no column defined, this record could be an older
-			// record, and this is a new field just return the java default
-			// value
-			if (column == null) {
-				return 0;
-			}
+	
 
-			return column.getValue()[0];
+			return value.toByte();
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -131,17 +120,11 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 	public char fetchCharField(int fieldNumber) {
 		try {
 
-			String columnName = getColumnName(metaData, fieldNumber);
-			Column column = this.columns.get(columnName);
+			Bytes columnName = getColumnName(metaData, fieldNumber);
+			Bytes value = this.columns.get(columnName);
 
-			// if there's no column defined, this record could be an older
-			// record, and this is a new field just return the java default
-			// value
-			if (column == null) {
-				return Character.MIN_VALUE;
-			}
 
-			return new Bytes(column.getValue()).toChar();
+			return (Character) byteContext.getCharConverter().getObject(value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -152,16 +135,11 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 	public double fetchDoubleField(int fieldNumber) {
 		try {
 
-			String columnName = getColumnName(metaData, fieldNumber);
-			Column column = this.columns.get(columnName);
+			Bytes columnName = getColumnName(metaData, fieldNumber);
+			Bytes value = this.columns.get(columnName);
 
-			// if there's no column defined, this record could be an older
-			// record, and this is a new field just return the java default
-			// value
-			if (column == null) {
-				return 0;
-			}
-			return new Bytes(column.getValue()).toDouble();
+		
+			return (Double) byteContext.getDoubleConverter().getObject(value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -172,16 +150,10 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 	public float fetchFloatField(int fieldNumber) {
 		try {
 
-			String columnName = getColumnName(metaData, fieldNumber);
-			Column column = this.columns.get(columnName);
+			Bytes columnName = getColumnName(metaData, fieldNumber);
+			Bytes value = this.columns.get(columnName);
 
-			// if there's no column defined, this record could be an older
-			// record, and this is a new field just return the java default
-			// value
-			if (column == null) {
-				return 0;
-			}
-			return new Bytes(column.getValue()).toFloat();
+			return (Float) byteContext.getFloadConverter().getObject(value);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -192,17 +164,11 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 	public int fetchIntField(int fieldNumber) {
 		try {
 
-			String columnName = getColumnName(metaData, fieldNumber);
-			Column column = this.columns.get(columnName);
+			Bytes columnName = getColumnName(metaData, fieldNumber);
+			Bytes column = this.columns.get(columnName);
 
-			// if there's no column defined, this record could be an older
-			// record, and this is a new field just return the java default
-			// value
-			if (column == null) {
-				return 0;
-			}
-
-			return new Bytes(column.getValue()).toInt();
+	
+			return (Integer) byteContext.getIntConverter().getObject(column);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -213,17 +179,10 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 	public long fetchLongField(int fieldNumber) {
 		try {
 
-			String columnName = getColumnName(metaData, fieldNumber);
-			Column column = this.columns.get(columnName);
+			Bytes columnName = getColumnName(metaData, fieldNumber);
+			Bytes column = this.columns.get(columnName);
 
-			// if there's no column defined, this record could be an older
-			// record, and this is a new field just return the java default
-			// value
-			if (column == null) {
-				return 0;
-			}
-
-			return new Bytes(column.getValue()).toLong();
+			return (Long) byteContext.getLongConverter().getObject(column);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -235,8 +194,8 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 	public Object fetchObjectField(int fieldNumber) {
 		try {
 
-			String columnName = getColumnName(metaData, fieldNumber);
-			Column column = columns.get(columnName);
+			Bytes columnName = getColumnName(metaData, fieldNumber);
+			Bytes column = columns.get(columnName);
 
 			// No object defined
 			if (column == null) {
@@ -259,7 +218,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 							"Embedded objects are currently unimplemented.");
 				}
 
-				Object key = serializer.getObject(column.getValue());
+				Object key = byteContext.convertToObject(column, this.context, this.metaData, fieldNumber);
 
 				Object object = context.findObject(key, false, false,
 						fieldMetaData.getTypeName());
@@ -289,8 +248,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 					// get our list of Strings
 
-					List<Object> serializedIdList = serializer.getObject(columns.get(
-							columnName).getValue());
+					List<Object> serializedIdList = (List<Object>) byteContext.convertToObject(column, context, this.metaData, fieldNumber);
 
 					for (Object key : serializedIdList) {
 
@@ -318,8 +276,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 					ApiAdapter adapter = objectProvider.getExecutionContext()
 							.getApiAdapter();
 
-					Map<Object, Object> serializedMap = serializer.getObject(columns.get(
-							columnName).getValue());
+					Map<Object, Object> serializedMap = (Map<Object, Object>) byteContext.convertToObject(column, context, this.metaData, fieldNumber);
 
 					Class<?> keyClass = clr.classForName(fieldMetaData.getMap()
 							.getKeyType());
@@ -355,8 +312,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 				} else if (fieldMetaData.getType().isArray()) {
 
-					List<Object> keys = serializer.getObject(columns.get(columnName)
-							.getValue());
+					List<Object> keys = (List<Object>) byteContext.convertToObject(column, context, this.metaData, fieldNumber);
 
 					Object array = Array.newInstance(fieldMetaData.getType()
 							.getComponentType(), keys.size());
@@ -375,21 +331,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 			}
 
-			ObjectLongConverter longConverter = this.context.getTypeManager().getLongConverter(fieldMetaData.getType());
-			
-			
-			if(longConverter != null){
-				return longConverter.toObject(new Bytes(column.getValue()).toLong());
-			}
-			
-			ObjectStringConverter converter = this.context.getTypeManager()
-					.getStringConverter(fieldMetaData.getType());
-
-			if (converter != null) {
-				return converter.toObject(Bytes.toUTF8(column.getValue()));
-			}
-
-			return serializer.getObject(column.getValue());
+			return byteContext.convertToObject(column, context, this.metaData, fieldNumber);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -400,17 +342,10 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 	public short fetchShortField(int fieldNumber) {
 		try {
 
-			String columnName = getColumnName(metaData, fieldNumber);
-			Column column = this.columns.get(columnName);
+			Bytes columnName = getColumnName(metaData, fieldNumber);
+			Bytes column = this.columns.get(columnName);
 
-			// if there's no column defined, this record could be an older
-			// record, and this is a new field just return the java default
-			// value
-			if (column == null) {
-				return 0;
-			}
-
-			return new Bytes(column.getValue()).toShort();
+			return (Short) byteContext.getShortConverter().getObject(column);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);
@@ -421,17 +356,10 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 	public String fetchStringField(int fieldNumber) {
 		try {
 
-			String columnName = getColumnName(metaData, fieldNumber);
-			Column column = this.columns.get(columnName);
+			Bytes columnName = getColumnName(metaData, fieldNumber);
+			Bytes column = this.columns.get(columnName);
 
-			// if there's no column defined, this record could be an older
-			// record, and this is a new field just return the java default
-			// value
-			if (column == null) {
-				return null;
-			}
-
-			return Bytes.toUTF8(column.getValue());
+			return (String) byteContext.getStringConverter().getObject(column);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);

@@ -1,6 +1,6 @@
 package com.spidertracks.datanucleus.client;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.junit.Test;

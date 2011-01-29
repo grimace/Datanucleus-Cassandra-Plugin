@@ -17,7 +17,8 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.basic;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import javax.jdo.JDODataStoreException;
 import javax.jdo.PersistenceManager;

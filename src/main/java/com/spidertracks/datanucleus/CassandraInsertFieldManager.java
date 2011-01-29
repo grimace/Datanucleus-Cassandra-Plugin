@@ -37,12 +37,10 @@ import org.datanucleus.metadata.Relation;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
-import org.datanucleus.store.types.ObjectLongConverter;
-import org.datanucleus.store.types.ObjectStringConverter;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Mutator;
 
-import com.spidertracks.datanucleus.serialization.Serializer;
+import com.spidertracks.datanucleus.convert.ByteConverterContext;
 
 /**
  * @author Todd Nine
@@ -50,27 +48,28 @@ import com.spidertracks.datanucleus.serialization.Serializer;
  */
 public class CassandraInsertFieldManager extends AbstractFieldManager {
 
-	private Serializer serializer;
 	private ExecutionContext context;
 	private Mutator mutator;
 	private AbstractClassMetaData metaData;
 	private ObjectProvider objectProvider;
 	private String columnFamily;
-	private String key;
+	private ByteConverterContext byteContext;
+	private Bytes key;
 
 	/**
 	 * @param columns
 	 * @param metaData
 	 */
 	public CassandraInsertFieldManager(Mutator mutator, ObjectProvider op,
-			String columnFamily, String key) {
+			String columnFamily, Bytes key) {
 		super();
 
 		this.mutator = mutator;
 		this.objectProvider = op;
 		this.metaData = op.getClassMetaData();
 		this.context = op.getExecutionContext();
-		this.serializer = ((CassandraStoreManager)context.getStoreManager()).getSerializer();
+		this.byteContext = ((CassandraStoreManager) context.getStoreManager())
+				.getByteConverterContext();
 		this.columnFamily = columnFamily;
 		this.key = key;
 
@@ -81,8 +80,8 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 		try {
 			mutator.writeColumn(columnFamily, key, mutator.newColumn(
-					getColumnName(metaData, fieldNumber),
-					Bytes.fromBoolean(value)));
+					getColumnName(metaData, fieldNumber), byteContext
+							.getBooleanConverter().getBytes(value)));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -108,7 +107,8 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 		try {
 			mutator.writeColumn(columnFamily, key, mutator.newColumn(
-					getColumnName(metaData, fieldNumber), Bytes.fromInt(value)));
+					getColumnName(metaData, fieldNumber), byteContext
+							.getCharConverter().getBytes(value)));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -120,8 +120,8 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 		try {
 			mutator.writeColumn(columnFamily, key, mutator.newColumn(
-					getColumnName(metaData, fieldNumber),
-					Bytes.fromDouble(value)));
+					getColumnName(metaData, fieldNumber), byteContext
+							.getDoubleConverter().getBytes(value)));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -133,8 +133,8 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 		try {
 			mutator.writeColumn(columnFamily, key, mutator.newColumn(
-					getColumnName(metaData, fieldNumber),
-					Bytes.fromFloat(value)));
+					getColumnName(metaData, fieldNumber), byteContext
+							.getFloadConverter().getBytes(value)));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -146,7 +146,8 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 		try {
 			mutator.writeColumn(columnFamily, key, mutator.newColumn(
-					getColumnName(metaData, fieldNumber), Bytes.fromInt(value)));
+					getColumnName(metaData, fieldNumber), byteContext
+							.getIntConverter().getBytes(value)));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -157,9 +158,9 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 	public void storeLongField(int fieldNumber, long value) {
 
 		try {
-			mutator.writeColumn(columnFamily, key,
-					mutator.newColumn(getColumnName(metaData, fieldNumber),
-							Bytes.fromLong(value)));
+			mutator.writeColumn(columnFamily, key, mutator.newColumn(
+					getColumnName(metaData, fieldNumber), byteContext
+							.getLongConverter().getBytes(value)));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -170,8 +171,8 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 	public void storeShortField(int fieldNumber, short value) {
 		try {
 			mutator.writeColumn(columnFamily, key, mutator.newColumn(
-					getColumnName(metaData, fieldNumber),
-					Bytes.fromShort(value)));
+					getColumnName(metaData, fieldNumber), byteContext
+							.getShortConverter().getBytes(value)));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -182,7 +183,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 	public void storeObjectField(int fieldNumber, Object value) {
 		try {
 
-			String columnName = getColumnName(metaData, fieldNumber);
+			Bytes columnName = getColumnName(metaData, fieldNumber);
 
 			// delete operation
 			if (value == null) {
@@ -221,16 +222,13 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 				Object persisted = context.persistObjectInternal(value,
 						objectProvider, fieldNumber, StateManager.PC);
 
-				// TODO add this data to the supercolumn info
-
 				Serializable objectPk = (Serializable) context.getApiAdapter()
 						.getIdForObject(persisted);
 
 				mutator.writeColumn(
 						columnFamily,
 						key,
-						mutator.newColumn(columnName,
-								new Bytes(serializer.getBytes(objectPk))));
+						mutator.newColumn(columnName, byteContext.convertToBytes(objectPk, context)));
 
 				return;
 			}
@@ -262,7 +260,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 					mutator.writeColumn(columnFamily, key, mutator.newColumn(
 							columnName,
-							new Bytes(serializer.getBytes(serializedKeys))));
+							 byteContext.convertToBytes(serializedKeys, context)));
 
 					return;
 
@@ -324,7 +322,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 					mutator.writeColumn(columnFamily, key, mutator.newColumn(
 							columnName,
-							new Bytes(serializer.getBytes(serializedMap))));
+							 byteContext.convertToBytes(serializedMap, context)));
 
 					return;
 
@@ -350,46 +348,17 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 					mutator.writeColumn(columnFamily, key, mutator.newColumn(
 							columnName,
-							new Bytes(serializer.getBytes(serializedKeys))));
+							byteContext.convertToBytes(serializedKeys, context)));
 
 				}
 
 				return;
 			}
 
-			ObjectLongConverter longConverter = this.context.getTypeManager()
-					.getLongConverter(fieldMetaData.getType());
+			Bytes data = byteContext.convertToBytes(value, this.context);
 
-			if (longConverter != null) {
-				mutator.writeColumn(
-						columnFamily,
-						key,
-						mutator.newColumn(columnName,
-								Bytes.fromLong(longConverter.toLong(value))));
-				return;
-			}
-
-			// see if we have an objecttoString converter. If we do convert it.
-
-			ObjectStringConverter converter = this.context.getTypeManager()
-					.getStringConverter(fieldMetaData.getType());
-
-			if (converter != null) {
-
-				mutator.writeColumn(
-						columnFamily,
-						key,
-						mutator.newColumn(columnName,
-								Bytes.fromUTF8(converter.toString(value))));
-
-				return;
-			}
-
-			mutator.writeColumn(
-					columnFamily,
-					key,
-					mutator.newColumn(columnName,
-							new Bytes(serializer.getBytes(value))));
+			mutator.writeColumn(columnFamily, key,
+					mutator.newColumn(columnName, data));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -400,15 +369,9 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 	public void storeStringField(int fieldNumber, String value) {
 		try {
 
-			String columnName = getColumnName(metaData, fieldNumber);
-
-//			if (value == null) {
-//				mutator.deleteColumn(columnFamily, key, columnName);
-//
-//				return;
-//			}
-			mutator.writeColumn(columnFamily, key,
-					mutator.newColumn(columnName, Bytes.fromUTF8(value)));
+			mutator.writeColumn(columnFamily, key, mutator.newColumn(
+					getColumnName(metaData, fieldNumber), byteContext
+							.getStringConverter().getBytes(value)));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);

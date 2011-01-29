@@ -20,7 +20,6 @@ package com.spidertracks.datanucleus;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnFamily;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getDiscriminatorColumnName;
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getFetchColumnList;
-import static com.spidertracks.datanucleus.utils.MetaDataUtils.getRowKey;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -39,11 +38,13 @@ import org.datanucleus.metadata.Relation;
 import org.datanucleus.store.AbstractPersistenceHandler;
 import org.datanucleus.store.ExecutionContext;
 import org.datanucleus.store.ObjectProvider;
+import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Mutator;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.spidertracks.datanucleus.client.Consistency;
+import com.spidertracks.datanucleus.convert.ByteConverterContext;
 import com.spidertracks.datanucleus.mutate.BatchMutationManager;
 import com.spidertracks.datanucleus.mutate.ExecutionContextDelete;
 
@@ -57,10 +58,12 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 	private CassandraStoreManager manager;
 	private BatchMutationManager batchManager;
+	private ByteConverterContext byteContext;
 
 	public CassandraPersistenceHandler(CassandraStoreManager manager) {
 		this.manager = manager;
 		this.batchManager = new BatchMutationManager(manager);
+		this.byteContext = manager.getByteConverterContext();
 	}
 
 	@Override
@@ -72,7 +75,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 	public void deleteObject(ObjectProvider op) {
 		try {
 
-			String key = getRowKey(op);
+			Bytes key = byteContext.getRowKey(op);
 
 			String columnFamily = getColumnFamily(op.getClassMetaData());
 
@@ -86,7 +89,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 				return;
 			}
 
-			// delete our secondary index as well
+			// delete our dependent objects as well.
 			AbstractClassMetaData metaData = op.getClassMetaData();
 
 
@@ -97,12 +100,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 						.getMetaDataForManagedMemberAtAbsolutePosition(current);
 
 				
-				// here we have the field value
-				Object value = op.provideField(current);
 				
-				if (value == null) {
-					continue;
-				}
 
 				
 				
@@ -111,6 +109,13 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 				if (fieldMetaData.isDependent()
 						|| (fieldMetaData.getCollection() != null && fieldMetaData
 								.getCollection().isDependentElement())) {
+					
+					// here we have the field value
+					Object value = op.provideField(current);
+					
+					if (value == null) {
+						continue;
+					}
 
 					ClassLoaderResolver clr = ec.getClassLoaderResolver();
 
@@ -195,7 +200,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		try {
 			AbstractClassMetaData metaData = op.getClassMetaData();
 
-			String key = getRowKey(op);
+			Bytes key = byteContext.getRowKey(op);
 
 			Selector selector = Pelops.createSelector(manager.getPoolName());
 
@@ -208,6 +213,10 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 				// check if the pk field was requested. If so, throw an
 				// exception b/c the object doesn't exist
 				pksearched(metaData, fieldNumbers);
+				
+				//do nothing if we didn't fail the check above.  Since cassandra has no concept of transactions the DN transaction is attempting
+				//to load and flush rows that no longer exist.
+				return;
 
 			}
 
@@ -275,7 +284,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 		// signal a write is about to start
 		Mutator mutator = this.batchManager.beginWrite(ec).getMutator();
 
-		String key = getRowKey(op);
+		Bytes key = byteContext.getRowKey(op);
 		String columnFamily = getColumnFamily(metaData);
 
 		// Write our all our primary object data
@@ -289,7 +298,7 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 			DiscriminatorMetaData discriminator = metaData
 					.getDiscriminatorMetaData();
 
-			String colName = getDiscriminatorColumnName(discriminator);
+			Bytes colName = getDiscriminatorColumnName(discriminator);
 
 			String value = discriminator.getValue();
 

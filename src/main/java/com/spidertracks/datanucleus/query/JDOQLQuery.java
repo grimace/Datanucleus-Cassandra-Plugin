@@ -24,8 +24,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.jdo.identity.SingleFieldIdentity;
 
@@ -49,9 +49,9 @@ import org.scale7.cassandra.pelops.Selector;
 
 import com.spidertracks.datanucleus.CassandraStoreManager;
 import com.spidertracks.datanucleus.client.Consistency;
+import com.spidertracks.datanucleus.convert.ByteConverterContext;
 import com.spidertracks.datanucleus.query.runtime.Columns;
 import com.spidertracks.datanucleus.query.runtime.Operand;
-import com.spidertracks.datanucleus.serialization.Serializer;
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 /**
@@ -123,8 +123,12 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		String poolName = ((CassandraStoreManager) ec.getStoreManager())
 				.getPoolName();
 
-		Serializer serializer = ((CassandraStoreManager) ec.getStoreManager())
-				.getSerializer();
+		// Serializer serializer = ((CassandraStoreManager)
+		// ec.getStoreManager())
+		// .getSerializer();
+
+		ByteConverterContext byteContext = ((CassandraStoreManager) ec
+				.getStoreManager()).getByteConverterContext();
 
 		AbstractClassMetaData acmd = ec.getMetaDataManager()
 				.getMetaDataForClass(candidateClass.getName(),
@@ -132,16 +136,15 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 		String columnFamily = MetaDataUtils.getColumnFamily(acmd);
 
-		String identityCol = MetaDataUtils.getIdentityColumn(acmd);
-
 		Set<Columns> candidateKeys = null;
 
-		Bytes idColumnBytes = Bytes.fromUTF8(identityCol);
-		Bytes descriminatorBytes = null;
-		String descriminiatorCol = null;
+		Bytes idColumnBytes = MetaDataUtils.getIdentityColumn(acmd);
 		DiscriminatorMetaData discriminator = null;
-		String[] selectColumns = new String[] { identityCol };
+
 		ClassLoaderResolver clr = ec.getClassLoaderResolver();
+
+		Bytes[] selectColumns = null;
+		Bytes descriminiatorCol = null;
 
 		if (acmd.hasDiscriminatorStrategy()) {
 
@@ -149,9 +152,9 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 			descriminiatorCol = getDiscriminatorColumnName(discriminator);
 
-			descriminatorBytes = Bytes.fromUTF8(descriminiatorCol);
-
-			selectColumns = new String[] { identityCol, descriminiatorCol };
+			selectColumns = new Bytes[] { idColumnBytes, descriminiatorCol };
+		} else {
+			selectColumns = new Bytes[] { idColumnBytes };
 		}
 
 		int range = DEFAULT_MAX;
@@ -177,7 +180,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 			// there's a discriminator so be sure to include it
 			if (acmd.hasDiscriminatorStrategy()) {
-				List<String> descriminatorValues = MetaDataUtils
+				List<Bytes> descriminatorValues = MetaDataUtils
 						.getDescriminatorValues(acmd.getFullClassName(), clr,
 								ec);
 
@@ -193,7 +196,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		}
 
 		Collection<?> results = getObjectsOfCandidateType(candidateKeys, acmd,
-				clr, subclasses, idColumnBytes, descriminatorBytes, serializer);
+				clr, subclasses, idColumnBytes, descriminiatorCol, byteContext);
 
 		if (this.getOrdering() != null || this.getGrouping() != null) {
 
@@ -229,7 +232,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 	public List<?> getObjectsOfCandidateType(Set<Columns> keys,
 			AbstractClassMetaData acmd, ClassLoaderResolver clr,
 			boolean subclasses, Bytes identityColumn,
-			Bytes descriminatorColumn, Serializer serializer) {
+			Bytes descriminatorColumn, ByteConverterContext byteConverter) {
 
 		// final ClassLoaderResolver clr = ec.getClassLoaderResolver();
 		// final AbstractClassMetaData acmd =
@@ -255,9 +258,8 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 
 			}
 
-			Object identity = MetaDataUtils.getObjectIdentity(ec, targetClass,
-					idBytes.getColumnValue(identityColumn).toByteArray(),
-					serializer);
+			Object identity =   
+				byteConverter.getObjectIdentity(ec, targetClass, idBytes.getColumnValue(identityColumn));
 
 			// Not a valid subclass, don't return it as a candidate
 			if (!(identity instanceof SingleFieldIdentity)) {
@@ -293,7 +295,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 	 * @throws Exception
 	 */
 	private Set<Columns> getAll(String poolName, String cfName,
-			String[] selectColumns, int maxSize) {
+			Bytes[] selectColumns, int maxSize) {
 
 		Set<Columns> candidateKeys = new HashSet<Columns>();
 
@@ -303,7 +305,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		range.setCount(maxSize);
 
 		Map<Bytes, List<Column>> results;
-		
+
 		try {
 			results = Pelops.createSelector(poolName).getColumnsFromRows(
 					cfName, range, Selector.newColumnsPredicate(selectColumns),
@@ -311,7 +313,7 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 		} catch (Exception e) {
 			throw new NucleusException("Error scanning rows", e);
 		}
-		
+
 		Columns cols;
 
 		for (Entry<Bytes, List<Column>> entry : results.entrySet()) {

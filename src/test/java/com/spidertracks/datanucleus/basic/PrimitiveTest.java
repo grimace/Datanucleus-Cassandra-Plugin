@@ -21,14 +21,17 @@ package com.spidertracks.datanucleus.basic;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.util.Calendar;
+import java.util.Date;
 
 import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 
+import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -42,11 +45,15 @@ import com.spidertracks.datanucleus.basic.model.PrimitiveObject;
 import com.spidertracks.datanucleus.basic.model.PrimitiveObjectSubclass;
 import com.spidertracks.datanucleus.basic.model.UnitData;
 import com.spidertracks.datanucleus.basic.model.UnitDataKey;
+import com.spidertracks.datanucleus.basic.model.UnitDataNoConverter;
+import com.spidertracks.datanucleus.basic.model.UnitDataNoConverterKey;
+import com.spidertracks.datanucleus.identity.ByteAware;
 
 /**
  * @author Todd Nine
  * 
- * TODO test 2 primitives A and B with bidirectional link and defaultFetchGroup="true"
+ *         TODO test 2 primitives A and B with bidirectional link and
+ *         defaultFetchGroup="true"
  */
 
 public class PrimitiveTest extends CassandraTest {
@@ -107,23 +114,60 @@ public class PrimitiveTest extends CassandraTest {
 	@Test
 	public void testCompositeKey() {
 
-		UnitData key = new UnitData();
-		key.setCreatedDate(Calendar.getInstance().getTime());
-
-		key.setUnitId("123456");
+		UnitData unitData = new UnitData();
+		
+		UnitDataKey key = new UnitDataKey(new Date(), "123456");
+		
+		unitData.setKey(key);
 
 		PersistenceManager pm = pmf.getPersistenceManager();
 
-		pm.makePersistent(key);
+		pm.makePersistent(unitData);
 
 		PersistenceManager pm2 = pmf.getPersistenceManager();
 
 		// now retrieve a copy
 		UnitData stored = (UnitData) pm2.getObjectById(UnitData.class,
-				new UnitDataKey(key.getCreatedDate(), key.getUnitId())
-						.toString());
+				new UnitDataKey(key.getCreatedDate(), key.getUnitId()));
 
-		assertEquals(key, stored);
+		assertEquals(unitData, stored);
+
+	}
+
+	/**
+	 * Tests an object is serialized as bytes properly
+	 */
+	@Test
+	public void testCompositeKeyNoConverter() {
+
+		UnitDataNoConverter data = new UnitDataNoConverter();
+		
+		UnitDataNoConverterKey key = new UnitDataNoConverterKey(new Date(), "123456");
+		data.setKey(key);
+		
+		PersistenceManager pm = pmf.getPersistenceManager();
+
+		try {
+			pm.makePersistent(data);
+		} catch (Exception e) {
+			
+			Throwable current = e;
+			
+			while(!(current instanceof NucleusDataStoreException) && current != null){
+				current = current.getCause();
+			}
+			
+			assertNotNull(current);
+			
+			assertEquals(String.format(
+					"You cannot use the default serializer on a key.  See the %s interface to use custom keys",
+					ByteAware.class.getName()), current.getMessage());
+			
+			return;
+			
+		}
+		
+		fail("An exception should have been thrown");
 
 	}
 
@@ -133,27 +177,29 @@ public class PrimitiveTest extends CassandraTest {
 	@Test
 	public void testByteArray() {
 
-		UnitData key = new UnitData();
-		key.setCreatedDate(Calendar.getInstance().getTime());
 
-		key.setUnitId("123456");
+		UnitData unitData = new UnitData();
+		
+		UnitDataKey key = new UnitDataKey(new Date(), "123456");
+		
+		unitData.setKey(key);
 
-		key.setData(new byte[] { 0x0F, 0x0A });
+
+		unitData.setData(new byte[] { 0x0F, 0x0A });
 
 		PersistenceManager pm = pmf.getPersistenceManager();
 
-		pm.makePersistent(key);
+		pm.makePersistent(unitData);
 
 		PersistenceManager pm2 = pmf.getPersistenceManager();
 
 		// now retrieve a copy
 		UnitData stored = (UnitData) pm2.getObjectById(UnitData.class,
-				new UnitDataKey(key.getCreatedDate(), key.getUnitId())
-						.toString());
+				new UnitDataKey(key.getCreatedDate(), key.getUnitId()));
 
-		assertEquals(key, stored);
+		assertEquals(unitData, stored);
 
-		assertArrayEquals(key.getData(), stored.getData());
+		assertArrayEquals(unitData.getData(), stored.getData());
 
 	}
 
@@ -204,7 +250,7 @@ public class PrimitiveTest extends CassandraTest {
 
 	}
 
-	@Test(expected=JDODataStoreException.class)
+	@Test(expected = JDODataStoreException.class)
 	public void testDelete() throws Exception {
 
 		PersistenceManager pm = pmf.getPersistenceManager();
@@ -213,7 +259,6 @@ public class PrimitiveTest extends CassandraTest {
 		object.setTestByte((byte) 0xf1);
 		object.setTestBool(true);
 		object.setTestChar('t');
-		
 
 		// now save our object
 		pm.makePersistent(object);
@@ -246,25 +291,24 @@ public class PrimitiveTest extends CassandraTest {
 		assertEquals(object.getTestLong(), stored.getTestLong());
 
 		assertEquals(object.getTestString(), stored.getTestString());
-		
-		//now delete our object
+
+		// now delete our object
 		pm2.deletePersistent(stored);
-		
+
 		PersistenceManager pm3 = pmf.getPersistenceManager();
-		
-		//should throw an exception
-		PrimitiveObject deletedRecord = pm3.getObjectById(PrimitiveObject.class, object.getId());
-		
-	
+
+		// should throw an exception
+		pm3.getObjectById(
+				PrimitiveObject.class, object.getId());
 
 	}
-	
-//	@Test
+
+	// @Test
 	@Ignore("Waiting to hear back from Andy at datanuclues.  Not sure if this is a valid test")
-	public void subClassReturned(){
+	public void subClassReturned() {
 
 		PrimitiveObject primitive = new PrimitiveObject();
-		
+
 		primitive.setTestByte((byte) 0xf1);
 		primitive.setTestBool(true);
 		primitive.setTestChar('t');
@@ -274,10 +318,9 @@ public class PrimitiveTest extends CassandraTest {
 		primitive.setTestLong(200);
 		primitive.setTestShort((short) 5);
 		primitive.setTestString("foobar");
-		
-		
+
 		PrimitiveObjectSubclass subclass = new PrimitiveObjectSubclass();
-		
+
 		subclass.setTestByte((byte) 0xf1);
 		subclass.setTestBool(true);
 		subclass.setTestChar('t');
@@ -288,32 +331,31 @@ public class PrimitiveTest extends CassandraTest {
 		subclass.setTestShort((short) 5);
 		subclass.setTestString("foobar");
 		subclass.setSubClassString("subclassString");
-		
-		
-		
 
 		PersistenceManager pm = pmf.getPersistenceManager();
 
 		pm.makePersistent(primitive);
 		pm.makePersistent(subclass);
-		
+
 		UUID primitiveId = primitive.getId();
 		UUID subclassId = subclass.getId();
-		
+
 		PersistenceManager pm2 = pmf.getPersistenceManager();
-		
-		PrimitiveObject subclassInstance = pm2.getObjectById(PrimitiveObject.class, subclassId);
-		
+
+		PrimitiveObject subclassInstance = pm2.getObjectById(
+				PrimitiveObject.class, subclassId);
+
 		boolean correctInstance = subclassInstance instanceof PrimitiveObjectSubclass;
-		
+
 		assertTrue(correctInstance);
-		
-		PrimitiveObject instance = pm2.getObjectById(PrimitiveObject.class, primitiveId);
-		
+
+		PrimitiveObject instance = pm2.getObjectById(PrimitiveObject.class,
+				primitiveId);
+
 		correctInstance = instance instanceof PrimitiveObject;
-		
+
 		assertTrue(correctInstance);
-		
+
 	}
 
 }

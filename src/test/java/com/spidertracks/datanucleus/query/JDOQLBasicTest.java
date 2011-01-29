@@ -18,8 +18,8 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.query;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -184,6 +184,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	/**
 	 * Runs basic query extent
 	 */
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void testExtent() {
 		PersistenceManager pm = pmf.getPersistenceManager();
@@ -210,6 +211,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	/**
 	 * Runs basic query
 	 */
+	@SuppressWarnings("rawtypes")
 	public void testBasicQuery() {
 		PersistenceManager pm = pmf.getPersistenceManager();
 		Transaction tx = pm.currentTransaction();
@@ -231,6 +233,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	/**
 	 * ordering
 	 */
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void testOrdering() {
 		PersistenceManager pm = pmf.getPersistenceManager();
@@ -257,6 +260,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	/**
 	 * result test
 	 */
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void testFilter() {
 		PersistenceManager pm = pmf.getPersistenceManager();
@@ -281,6 +285,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	/**
 	 * Test query with parameters (NUCCORE-205)
 	 */
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void testFilterWithParameters() {
 		PersistenceManager pm = pmf.getPersistenceManager();
@@ -338,6 +343,7 @@ public class JDOQLBasicTest extends CassandraTest {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testEqualStringId() throws Exception {
 
@@ -586,7 +592,7 @@ public class JDOQLBasicTest extends CassandraTest {
 	 * Query returning an object with relation fields, testing the contents of
 	 * the relation fields.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "unused" })
 	@Test
 	public void testRetrieveGreaterLessThanEqualNoOrderRange() {
 

@@ -42,9 +42,9 @@ import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.spidertracks.datanucleus.client.Consistency;
+import com.spidertracks.datanucleus.convert.ByteConverterContext;
 import com.spidertracks.datanucleus.serialization.JavaSerializer;
 import com.spidertracks.datanucleus.serialization.Serializer;
-import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 public class CassandraStoreManager extends AbstractStoreManager {
 
@@ -56,6 +56,9 @@ public class CassandraStoreManager extends AbstractStoreManager {
 	private static final String CREATE_TABLES = "datanucleus.autoCreateTables";
 	private static final String CREATE_SCHEMA = "datanucleus.autoCreateSchema";
 	private static final String SERIALIZER = "com.spidertracks.cassandra.serializer";
+	private static final String BYTEMAPPER = "com.spidertracks.cassandra.bytemapper";
+	
+	
 	private boolean autoCreateSchema = false;
 	private boolean autoCreateTables = false;
 	private boolean autoCreateColumns = false;
@@ -65,7 +68,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
 
 	private ConnectionFactoryImpl connectionFactory;
 
-	private Serializer serializer;
+	private ByteConverterContext byteConverterContext;
 
 	/**
 	 * Constructor.
@@ -78,15 +81,15 @@ public class CassandraStoreManager extends AbstractStoreManager {
 	public CassandraStoreManager(ClassLoaderResolver clr, OMFContext omfContext) {
 		super("cassandra", clr, omfContext);
 
-		// Handler for persistence process
-		persistenceHandler2 = new CassandraPersistenceHandler(this);
-
+		
 		PersistenceConfiguration conf = omfContext
 				.getPersistenceConfiguration();
 
 		String serializerClass = conf
 				.getStringProperty(SERIALIZER);
 
+		Serializer serializer = null;
+		
 		if (serializerClass == null) {
 			serializer = new JavaSerializer();
 		} else {
@@ -99,6 +102,10 @@ public class CassandraStoreManager extends AbstractStoreManager {
 						serializerClass));
 			}
 		}
+		
+		String byteMapperFile = conf.getStringProperty(BYTEMAPPER);
+		
+		byteConverterContext = new ByteConverterContext(byteMapperFile, serializer);
 
 		autoCreateSchema = conf
 				.getBooleanProperty(CREATE_SCHEMA);
@@ -136,9 +143,16 @@ public class CassandraStoreManager extends AbstractStoreManager {
 			connectionFactory.cfComplete(autoCreateTables, autoCreateColumns);
 		}
 		
+		
+		// Handler for persistence process
+		persistenceHandler2 = new CassandraPersistenceHandler(this);
+
+		
 		logConfiguration();
 
 	}
+
+
 
 	protected void registerConnectionMgr() {
 		super.registerConnectionMgr();
@@ -192,14 +206,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
 	public String getKeyspace() {
 		return connectionFactory.getKeyspace();
 	}
-	
-	/**
-	 * Return the configured object serializer
-	 * @return
-	 */
-	public Serializer getSerializer(){
-		return serializer;
-	}
+
 
 	/**
 	 * @return the poolName
@@ -221,6 +228,13 @@ public class CassandraStoreManager extends AbstractStoreManager {
 
 	}
 
+	/**
+	 * @return the byteConverterContext
+	 */
+	public ByteConverterContext getByteConverterContext() {
+		return byteConverterContext;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -246,13 +260,13 @@ public class CassandraStoreManager extends AbstractStoreManager {
 			return pcClassName;
 		}
 
-		String key = MetaDataUtils.getRowKeyForId(ec, id);
+		Bytes key = byteConverterContext.getRowKeyForId(ec, id);
 
 		return findObject(key, metaData, clr, ec, id);
 
 	}
 
-	private String findObject(String key, AbstractClassMetaData metaData,
+	private String findObject(Bytes key, AbstractClassMetaData metaData,
 			ClassLoaderResolver clr, ExecutionContext ec, Object id) {
 
 		Selector selector = Pelops.createSelector(getPoolName());

@@ -21,6 +21,7 @@ import org.scale7.cassandra.pelops.ColumnFamilyManager;
 import org.scale7.cassandra.pelops.KeyspaceManager;
 import org.scale7.cassandra.pelops.Pelops;
 
+import com.spidertracks.datanucleus.convert.ByteConverterContext;
 import com.spidertracks.datanucleus.utils.ClusterUtils;
 import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
@@ -114,6 +115,8 @@ public class ColumnFamilyCreator implements MetaDataListener {
 
 				TypeManager typeManager = storeManager.getOMFContext()
 						.getTypeManager();
+				
+				ByteConverterContext context = ((CassandraStoreManager)storeManager).getByteConverterContext();
 
 				for (int field : cmd.getAllMemberPositions()) {
 					AbstractMemberMetaData memberData = cmd
@@ -126,19 +129,19 @@ public class ColumnFamilyCreator implements MetaDataListener {
 						continue;
 					}
 
-					String columnName = MetaDataUtils.getColumnName(cmd, field);
+					Bytes columnName = MetaDataUtils.getColumnName(cmd, field);
 
 					// already defined
 					if (hasColumn(columnName, columnFamily)) {
 						continue;
 					}
 
-					String validationClass = MetaDataUtils.getValidationClass(
+					String validationClass = context.getValidationClass(
 							memberData.getType(), typeManager);
 
 					ColumnDef def = new ColumnDef();
 
-					def.setName(Bytes.fromUTF8(columnName).getBytes());
+					def.setName(columnName.toByteArray());
 					def.setValidation_class(validationClass);
 
 					def.setIndex_name(indexName);
@@ -150,17 +153,17 @@ public class ColumnFamilyCreator implements MetaDataListener {
 
 				// if we have a discriminator we should index it as we'll be
 				// referencing it in queries
-				String discriminatorColumn = MetaDataUtils
+				Bytes discriminatorColumn = MetaDataUtils
 						.getDiscriminatorColumnName(cmd);
 
 				if (discriminatorColumn != null
 						&& !hasColumn(discriminatorColumn, columnFamily)) {
 					ColumnDef def = new ColumnDef();
 
-					def.setName(Bytes.fromUTF8(discriminatorColumn).getBytes());
+					def.setName(discriminatorColumn.toByteArray());
 					def.setValidation_class(ColumnFamilyManager.CFDEF_COMPARATOR_UTF8);
 
-					def.setIndex_name(discriminatorColumn + "_index");
+					def.setIndex_name(discriminatorColumn.toUTF8() + "_index");
 					def.setIndex_type(IndexType.KEYS);
 					indexColumns.add(def);
 				}
@@ -216,12 +219,11 @@ public class ColumnFamilyCreator implements MetaDataListener {
 	 * @param cf
 	 * @return
 	 */
-	private boolean hasColumn(String cfName, CfDef cf) {
+	private boolean hasColumn(Bytes colName, CfDef cf) {
 		if (!cf.isSetColumn_metadata()) {
 			return false;
 		}
-
-		Bytes colName = Bytes.fromUTF8(cfName);
+		
 
 		for (ColumnDef col : cf.getColumn_metadata()) {
 			if (colName.equals(new Bytes(col.getName()))) {

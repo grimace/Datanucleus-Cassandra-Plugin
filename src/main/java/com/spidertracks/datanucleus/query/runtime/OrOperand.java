@@ -19,6 +19,8 @@ package com.spidertracks.datanucleus.query.runtime;
 
 import java.util.List;
 
+import org.scale7.cassandra.pelops.Bytes;
+
 /**
  * @author Todd Nine
  *
@@ -48,7 +50,7 @@ public class OrOperand extends Operand {
 	}
 
 	@Override
-	public void performQuery(String poolName, String cfName, String[] columns) {
+	public void performQuery(String poolName, String cfName, Bytes[] columns) {
 		
 		left.performQuery(poolName, cfName, columns);
 		right.performQuery(poolName, cfName, columns);
@@ -56,8 +58,8 @@ public class OrOperand extends Operand {
 	}
 
 	@Override
-	public Operand optimizeDescriminator(String descriminatorColumnValue,
-			List<String> possibleValues) {
+	public Operand optimizeDescriminator(Bytes descriminatorColumnValue,
+			List<Bytes> possibleValues) {
 		setLeft(left.optimizeDescriminator(descriminatorColumnValue, possibleValues));
 		setRight(right.optimizeDescriminator(descriminatorColumnValue, possibleValues));
 		
