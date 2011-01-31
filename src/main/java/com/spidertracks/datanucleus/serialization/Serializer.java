@@ -40,5 +40,10 @@ public interface Serializer {
 	 */
 	public <T> T getObject(byte[] bytes);
 	
+	/**
+	 * Return the maximum number of bytes this object could have when serialized
+	 */
+	public int size(Object value);
+	
 	
 }

@@ -24,6 +24,7 @@ import java.util.Date;
 
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 
+import com.spidertracks.datanucleus.convert.ConverterUtils;
 import com.spidertracks.datanucleus.identity.ByteAware;
 
 /**
@@ -46,7 +47,6 @@ public class UnitDataKey implements Serializable, ByteAware {
 		this.createdDate = createdDate;
 		this.unitId = unitId;
 	}
-
 
 	public Date getCreatedDate() {
 		return createdDate;
@@ -80,38 +80,37 @@ public class UnitDataKey implements Serializable, ByteAware {
 	}
 
 	@Override
-	public ByteBuffer getBytes() {
-		ByteBuffer buffer = ByteBuffer.allocate(this.unitId.length()+8);
-		buffer.putLong(this.createdDate.getTime());
+	public ByteBuffer writeBytes(ByteBuffer buffer) {
 		
+		ByteBuffer checked = ConverterUtils.check(buffer, 8+this.unitId.length());
 		
+		checked.putLong(this.createdDate.getTime());
 		try {
-			buffer.put(this.unitId.getBytes("UTF-8"));
+			return checked.put(this.unitId.getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e) {
-			//should never happen
+			// should never happen
 			throw new RuntimeException(e);
 		}
-		
-		
-		return buffer;
-		
+
 	}
 
 	@Override
 	public void parseBytes(ByteBuffer buffer) {
 		this.createdDate = new Date(buffer.getLong());
 		try {
-			this.unitId =  new String(buffer.array(), buffer.position(), buffer.remaining(), "UTF-8");
+			this.unitId = new String(buffer.array(), buffer.position(),
+					buffer.remaining(), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			//should never happen
+			// should never happen
 			throw new RuntimeException(e);
 		}
-		
+
 	}
 
 	@Override
 	public String getComparatorType() {
 		return ColumnFamilyManager.CFDEF_COMPARATOR_BYTES;
 	}
+
 
 }

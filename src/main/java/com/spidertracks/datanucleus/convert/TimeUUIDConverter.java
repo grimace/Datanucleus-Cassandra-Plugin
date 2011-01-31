@@ -17,37 +17,53 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.convert;
 
+import static com.spidertracks.datanucleus.convert.ConverterUtils.check;
 
-import org.scale7.cassandra.pelops.Bytes;
+import java.nio.ByteBuffer;
+
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 
 import com.eaio.uuid.UUID;
 
 /**
  * @author Todd Nine
- *
+ * 
  */
 public class TimeUUIDConverter implements ByteConverter {
 
+	private static final int SIZE = 128 / Byte.SIZE;
+
 	@Override
-	public UUID getObject(Bytes bytes) {
-		if(bytes == null){
+	public Object getObject(ByteBuffer buffer) {
+		if (buffer == null || buffer.remaining() < SIZE) {
 			return null;
 		}
-		return bytes.toTimeUuid();
+
+		long time = buffer.getLong();
+		long clockSeqNode = buffer.getLong();
+
+		return new UUID(time, clockSeqNode);
+
 	}
 
 	@Override
-	public Bytes getBytes(Object value) {
-		
-		return Bytes.fromTimeUuid((UUID) value);
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+		if (value == null) {
+			return buffer;
+		}
+
+		ByteBuffer returned = check(buffer, SIZE);
+
+		UUID uuid = (UUID) value;
+
+		returned.putLong(uuid.getTime());
+		return returned.putLong(uuid.getClockSeqAndNode());
+
 	}
 
 	@Override
 	public String getComparatorType() {
 		return ColumnFamilyManager.CFDEF_COMPARATOR_TIME_UUID;
 	}
-
-	
 
 }

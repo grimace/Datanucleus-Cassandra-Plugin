@@ -16,34 +16,44 @@ Contributors :
     ...
  ***********************************************************************/
 package com.spidertracks.datanucleus.convert;
+import static com.spidertracks.datanucleus.convert.ConverterUtils.check;
 
-import org.scale7.cassandra.pelops.Bytes;
+import java.nio.ByteBuffer;
+
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 
 /**
  * @author Todd Nine
- *
+ * 
  */
 public class FloatConverter implements ByteConverter {
 
+	private static final int SIZE = Float.SIZE / Byte.SIZE;
+
 	@Override
-	public Float getObject(Bytes bytes) {
-		if(bytes == null){
+	public Object getObject(ByteBuffer buffer) {
+		if (buffer == null || buffer.remaining() < SIZE) {
 			return null;
 		}
-		return bytes.toFloat(0f);
+
+		return buffer.getFloat();
 	}
 
 	@Override
-	public Bytes getBytes(Object value) {
-		return Bytes.fromFloat((Float) value);
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+		if (value == null) {
+			return buffer;
+		}
+
+		ByteBuffer checked = check(buffer, SIZE);
+		
+		return checked.putFloat((Float) value);
 	}
+
 
 	@Override
 	public String getComparatorType() {
 		return ColumnFamilyManager.CFDEF_COMPARATOR_LONG;
 	}
-
-	
 
 }

@@ -5,3 +5,5 @@ Bundle-SymbolicName: com.spidertracks.datanucleus.cassandra;singleton:=true
 Bundle-Version: 0.7.0
 Bundle-Vendor: Spidertracks
 Require-Bundle: org.datanucleus
+Agent-Class: com.spidertracks.datanucleus.serialization.ByteSizeEstimator
+Premain-Class: com.spidertracks.datanucleus.serialization.ByteSizeEstimator

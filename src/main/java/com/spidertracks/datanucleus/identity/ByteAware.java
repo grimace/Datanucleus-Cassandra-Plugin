@@ -29,16 +29,21 @@ import java.nio.ByteBuffer;
 public interface ByteAware {
 
 	/**
-	 * Create a byte buffer and write all bytes to it for storage
+	 * Create a byte buffer and write all bytes to it for storage.  The returned buffer
+	 * will be used for all subsequent write operations.  If the buffer is null
+	 * it should be allocated to the correct capacity for this instance.  If it is too small
+	 * a new buffer should be allocated
 	 * @return
 	 */
-	public ByteBuffer getBytes();
+	public ByteBuffer writeBytes(ByteBuffer buffer);
 	
 	/**
 	 * Populate a new instance of the object from the bytes
 	 * @param buffer
 	 */
 	public void parseBytes(ByteBuffer buffer);
+	
+
 	
 
 	/**

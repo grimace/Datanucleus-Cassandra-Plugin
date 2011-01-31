@@ -19,42 +19,39 @@ package com.spidertracks.datanucleus.model;
 
 import java.nio.ByteBuffer;
 
-import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 
 import com.spidertracks.datanucleus.convert.ByteConverter;
+import com.spidertracks.datanucleus.convert.ConverterUtils;
 
 /**
  * @author Todd Nine
- *
+ * 
  */
 public class CompositeKeyConverter implements ByteConverter {
 
+	private static final int SIZE = (Long.SIZE*2+Integer.SIZE)/Byte.SIZE;
+	
 	@Override
-	public CompositeKey getObject(Bytes bytes) {
-		
+	public Object getObject(ByteBuffer buffer) {
 		CompositeKey key = new CompositeKey();
-		ByteBuffer buffer = bytes.getBytes();
-		
+
 		key.setFirst(buffer.getLong());
 		key.setSecond(buffer.getLong());
 		key.setThird(buffer.getInt());
-		
 		return key;
 	}
 
 	@Override
-	public Bytes getBytes(Object value) {
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+
+		ByteBuffer checked = ConverterUtils.check(buffer, SIZE);
 		
 		CompositeKey key = (CompositeKey) value;
-		
-		ByteBuffer buffer = ByteBuffer.allocate(20);
-		buffer.putLong(key.getFirst());
-		buffer.putLong(key.getSecond());
-		buffer.putInt(key.getThird());
-		buffer.rewind();
-		
-		return Bytes.fromByteBuffer(buffer);
+		checked.putLong(key.getFirst());
+		checked.putLong(key.getSecond());
+		return checked.putInt(key.getThird());
+
 	}
 
 	@Override
@@ -63,5 +60,4 @@ public class CompositeKeyConverter implements ByteConverter {
 	}
 
 	
-
 }

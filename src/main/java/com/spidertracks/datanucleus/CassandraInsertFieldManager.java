@@ -81,7 +81,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 		try {
 			mutator.writeColumn(columnFamily, key, mutator.newColumn(
 					getColumnName(metaData, fieldNumber), byteContext
-							.getBooleanConverter().getBytes(value)));
+							.getBytes(value)));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -107,8 +107,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 		try {
 			mutator.writeColumn(columnFamily, key, mutator.newColumn(
-					getColumnName(metaData, fieldNumber), byteContext
-							.getCharConverter().getBytes(value)));
+					getColumnName(metaData, fieldNumber), byteContext.getBytes(value)));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -121,7 +120,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 		try {
 			mutator.writeColumn(columnFamily, key, mutator.newColumn(
 					getColumnName(metaData, fieldNumber), byteContext
-							.getDoubleConverter().getBytes(value)));
+							.getBytes(value)));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -133,9 +132,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 		try {
 			mutator.writeColumn(columnFamily, key, mutator.newColumn(
-					getColumnName(metaData, fieldNumber), byteContext
-							.getFloadConverter().getBytes(value)));
-
+					getColumnName(metaData, fieldNumber), byteContext.getBytes(value)));
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
 		}
@@ -147,7 +144,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 		try {
 			mutator.writeColumn(columnFamily, key, mutator.newColumn(
 					getColumnName(metaData, fieldNumber), byteContext
-							.getIntConverter().getBytes(value)));
+							.getBytes(value)));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -160,7 +157,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 		try {
 			mutator.writeColumn(columnFamily, key, mutator.newColumn(
 					getColumnName(metaData, fieldNumber), byteContext
-							.getLongConverter().getBytes(value)));
+							.getBytes(value)));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -172,7 +169,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 		try {
 			mutator.writeColumn(columnFamily, key, mutator.newColumn(
 					getColumnName(metaData, fieldNumber), byteContext
-							.getShortConverter().getBytes(value)));
+							.getBytes(value)));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
@@ -311,7 +308,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 							serializedValue = context.getApiAdapter()
 									.getIdForObject(persisted);
-							;
+							
 						} else {
 							serializedKey = mapValue;
 						}
@@ -371,7 +368,7 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 
 			mutator.writeColumn(columnFamily, key, mutator.newColumn(
 					getColumnName(metaData, fieldNumber), byteContext
-							.getStringConverter().getBytes(value)));
+							.getBytes(value)));
 
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);

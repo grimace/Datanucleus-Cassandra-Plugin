@@ -16,35 +16,45 @@ Contributors :
     ...
  ***********************************************************************/
 package com.spidertracks.datanucleus.convert;
+import static com.spidertracks.datanucleus.convert.ConverterUtils.check;
 
-import org.scale7.cassandra.pelops.Bytes;
+import java.nio.ByteBuffer;
+
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 
 /**
  * @author Todd Nine
- *
+ * 
  */
 public class ShortConverter implements ByteConverter {
 
+	private static final int SIZE = Short.SIZE / Byte.SIZE;
+
 	@Override
-	public Short getObject(Bytes bytes) {
-		if(bytes == null){
+	public Object getObject(ByteBuffer buffer) {
+		if (buffer == null || buffer.remaining() < SIZE) {
 			return null;
 		}
-		return bytes.toShort((short) 0);
+
+		return buffer.getShort();
 	}
 
 	@Override
-	public Bytes getBytes(Object value) {
-		
-		return Bytes.fromShort((Short) value);
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+		if (value == null) {
+			return buffer;
+		}
+
+		ByteBuffer returned = check(buffer, SIZE);
+
+		return returned.putShort((Short) value);
+
 	}
+
 
 	@Override
 	public String getComparatorType() {
 		return ColumnFamilyManager.CFDEF_COMPARATOR_BYTES;
 	}
-
-	
 
 }

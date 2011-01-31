@@ -28,6 +28,7 @@ import java.io.ObjectOutputStream;
  */
 public class JavaSerializer implements Serializer {
 
+
 	/* (non-Javadoc)
 	 * @see com.spidertracks.datanucleus.serialization.Serializer#getBytes(java.lang.Object)
 	 */
@@ -70,6 +71,12 @@ public class JavaSerializer implements Serializer {
 		} catch (Exception e) {
 			throw new RuntimeException("Unable to de-serialize to object", e);
 		}
+	}
+
+	@Override
+	public int size(Object value) {
+		//no object can be larger than 2048 bytes
+		return 2048;
 	}
 
 }

@@ -20,7 +20,6 @@ package com.spidertracks.datanucleus.convert;
 import java.nio.ByteBuffer;
 
 import org.datanucleus.exceptions.NucleusDataStoreException;
-import org.scale7.cassandra.pelops.Bytes;
 
 import com.spidertracks.datanucleus.identity.ByteAware;
 
@@ -39,35 +38,31 @@ public class ByteAwareConverter implements ByteConverter {
 	}
 
 	@Override
-	public Object getObject(Bytes bytes) {
+	public Object getObject(ByteBuffer buffer) {
 
-		
 		ByteAware instance = createInstance();
-		
-		instance.parseBytes(bytes.getBytes());
+
+		instance.parseBytes(buffer);
 
 		return instance;
 
 	}
 
 	@Override
-	public Bytes getBytes(Object value) {
-		
-		ByteBuffer buffer = ((ByteAware)value).getBytes();
-		
-		buffer.rewind();
-		
-		return Bytes.fromByteBuffer(buffer);
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+
+		return ((ByteAware) value).writeBytes(buffer);
+
 	}
 
 	@Override
 	public String getComparatorType() {
 		return createInstance().getComparatorType();
 	}
-	
-	private ByteAware createInstance(){
+
+	private ByteAware createInstance() {
 		try {
-			return  (ByteAware) targetClass.newInstance();
+			return (ByteAware) targetClass.newInstance();
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(
 					String.format(

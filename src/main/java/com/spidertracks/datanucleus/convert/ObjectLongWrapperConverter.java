@@ -17,41 +17,48 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.convert;
 
+import java.nio.ByteBuffer;
+
 import org.datanucleus.store.types.ObjectLongConverter;
-import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 
 /**
- * Encapsulates both a long converter and a DN long converter in the same instance
+ * Encapsulates both a long converter and a DN long converter in the same
+ * instance
+ * 
  * @author Todd Nine
- *
+ * 
  */
 public class ObjectLongWrapperConverter implements ByteConverter {
 
 	private ObjectLongConverter dnLongConverter;
 	private ByteConverter longConverter;
-	
-	public ObjectLongWrapperConverter(ObjectLongConverter dnLongConverter, ByteConverter longConverter){
+
+	public ObjectLongWrapperConverter(ObjectLongConverter dnLongConverter,
+			ByteConverter longConverter) {
 		this.dnLongConverter = dnLongConverter;
 		this.longConverter = longConverter;
-	}
-	
-	@Override
-	public Object getObject(Bytes bytes) {
-		if(bytes == null){
-			return null;
-		}
-		return dnLongConverter.toObject((Long)longConverter.getObject(bytes));
-	}
-
-	@Override
-	public Bytes getBytes(Object value) {
-		return longConverter.getBytes(dnLongConverter.toLong(value));
 	}
 
 	@Override
 	public String getComparatorType() {
 		return ColumnFamilyManager.CFDEF_COMPARATOR_LONG;
+	}
+
+	@Override
+	public Object getObject(ByteBuffer buffer) {
+		if (buffer == null) {
+			return null;
+		}
+		return dnLongConverter.toObject((Long) longConverter.getObject(buffer));
+	}
+
+	@Override
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+		Long longVal = dnLongConverter.toLong(value);
+
+		return longConverter.writeBytes(longVal, buffer);
+
 	}
 
 	

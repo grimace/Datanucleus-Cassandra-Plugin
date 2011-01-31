@@ -47,25 +47,24 @@ public class XStreamSerializer implements Serializer {
 	@Override
 	public byte[] getBytes(Object value) {
 		try {
-			
-			//we have to unwrap SCO instances, otherwise serialization blows up
-			if(value instanceof SCO){
-				value = ((SCO)value).getValue();
+
+			// we have to unwrap SCO instances, otherwise serialization blows up
+			if (value instanceof SCO) {
+				value = ((SCO) value).getValue();
 			}
-			
-			
+
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
-			
+
 			XStream xstream = new XStream();
 
 			xstream.toXML(value, output);
-					
+
 			output.flush();
 
-			byte[] result  = output.toByteArray();
-			
+			byte[] result = output.toByteArray();
+
 			output.close();
-			
+
 			return result;
 		} catch (IOException e) {
 			throw new RuntimeException("Unable to serialize to json", e);
@@ -84,22 +83,27 @@ public class XStreamSerializer implements Serializer {
 	public <T> T getObject(byte[] bytes) {
 
 		try {
-			
+
 			ByteArrayInputStream input = new ByteArrayInputStream(bytes);
-			
+
 			XStream xstream = new XStream();
 
-
 			T result = (T) xstream.fromXML(input);
-			
+
 			input.close();
-	
+
 			return result;
-			
+
 		} catch (Exception e) {
 			throw new RuntimeException("Unable to de-serialize to json", e);
 		}
 
+	}
+
+	@Override
+	public int size(Object value) {
+		//no object can be larger than 2048 bytes
+		return 2048;
 	}
 
 }

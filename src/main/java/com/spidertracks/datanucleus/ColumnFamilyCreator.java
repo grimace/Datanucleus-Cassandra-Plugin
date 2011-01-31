@@ -96,7 +96,7 @@ public class ColumnFamilyCreator implements MetaDataListener {
 			// no column family, define one
 			if (columnFamily == null) {
 				columnFamily = new CfDef(keyspace, cfName);
-				columnFamily.setComparator_type("UTF8Type");
+				columnFamily.setComparator_type(ColumnFamilyManager.CFDEF_COMPARATOR_BYTES);
 				existingCf = false;
 			}
 

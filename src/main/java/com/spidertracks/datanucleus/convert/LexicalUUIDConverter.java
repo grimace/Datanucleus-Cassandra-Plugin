@@ -16,36 +16,54 @@ Contributors :
     ...
  ***********************************************************************/
 package com.spidertracks.datanucleus.convert;
+import static com.spidertracks.datanucleus.convert.ConverterUtils.check;
 
+import java.nio.ByteBuffer;
 import java.util.UUID;
 
-import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 
 /**
  * @author Todd Nine
- *
+ * 
  */
 public class LexicalUUIDConverter implements ByteConverter {
 
+	private static final int SIZE = 128 / Byte.SIZE;
+
 	@Override
-	public UUID getObject(Bytes bytes) {
-		if(bytes == null){
+	public Object getObject(ByteBuffer buffer) {
+		if (buffer == null || buffer.remaining() < SIZE) {
 			return null;
 		}
-		return bytes.toUuid();
+
+		long msb = buffer.getLong();
+		long lsb = buffer.getLong();
+
+		return new UUID(msb, lsb);
+
 	}
 
 	@Override
-	public Bytes getBytes(Object value) {
-		return Bytes.fromUuid((UUID) value);
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+		if (value == null) {
+			return buffer;
+		}
+
+		UUID uuid = (UUID) value;
+		
+		ByteBuffer returned = check(buffer, SIZE);
+
+
+		returned.putLong(uuid.getMostSignificantBits());
+		return returned.putLong(uuid.getLeastSignificantBits());
+
 	}
+
 
 	@Override
 	public String getComparatorType() {
 		return ColumnFamilyManager.CFDEF_COMPARATOR_LEXICAL_UUID;
 	}
-
-	
 
 }

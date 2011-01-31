@@ -16,8 +16,10 @@ Contributors :
     ...
  ***********************************************************************/
 package com.spidertracks.datanucleus.convert;
+import static com.spidertracks.datanucleus.convert.ConverterUtils.check;
 
-import org.scale7.cassandra.pelops.Bytes;
+import java.nio.ByteBuffer;
+
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 
 /**
@@ -26,19 +28,34 @@ import org.scale7.cassandra.pelops.ColumnFamilyManager;
  */
 public class BooleanConverter implements ByteConverter {
 
+	private static final byte TRUE = 1;
+	private static final byte FALSE = 0;
+	
 	@Override
-	public Boolean getObject(Bytes bytes) {
-		if(bytes == null){
+	public Boolean getObject(ByteBuffer buffer) {
+		if(buffer == null){
 			return null;
 		}
 		
-		return bytes.toBoolean();
+		return buffer.get() == TRUE;
 	}
 
 	@Override
-	public Bytes getBytes(Object value) {
-		return Bytes.fromBoolean((Boolean) value);
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+		ByteBuffer checked = check(buffer, 1);
+		
+		if((Boolean) value){
+			checked.put(TRUE);
+		}else{
+			checked.put(FALSE);
+		}
+		
+		return checked;
+		
 	}
+
+
+	
 
 	@Override
 	public String getComparatorType() {

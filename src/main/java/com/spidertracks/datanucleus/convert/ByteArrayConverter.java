@@ -17,6 +17,10 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.convert;
 
+import static com.spidertracks.datanucleus.convert.ConverterUtils.check;
+
+import java.nio.ByteBuffer;
+
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 
@@ -24,19 +28,24 @@ import org.scale7.cassandra.pelops.ColumnFamilyManager;
  * @author Todd Nine
  *
  */
-public class ByteArrayConverter implements ByteConverter {
+public class ByteArrayConverter implements ByteConverter{
 
 	@Override
-	public byte[] getObject(Bytes bytes) {
-		if(bytes == null){
+	public byte[] getObject(ByteBuffer buffer) {
+		if(buffer == null){
 			return null;
 		}
-		return bytes.toByteArray();
+		
+		return Bytes.fromByteBuffer(buffer).toByteArray();
 	}
 
 	@Override
-	public Bytes getBytes(Object value) {
-		return Bytes.fromBytes((byte[])value);
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+		byte[] bytes = (byte[]) value;
+		
+		ByteBuffer checked = check(buffer, bytes.length);
+		
+		return checked.put(bytes);
 	}
 
 	@Override

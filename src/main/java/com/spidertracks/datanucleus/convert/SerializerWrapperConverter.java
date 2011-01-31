@@ -16,8 +16,10 @@ Contributors :
     ...
  ***********************************************************************/
 package com.spidertracks.datanucleus.convert;
+import static com.spidertracks.datanucleus.convert.ConverterUtils.check;
 
-import org.scale7.cassandra.pelops.Bytes;
+import java.nio.ByteBuffer;
+
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 
 import com.spidertracks.datanucleus.serialization.Serializer;
@@ -36,17 +38,31 @@ public class SerializerWrapperConverter implements ByteConverter {
 	}
 
 	@Override
-	public Object getObject(Bytes bytes) {
-		if(bytes == null){
+	public Object getObject(ByteBuffer buffer) {
+		if (buffer == null) {
 			return null;
 		}
-		return serializer.getObject(bytes.toByteArray());
+
+		// TODO this be required to copy
+		byte[] data = new byte[buffer.limit() - buffer.position()];
+
+		buffer.get(data);
+
+		return serializer.getObject(data);
+
 	}
 
 	@Override
-	public Bytes getBytes(Object value) {
-		return Bytes.fromBytes(serializer.getBytes(value));
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+
+		byte[] serialized = serializer.getBytes(value);
+
+		ByteBuffer returned = check(buffer, serialized.length);
+
+		return returned.put(serialized);
+
 	}
+
 
 	@Override
 	public String getComparatorType() {

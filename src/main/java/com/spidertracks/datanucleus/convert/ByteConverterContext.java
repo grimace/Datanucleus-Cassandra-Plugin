@@ -19,6 +19,7 @@ package com.spidertracks.datanucleus.convert;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -249,14 +250,18 @@ public class ByteConverterContext {
 		if (converter == serializerConverter) {
 			throw new NucleusDataStoreException(
 					String.format(
-							"You cannot use the default serializer on a key.  See the %s interface to use custom keys",
+							"You cannot use the default serializer on a key.  See the %s to defined your own converter or %s interface to use custom keys",
+							ByteConverterContext.class.getName(),
 							ByteAware.class.getName()));
 		}
 
 		// else just call the default tostring since it's a user defined key
 		converters.put(objectId.getClass(), converter);
 
-		return converter.getBytes(objectId);
+		ByteBuffer buffer = convert(converter, objectId);
+		;
+
+		return Bytes.fromByteBuffer(buffer);
 	}
 
 	/**
@@ -278,14 +283,14 @@ public class ByteConverterContext {
 		ByteConverter converter = converters.get(value.getClass());
 
 		if (converter != null) {
-			return converter.getBytes(value);
+			return convertPelops(converter, value);
 		}
 
 		converter = determineConverter(value.getClass(), ec.getTypeManager());
 
 		converters.put(value.getClass(), converter);
 
-		return converter.getBytes(value);
+		return convertPelops(converter, value);
 	}
 
 	/**
@@ -309,17 +314,42 @@ public class ByteConverterContext {
 		AbstractMemberMetaData member = meta
 				.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
 
-		ByteConverter converter = converters.get(member.getType());
+		return convertToObject(value, ec, member.getType());
+
+	}
+
+	/**
+	 * Convert the bytes to a value using the defined converters.
+	 * 
+	 * <ol>
+	 * <li>ByteConverter from converter Mapping</li>
+	 * <li>ByteAware implementation</li>
+	 * <li>ObjectLongConverter which is cached</li>
+	 * <li>ObjectStringConverter which is cached</li>
+	 * <li>Serialization using the serializer which is cached</li>
+	 * </ol>
+	 * 
+	 * @param value
+	 *            The bytes value
+	 * @param ec
+	 * @param targetType
+	 *            The class type of the target object
+	 * @return
+	 */
+	public Object convertToObject(Bytes value, ExecutionContext ec,
+			Class<?> targetType) {
+
+		ByteConverter converter = converters.get(targetType);
 
 		if (converter != null) {
-			return converter.getObject(value);
+			return convert(converter, value);
 		}
 
-		converter = determineConverter(value.getClass(), ec.getTypeManager());
+		converter = determineConverter(targetType, ec.getTypeManager());
 
-		converters.put(value.getClass(), converter);
+		converters.put(targetType, converter);
 
-		return converter.getObject(value);
+		return convert(converter, value);
 
 	}
 
@@ -429,36 +459,115 @@ public class ByteConverterContext {
 		return converter.getComparatorType();
 	}
 
-	public ByteConverter getBooleanConverter() {
-		return this.boolConverter;
+	public Bytes getBytes(Boolean value) {
+		return Bytes.fromByteBuffer(convert(this.boolConverter, value));
 	}
 
-	public ByteConverter getShortConverter() {
-		return this.shortConverter;
+	public Boolean getBoolean(Bytes bytes) {
+		return (Boolean) convert(this.boolConverter, bytes);
 	}
 
-	public ByteConverter getIntConverter() {
-		return this.intConverter;
+	public Bytes getBytes(Short value) {
+		return Bytes.fromByteBuffer(convert(this.shortConverter, value));
 	}
 
-	public ByteConverter getDoubleConverter() {
-		return this.doubleConverter;
+	public Short getShort(Bytes bytes) {
+		return (Short) convert(this.shortConverter, bytes);
 	}
 
-	public ByteConverter getLongConverter() {
-		return this.longConverter;
+	public Bytes getBytes(Integer value) {
+		return Bytes.fromByteBuffer(convert(this.intConverter, value));
+
 	}
 
-	public ByteConverter getFloadConverter() {
-		return this.floatConverter;
+	public Integer getInteger(Bytes bytes) {
+		return (Integer) convert(this.intConverter, bytes);
 	}
 
-	public ByteConverter getStringConverter() {
-		return this.stringConverter;
+	public Bytes getBytes(Double value) {
+		return Bytes.fromByteBuffer(convert(this.doubleConverter, value));
 	}
 
-	public ByteConverter getCharConverter() {
-		return charConverter;
+	public Double getDouble(Bytes bytes) {
+		return (Double) convert(this.doubleConverter, bytes);
+	}
+
+	public Bytes getBytes(Long value) {
+		return Bytes.fromByteBuffer(convert(this.longConverter, value));
+
+	}
+
+	public Long getLong(Bytes bytes) {
+		return (Long) convert(this.longConverter, bytes);
+	}
+
+	public Bytes getBytes(Float value) {
+		return Bytes.fromByteBuffer(convert(this.floatConverter, value));
+	}
+
+	public Float getFloat(Bytes bytes) {
+		return (Float) convert(this.floatConverter, bytes);
+	}
+
+	public Bytes getBytes(String value) {
+		return Bytes.fromByteBuffer(convert(this.stringConverter, value));
+	}
+
+	public String getString(Bytes bytes) {
+		return (String) convert(this.stringConverter, bytes);
+	}
+
+	public Bytes getBytes(Character value) {
+		return Bytes.fromByteBuffer(convert(this.charConverter, value));
+	}
+
+	public Character getCharacter(Bytes bytes) {
+		return (Character) convert(this.charConverter, bytes);
+	}
+
+	/**
+	 * Wrap the buffer in pelops bytes
+	 * 
+	 * @param converter
+	 * @param value
+	 * @return
+	 */
+	private Bytes convertPelops(ByteConverter converter, Object value) {
+		return Bytes.fromByteBuffer(convert(converter, value));
+	}
+
+	/**
+	 * Allocate a byte buffer and convert the bytes with the given converter.
+	 * Performs a mark and a reset on the internal buffer before invoking the
+	 * write
+	 * 
+	 * @param converter
+	 * @param value
+	 * @return
+	 */
+	private ByteBuffer convert(ByteConverter converter, Object value) {
+		ByteBuffer buff = converter.writeBytes(value, null);
+
+		if (buff != null) {
+			buff.rewind();
+		}
+
+		return buff;
+	}
+
+	/**
+	 * Convert the bytes with the underlying buffer
+	 * 
+	 * @param converter
+	 * @param bytes
+	 * @return
+	 */
+	private Object convert(ByteConverter converter, Bytes bytes) {
+		if(bytes == null){
+			return null;
+		}
+		
+		return converter.getObject(bytes.getBytes());
 	}
 
 }

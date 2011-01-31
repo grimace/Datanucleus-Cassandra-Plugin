@@ -17,7 +17,10 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.convert;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 
 import org.junit.Test;
 import org.scale7.cassandra.pelops.Bytes;
@@ -33,19 +36,25 @@ public class StringConverterTest {
 	 * Test method for
 	 * {@link com.spidertracks.datanucleus.convert.StringConverter#getObject(org.scale7.cassandra.pelops.Bytes)}
 	 * .
+	 * 
+	 * @throws UnsupportedEncodingException
 	 */
 	@Test
-	public void testGetObject() {
+	public void testGetObject() throws UnsupportedEncodingException {
 		String value = "foo";
 
 		StringConverter converter = new StringConverter();
-		String returned = converter.getObject(Bytes.fromUTF8(value));
+
+		ByteBuffer buffer = ByteBuffer.allocate(3);
+
+		buffer.mark();
+		buffer.put(value.getBytes("UTF-8"));
+		buffer.reset();
+
+		String returned = (String) converter.getObject(buffer);
 
 		assertEquals(value, returned);
 	}
-	
-
-
 
 	/**
 	 * Test method for
@@ -55,14 +64,19 @@ public class StringConverterTest {
 	@Test
 	public void testGetBytes() {
 		String string = "foo";
+		StringConverter converter = new StringConverter();
+
 		Bytes bytes = Bytes.fromUTF8(string);
 
-		StringConverter converter = new StringConverter();
-		Bytes returned = converter.getBytes(string);
+		ByteBuffer buffer = converter.writeBytes(string, null);
+		buffer.rewind();
 
-		assertEquals(bytes, returned);
+		byte[] data = new byte[buffer.limit() - buffer.position()];
+		buffer.get(data);
+
+		assertArrayEquals(bytes.toByteArray(), data);
 	}
-	
+
 	/**
 	 * Test method for
 	 * {@link com.spidertracks.datanucleus.convert.StringConverter#getBytes(java.lang.Object)}
@@ -71,12 +85,12 @@ public class StringConverterTest {
 	@Test
 	public void testGetBytesNull() {
 		String string = null;
-		Bytes bytes = Bytes.fromUTF8(string);
 
 		StringConverter converter = new StringConverter();
-		Bytes returned = converter.getBytes(string);
 
-		assertEquals(bytes, returned);
+		ByteBuffer buffer = converter.writeBytes(string, null);
+
+		assertNull(buffer);
 	}
 
 	/**
@@ -86,7 +100,8 @@ public class StringConverterTest {
 	 */
 	@Test
 	public void testGetComparatorType() {
-		assertEquals(ColumnFamilyManager.CFDEF_COMPARATOR_UTF8, new StringConverter().getComparatorType());
+		assertEquals(ColumnFamilyManager.CFDEF_COMPARATOR_UTF8,
+				new StringConverter().getComparatorType());
 	}
 
 }

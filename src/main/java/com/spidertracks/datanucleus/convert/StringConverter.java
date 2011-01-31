@@ -17,33 +17,47 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.convert;
 
-import org.scale7.cassandra.pelops.Bytes;
+import static com.spidertracks.datanucleus.convert.ConverterUtils.check;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 
 /**
  * @author Todd Nine
- *
+ * 
  */
 public class StringConverter implements ByteConverter {
 
-	@Override
-	public String getObject(Bytes bytes) {
-		if(bytes == null){
-			return null;
-		}
-		return bytes.toUTF8();
-	}
-
-	@Override
-	public Bytes getBytes(Object value) {
-		return Bytes.fromUTF8((String) value);
-	}
+	private static final Charset ENCODING = Charset.forName("UTF-8");
 
 	@Override
 	public String getComparatorType() {
 		return ColumnFamilyManager.CFDEF_COMPARATOR_UTF8;
 	}
 
-	
+	@Override
+	public Object getObject(ByteBuffer buffer) {
+		if (buffer == null || buffer.remaining() == 0) {
+			return null;
+		}
+
+		return new String(buffer.array(), buffer.position(),
+				buffer.remaining(), ENCODING);
+
+	}
+
+	@Override
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+		if (value == null) {
+			return buffer;
+		}
+
+		ByteBuffer returned = check(buffer, ((String) value).length());
+
+		return returned.put(((String) value).getBytes(ENCODING));
+
+	}
 
 }

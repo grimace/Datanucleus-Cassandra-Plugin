@@ -81,7 +81,6 @@ public class CassandraStoreManager extends AbstractStoreManager {
 	public CassandraStoreManager(ClassLoaderResolver clr, OMFContext omfContext) {
 		super("cassandra", clr, omfContext);
 
-		
 		PersistenceConfiguration conf = omfContext
 				.getPersistenceConfiguration();
 

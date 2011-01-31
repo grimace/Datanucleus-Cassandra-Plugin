@@ -17,36 +17,27 @@ Contributors :
  ***********************************************************************/
 package com.spidertracks.datanucleus.convert;
 
+import java.nio.ByteBuffer;
+
 import org.datanucleus.store.types.ObjectStringConverter;
-import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 
 /**
- * Encapsulates both a long converter and a DN long converter in the same instance
+ * Encapsulates both a long converter and a DN long converter in the same
+ * instance
+ * 
  * @author Todd Nine
- *
+ * 
  */
 public class ObjectStringWrapperConverter implements ByteConverter {
 
 	private ObjectStringConverter dnStringConverter;
 	private ByteConverter stringConverter;
-	
-	public ObjectStringWrapperConverter(ObjectStringConverter dnLongConverter, ByteConverter stringConverter){
+
+	public ObjectStringWrapperConverter(ObjectStringConverter dnLongConverter,
+			ByteConverter stringConverter) {
 		this.dnStringConverter = dnLongConverter;
 		this.stringConverter = stringConverter;
-	}
-	
-	@Override
-	public Object getObject(Bytes bytes) {
-		if(bytes == null){
-			return null;
-		}
-		return dnStringConverter.toString((Long)stringConverter.getObject(bytes));
-	}
-
-	@Override
-	public Bytes getBytes(Object value) {
-		return stringConverter.getBytes(dnStringConverter.toString(value));
 	}
 
 	@Override
@@ -54,6 +45,21 @@ public class ObjectStringWrapperConverter implements ByteConverter {
 		return ColumnFamilyManager.CFDEF_COMPARATOR_UTF8;
 	}
 
-	
+	@Override
+	public Object getObject(ByteBuffer buffer) {
+		if (buffer == null) {
+			return null;
+		}
+		return dnStringConverter.toObject((String) stringConverter
+				.getObject(buffer));
+	}
+
+	@Override
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+		String stringVal = dnStringConverter.toString(value);
+
+		return stringConverter.writeBytes(stringVal, buffer);
+	}
+
 
 }

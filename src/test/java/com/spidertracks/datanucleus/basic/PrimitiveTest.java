@@ -47,6 +47,7 @@ import com.spidertracks.datanucleus.basic.model.UnitData;
 import com.spidertracks.datanucleus.basic.model.UnitDataKey;
 import com.spidertracks.datanucleus.basic.model.UnitDataNoConverter;
 import com.spidertracks.datanucleus.basic.model.UnitDataNoConverterKey;
+import com.spidertracks.datanucleus.convert.ByteConverterContext;
 import com.spidertracks.datanucleus.identity.ByteAware;
 
 /**
@@ -159,9 +160,8 @@ public class PrimitiveTest extends CassandraTest {
 			
 			assertNotNull(current);
 			
-			assertEquals(String.format(
-					"You cannot use the default serializer on a key.  See the %s interface to use custom keys",
-					ByteAware.class.getName()), current.getMessage());
+			assertEquals(String.format("You cannot use the default serializer on a key.  See the %s to defined your own converter or %s interface to use custom keys",
+					ByteConverterContext.class.getName(), ByteAware.class.getName()), current.getMessage());
 			
 			return;
 			
