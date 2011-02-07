@@ -14,7 +14,6 @@ import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.MetaDataListener;
 import org.datanucleus.store.StoreManager;
-import org.datanucleus.store.types.TypeManager;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Cluster;
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
@@ -113,9 +112,6 @@ public class ColumnFamilyCreator implements MetaDataListener {
 
 				previousColumnCount = indexColumns.size();
 
-				TypeManager typeManager = storeManager.getOMFContext()
-						.getTypeManager();
-				
 				ByteConverterContext context = ((CassandraStoreManager)storeManager).getByteConverterContext();
 
 				for (int field : cmd.getAllMemberPositions()) {
@@ -137,7 +133,7 @@ public class ColumnFamilyCreator implements MetaDataListener {
 					}
 
 					String validationClass = context.getValidationClass(
-							memberData.getType(), typeManager);
+							memberData.getType());
 
 					ColumnDef def = new ColumnDef();
 

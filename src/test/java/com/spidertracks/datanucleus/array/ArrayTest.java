@@ -87,9 +87,6 @@ public class ArrayTest extends CassandraTest {
 		pmf.getPersistenceManager().makePersistent(pack);
 
 		PersistenceManager pm = pmf.getPersistenceManager();
-		Transaction trans = pm.currentTransaction();
-		trans.begin();
-
 		PackArray saved = pm.getObjectById(PackArray.class, pack.getId());
 
 		assertEquals(pack, saved);
@@ -107,8 +104,7 @@ public class ArrayTest extends CassandraTest {
 
 		pm.deletePersistent(saved);
 
-		trans.commit();
-
+	
 		boolean deleted = false;
 
 		try {

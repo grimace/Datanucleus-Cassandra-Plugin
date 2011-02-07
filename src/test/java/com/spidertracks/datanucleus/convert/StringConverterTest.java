@@ -51,7 +51,7 @@ public class StringConverterTest {
 		buffer.put(value.getBytes("UTF-8"));
 		buffer.reset();
 
-		String returned = (String) converter.getObject(buffer);
+		String returned = (String) converter.getObject(buffer, null);
 
 		assertEquals(value, returned);
 	}
@@ -68,8 +68,8 @@ public class StringConverterTest {
 
 		Bytes bytes = Bytes.fromUTF8(string);
 
-		ByteBuffer buffer = converter.writeBytes(string, null);
-		buffer.rewind();
+		ByteBuffer buffer = converter.writeBytes(string, null, null);
+		buffer.reset();
 
 		byte[] data = new byte[buffer.limit() - buffer.position()];
 		buffer.get(data);
@@ -88,7 +88,7 @@ public class StringConverterTest {
 
 		StringConverter converter = new StringConverter();
 
-		ByteBuffer buffer = converter.writeBytes(string, null);
+		ByteBuffer buffer = converter.writeBytes(string, null, null);
 
 		assertNull(buffer);
 	}

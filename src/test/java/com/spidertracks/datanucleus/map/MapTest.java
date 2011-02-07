@@ -18,6 +18,7 @@ Contributors :
 
 package com.spidertracks.datanucleus.map;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -43,14 +44,10 @@ import com.spidertracks.datanucleus.map.model.PackMapDate;
  * 
  */
 
-public class MapTest  extends CassandraTest {
-
-
+public class MapTest extends CassandraTest {
 
 	@Test
 	public void testBasicPeristAndLoadOneToManyMap() throws Exception {
-
-		
 
 		PackMap pack = new PackMap();
 
@@ -76,18 +73,65 @@ public class MapTest  extends CassandraTest {
 		assertEquals(jackHearts, saved.getCards().get(jackHearts.getName()));
 
 	}
-	
+
+	/**
+	 * Test no exception is thrown on orphaned collections
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testBasicPeristAndLoadOneToManyMapOrphaned() throws Exception {
+		PackMap pack = new PackMap();
+
+		CardMap aceSpades = new CardMap();
+		aceSpades.setName("Ace of Spades");
+		pack.AddCard(aceSpades);
+
+		CardMap jackHearts = new CardMap();
+		jackHearts.setName("Jack of Hearts");
+		pack.AddCard(jackHearts);
+
+		pmf.getPersistenceManager().makePersistent(pack);
+
+		PackMap saved = pmf.getPersistenceManager().getObjectById(
+				PackMap.class, pack.getId());
+
+		assertEquals(pack, saved);
+
+		assertNotNull(saved.getCards());
+
+		assertEquals(aceSpades, saved.getCards().get(aceSpades.getName()));
+
+		assertEquals(jackHearts, saved.getCards().get(jackHearts.getName()));
+
+		PersistenceManager pm = pmf.getPersistenceManager();
+
+		CardMap deleted = pm.getObjectById(CardMap.class, jackHearts.getId());
+		pm.deletePersistent(deleted);
+
+		saved = pmf.getPersistenceManager().getObjectById(PackMap.class,
+				pack.getId());
+
+		assertEquals(pack, saved);
+
+		assertNotNull(saved.getCards());
+
+		assertEquals(aceSpades, saved.getCards().get(aceSpades.getName()));
+
+		assertNull(saved.getCards().get(jackHearts.getName()));
+
+	}
 
 	@Test
 	public void testBasicPeristAndLoadOneToManyMapByDate() throws Exception {
 
 		PackMapDate pack = new PackMapDate();
 
-		CardMapDate aceSpades = new CardMapDate(2010,05,01);
+		CardMapDate aceSpades = new CardMapDate(2010, 05, 01);
 		aceSpades.setName("Ace of Spades");
 		pack.AddCard(aceSpades);
 
-		CardMapDate jackHearts = new CardMapDate(2010,05,02);
+		CardMapDate jackHearts = new CardMapDate(2010, 05, 02);
 		jackHearts.setName("Jack of Hearts");
 		pack.AddCard(jackHearts);
 
@@ -105,12 +149,9 @@ public class MapTest  extends CassandraTest {
 		assertEquals(jackHearts, saved.getCards().get(jackHearts.getTime()));
 
 	}
-	
 
 	@Test
 	public void testDeleteMap() throws Exception {
-
-		
 
 		PackMap pack = new PackMap();
 
@@ -123,13 +164,10 @@ public class MapTest  extends CassandraTest {
 		pack.AddCard(jackHearts);
 
 		pmf.getPersistenceManager().makePersistent(pack);
-		
-		PersistenceManager pm = pmf.getPersistenceManager();
-		Transaction trans = pm.currentTransaction();
-		trans.begin();
 
-		PackMap saved = pm.getObjectById(
-				PackMap.class, pack.getId());
+		PersistenceManager pm = pmf.getPersistenceManager();
+
+		PackMap saved = pm.getObjectById(PackMap.class, pack.getId());
 
 		assertEquals(pack, saved);
 
@@ -138,18 +176,12 @@ public class MapTest  extends CassandraTest {
 		assertEquals(aceSpades, saved.getCards().get(aceSpades.getName()));
 
 		assertEquals(jackHearts, saved.getCards().get(jackHearts.getName()));
-		
-	
 
 		UUID packId = pack.getId();
 		UUID aceId = aceSpades.getId();
 		UUID jackId = jackHearts.getId();
 
-		
 		pm.deletePersistent(saved);
-		
-		trans.commit();
-		
 
 		boolean deleted = false;
 
@@ -174,7 +206,7 @@ public class MapTest  extends CassandraTest {
 
 		deleted = false;
 		try {
-			pmf.getPersistenceManager().getObjectById(Card.class,jackId);
+			pmf.getPersistenceManager().getObjectById(Card.class, jackId);
 
 		} catch (JDODataStoreException n) {
 			deleted = n.getCause() instanceof NucleusObjectNotFoundException;
@@ -185,8 +217,5 @@ public class MapTest  extends CassandraTest {
 		deleted = false;
 
 	}
-	
-
-
 
 }

@@ -34,7 +34,7 @@ import com.spidertracks.datanucleus.model.BaseEntity;
  * 
  * @author Todd Nine
  */
-@PersistenceCapable(table = "PackMap", identityType = IdentityType.APPLICATION)
+@PersistenceCapable(table = "PackMap", identityType = IdentityType.APPLICATION, detachable="true")
 @Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
 public class PackMap extends BaseEntity {
 

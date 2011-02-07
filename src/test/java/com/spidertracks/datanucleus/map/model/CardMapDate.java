@@ -36,7 +36,7 @@ import com.spidertracks.datanucleus.model.BaseEntity;
  * @author Todd Nine
  * 
  */
-@PersistenceCapable(table = "CardMapDate", identityType = IdentityType.APPLICATION)
+@PersistenceCapable(table = "CardMapDate", identityType = IdentityType.APPLICATION, detachable="true")
 @Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
 public class CardMapDate extends BaseEntity {
 

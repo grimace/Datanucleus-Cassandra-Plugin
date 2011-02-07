@@ -104,8 +104,8 @@ public class CassandraStoreManager extends AbstractStoreManager {
 		
 		String byteMapperFile = conf.getStringProperty(BYTEMAPPER);
 		
-		byteConverterContext = new ByteConverterContext(byteMapperFile, serializer);
-
+		byteConverterContext = new ByteConverterContext(byteMapperFile, serializer, getOMFContext().getTypeManager(), getApiAdapter());
+		
 		autoCreateSchema = conf
 				.getBooleanProperty(CREATE_SCHEMA);
 
@@ -259,7 +259,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
 			return pcClassName;
 		}
 
-		Bytes key = byteConverterContext.getRowKeyForId(ec, id);
+		Bytes key = byteConverterContext.getRowKeyForId(id);
 
 		return findObject(key, metaData, clr, ec, id);
 

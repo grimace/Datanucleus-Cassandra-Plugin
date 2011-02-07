@@ -19,6 +19,8 @@ package com.spidertracks.datanucleus.identity;
 
 import java.nio.ByteBuffer;
 
+import com.spidertracks.datanucleus.convert.ByteConverterContext;
+
 /**
  * Interface that complex objects can implement to generate their own bytes for storage in either
  * columns or as row keys.  Note that each implementation must have a default empty constructor
@@ -35,13 +37,13 @@ public interface ByteAware {
 	 * a new buffer should be allocated
 	 * @return
 	 */
-	public ByteBuffer writeBytes(ByteBuffer buffer);
+	public ByteBuffer writeBytes(ByteBuffer buffer, ByteConverterContext context);
 	
 	/**
 	 * Populate a new instance of the object from the bytes
 	 * @param buffer
 	 */
-	public void parseBytes(ByteBuffer buffer);
+	public void parseBytes(ByteBuffer buffer, ByteConverterContext context);
 	
 
 	

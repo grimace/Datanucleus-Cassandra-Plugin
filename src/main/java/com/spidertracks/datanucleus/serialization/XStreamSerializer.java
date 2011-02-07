@@ -95,7 +95,7 @@ public class XStreamSerializer implements Serializer {
 			return result;
 
 		} catch (Exception e) {
-			throw new RuntimeException("Unable to de-serialize to json", e);
+			throw new RuntimeException("Unable to de-serialize xml to object.  Make sure you used this converter to persist the object", e);
 		}
 
 	}

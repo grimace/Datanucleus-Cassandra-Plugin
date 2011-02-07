@@ -27,6 +27,7 @@ import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.datanucleus.ClassLoaderResolver;
+import org.datanucleus.api.ApiAdapter;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
@@ -37,6 +38,7 @@ import org.datanucleus.metadata.InheritanceMetaData;
 import org.datanucleus.metadata.InheritanceStrategy;
 import org.datanucleus.metadata.MetaDataManager;
 import org.datanucleus.store.ExecutionContext;
+import org.datanucleus.store.mapped.exceptions.DatastoreFieldDefinitionException;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Selector;
 
@@ -50,8 +52,6 @@ import org.scale7.cassandra.pelops.Selector;
  */
 public class MetaDataUtils {
 
-	//TODO Remove this and get consistency from the currently executing transaction
-	
 	public static final Charset UTF8 = Charset.forName("UTF-8");
 
 	//A null place holder for the cached values
@@ -65,42 +65,6 @@ public class MetaDataUtils {
 
 	private static ConcurrentMap<String, List<Bytes>> classToSubclasses = new ConcurrentHashMap<String, List<Bytes>>();
 
-	//
-	
-//	/**
-//	 * Use the datanucleus converers to convert from the string to a new
-//	 * instance of the target class
-//	 * 
-//	 * @param ec
-//	 * @param targetClass
-//	 * @param value
-//	 * @return
-//	 */
-//	public static Object getIdentityFromRowKey(ExecutionContext ec,
-//			String targetClassName, String value) {
-//
-//		ClassLoaderResolver clr = ec.getClassLoaderResolver();
-//
-//		Class<?> targetClass = clr.classForName(targetClassName);
-//
-//		if (targetClass.equals(String.class)) {
-//			return value;
-//		}
-//
-//		ObjectStringConverter converter = ec.getTypeManager()
-//				.getStringConverter(targetClass);
-//
-//		if (converter == null) {
-//			throw new DatastoreFieldDefinitionException(String.format(
-//					"You must define an ObjectStringConverter for type %s",
-//					targetClass));
-//		}
-//
-//		return converter.toObject(value);
-//
-//	}
-
-	
 
 	/**
 	 * Get the column metadata for the class and fieldname
@@ -203,6 +167,8 @@ public class MetaDataUtils {
 		return getDiscriminatorColumnName(meta);
 
 	}
+	
+
 
 	/**
 	 * Get the name of the index. Will return null if no index is defined. If

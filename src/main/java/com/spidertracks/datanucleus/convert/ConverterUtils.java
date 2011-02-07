@@ -36,7 +36,9 @@ public class ConverterUtils  {
 	public static ByteBuffer check(ByteBuffer buffer, int size) {
 		
 		if(buffer == null){
-			return ByteBuffer.allocate(size);
+			ByteBuffer newBuffer =  ByteBuffer.allocate(size);
+			newBuffer.mark();
+			return newBuffer;
 		}
 		
 		if (buffer.remaining() < size) {
@@ -46,7 +48,7 @@ public class ConverterUtils  {
 			ByteBuffer newBuffer = ByteBuffer.allocate(position + size + 1);
 			newBuffer.mark();
 
-			buffer.rewind();
+			buffer.reset();
 
 			newBuffer.put(Arrays.copyOfRange(buffer.array(), 0, position));
 

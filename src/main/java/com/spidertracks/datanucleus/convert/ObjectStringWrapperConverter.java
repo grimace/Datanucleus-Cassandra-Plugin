@@ -46,19 +46,19 @@ public class ObjectStringWrapperConverter implements ByteConverter {
 	}
 
 	@Override
-	public Object getObject(ByteBuffer buffer) {
+	public Object getObject(ByteBuffer buffer, ByteConverterContext context) {
 		if (buffer == null) {
 			return null;
 		}
 		return dnStringConverter.toObject((String) stringConverter
-				.getObject(buffer));
+				.getObject(buffer, context));
 	}
 
 	@Override
-	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer, ByteConverterContext context) {
 		String stringVal = dnStringConverter.toString(value);
 
-		return stringConverter.writeBytes(stringVal, buffer);
+		return stringConverter.writeBytes(stringVal, buffer, context);
 	}
 
 

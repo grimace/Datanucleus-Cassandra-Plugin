@@ -17,7 +17,7 @@ public interface ByteConverter {
 	 * @param buffer
 	 * @return
 	 */
-	public Object getObject(ByteBuffer buffer);
+	public Object getObject(ByteBuffer buffer, ByteConverterContext context);
 	
 	
 	/**
@@ -28,7 +28,7 @@ public interface ByteConverter {
 	 * @param instance
 	 * @return
 	 */
-	public ByteBuffer writeBytes(Object value, ByteBuffer buffer);
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer, ByteConverterContext context);
 	
 	/**
 	 * Returns the comparator type (UTF-8, TimeUUIDType etc) that should be used when comparing the values in this column

@@ -19,6 +19,7 @@ Contributors :
 package com.spidertracks.datanucleus.collection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -69,6 +70,55 @@ public class CollectionTest extends CassandraTest {
 		assertTrue(saved.getCards().contains(aceSpades));
 
 		assertTrue(saved.getCards().contains(jackHearts));
+
+	}
+	
+	@Test
+	public void testBasicPeristAndLoadOneToManyOrphaned() throws Exception {
+
+		Pack pack = new Pack();
+
+		Card aceSpades = new Card();
+		aceSpades.setName("Ace of Spades");
+		pack.addCard(aceSpades);
+
+		Card jackHearts = new Card();
+		jackHearts.setName("Jack of Hearts");
+		pack.addCard(jackHearts);
+
+		pmf.getPersistenceManager().makePersistent(pack);
+
+		Pack saved = pmf.getPersistenceManager().getObjectById(Pack.class,
+				pack.getId());
+
+		assertEquals(pack, saved);
+
+		assertNotNull(saved.getCards());
+
+		assertTrue(saved.getCards().contains(aceSpades));
+
+		assertTrue(saved.getCards().contains(jackHearts));
+		
+		//now delete the card
+		PersistenceManager pm = pmf.getPersistenceManager();
+		Card stored = pm.getObjectById(Card.class, jackHearts.getId());
+		pm.deletePersistent(stored);
+		
+		pm = pmf.getPersistenceManager();
+		pm.evictAll();
+		
+		saved = pm.getObjectById(Pack.class,
+				pack.getId());
+
+		assertEquals(pack, saved);
+
+		assertNotNull(saved.getCards());
+
+		assertTrue(saved.getCards().contains(aceSpades));
+
+		assertFalse(saved.getCards().contains(jackHearts));
+		
+		
 
 	}
 
@@ -196,8 +246,7 @@ public class CollectionTest extends CassandraTest {
 		pmf.getPersistenceManager().makePersistent(pack);
 
 		PersistenceManager pm = pmf.getPersistenceManager();
-		Transaction trans = pm.currentTransaction();
-		trans.begin();
+	
 
 		Pack saved = pm.getObjectById(Pack.class, pack.getId());
 
@@ -225,7 +274,8 @@ public class CollectionTest extends CassandraTest {
 		UUID jackId = jackHearts.getId();
 
 		// now perform a delete and ensure that everything is deleted
-
+		Transaction trans = pm.currentTransaction();
+		trans.begin();
 		pm.deletePersistent(saved);
 		trans.commit();
 

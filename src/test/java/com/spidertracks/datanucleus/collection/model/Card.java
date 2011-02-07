@@ -32,7 +32,7 @@ import com.spidertracks.datanucleus.model.BaseEntity;
  * @author Todd Nine
  *
  */
-@PersistenceCapable(table = "Card", identityType = IdentityType.APPLICATION)
+@PersistenceCapable(table = "Card", identityType = IdentityType.APPLICATION, detachable="true")
 @Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
 public class Card extends BaseEntity  implements Serializable{
 

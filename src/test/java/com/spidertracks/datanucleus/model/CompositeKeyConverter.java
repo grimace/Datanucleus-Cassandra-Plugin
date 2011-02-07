@@ -22,6 +22,7 @@ import java.nio.ByteBuffer;
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 
 import com.spidertracks.datanucleus.convert.ByteConverter;
+import com.spidertracks.datanucleus.convert.ByteConverterContext;
 import com.spidertracks.datanucleus.convert.ConverterUtils;
 
 /**
@@ -33,7 +34,7 @@ public class CompositeKeyConverter implements ByteConverter {
 	private static final int SIZE = (Long.SIZE*2+Integer.SIZE)/Byte.SIZE;
 	
 	@Override
-	public Object getObject(ByteBuffer buffer) {
+	public Object getObject(ByteBuffer buffer,  ByteConverterContext context) {
 		CompositeKey key = new CompositeKey();
 
 		key.setFirst(buffer.getLong());
@@ -43,7 +44,7 @@ public class CompositeKeyConverter implements ByteConverter {
 	}
 
 	@Override
-	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer, ByteConverterContext context) {
 
 		ByteBuffer checked = ConverterUtils.check(buffer, SIZE);
 		

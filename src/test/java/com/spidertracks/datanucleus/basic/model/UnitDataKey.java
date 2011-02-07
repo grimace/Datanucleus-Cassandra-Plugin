@@ -24,6 +24,7 @@ import java.util.Date;
 
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 
+import com.spidertracks.datanucleus.convert.ByteConverterContext;
 import com.spidertracks.datanucleus.convert.ConverterUtils;
 import com.spidertracks.datanucleus.identity.ByteAware;
 
@@ -80,7 +81,7 @@ public class UnitDataKey implements Serializable, ByteAware {
 	}
 
 	@Override
-	public ByteBuffer writeBytes(ByteBuffer buffer) {
+	public ByteBuffer writeBytes(ByteBuffer buffer, ByteConverterContext context) {
 		
 		ByteBuffer checked = ConverterUtils.check(buffer, 8+this.unitId.length());
 		
@@ -95,7 +96,7 @@ public class UnitDataKey implements Serializable, ByteAware {
 	}
 
 	@Override
-	public void parseBytes(ByteBuffer buffer) {
+	public void parseBytes(ByteBuffer buffer, ByteConverterContext context) {
 		this.createdDate = new Date(buffer.getLong());
 		try {
 			this.unitId = new String(buffer.array(), buffer.position(),

@@ -110,9 +110,15 @@ public class ByteConverterContext {
 	private ByteConverter serializerConverter;
 
 	private Serializer serializer;
+	private TypeManager typeManager;
+	private ApiAdapter apiAdapter;
 
-	public ByteConverterContext(String propertiesFilePath, Serializer serializer) {
+	public ByteConverterContext(String propertiesFilePath,
+			Serializer serializer, TypeManager typeManager,
+			ApiAdapter apiAdapter) {
 		this.serializer = serializer;
+		this.typeManager = typeManager;
+		this.apiAdapter = apiAdapter;
 		initialize(propertiesFilePath);
 
 	}
@@ -207,7 +213,7 @@ public class ByteConverterContext {
 	 */
 	public Bytes getRowKey(ObjectProvider op) {
 
-		return getRowKey(op.getExecutionContext(), op.getObject());
+		return getRowKey(op.getObject());
 
 	}
 
@@ -218,10 +224,10 @@ public class ByteConverterContext {
 	 * @param object
 	 * @return
 	 */
-	public Bytes getRowKey(ExecutionContext ec, Object object) {
-		Object id = ec.getApiAdapter().getIdForObject(object);
+	public Bytes getRowKey(Object object) {
+		Object id = apiAdapter.getIdForObject(object);
 
-		return getRowKeyForId(ec, id);
+		return getRowKeyForId(id);
 	}
 
 	/**
@@ -231,7 +237,23 @@ public class ByteConverterContext {
 	 * @param id
 	 * @return
 	 */
-	public Bytes getRowKeyForId(ExecutionContext ec, Object id) {
+	public Bytes getRowKeyForId(Object id) {
+		ByteBuffer buffer = getRowKeyForId(id, null);
+		buffer.limit(buffer.position());
+		buffer.reset();
+		return Bytes.fromByteBuffer(buffer);
+	}
+
+	/**
+	 * Get the row key for the given id. If the object is just a plain object
+	 * I.E not an object identity or single field identity, then it will convert
+	 * the bytes using the appropriate converter.
+	 * 
+	 * @param ec
+	 * @param id
+	 * @return
+	 */
+	public ByteBuffer getRowKeyForId(Object id, ByteBuffer buffer) {
 
 		Object objectId = null;
 
@@ -244,8 +266,7 @@ public class ByteConverterContext {
 			objectId = id;
 		}
 
-		ByteConverter converter = determineConverter(objectId.getClass(),
-				ec.getTypeManager());
+		ByteConverter converter = determineConverter(objectId.getClass());
 
 		if (converter == serializerConverter) {
 			throw new NucleusDataStoreException(
@@ -255,13 +276,8 @@ public class ByteConverterContext {
 							ByteAware.class.getName()));
 		}
 
-		// else just call the default tostring since it's a user defined key
-		converters.put(objectId.getClass(), converter);
+		return convertToBytes(converter, objectId, buffer);
 
-		ByteBuffer buffer = convert(converter, objectId);
-		;
-
-		return Bytes.fromByteBuffer(buffer);
 	}
 
 	/**
@@ -279,18 +295,41 @@ public class ByteConverterContext {
 	 * @param ec
 	 * @return
 	 */
-	public Bytes convertToBytes(Object value, ExecutionContext ec) {
+	public Bytes getBytes(Object value) {
 		ByteConverter converter = converters.get(value.getClass());
 
 		if (converter != null) {
 			return convertPelops(converter, value);
 		}
 
-		converter = determineConverter(value.getClass(), ec.getTypeManager());
+		converter = determineConverter(value.getClass());
 
 		converters.put(value.getClass(), converter);
 
 		return convertPelops(converter, value);
+	}
+
+	/**
+	 * Convert to bytes using the given buffer. Does not reset the buffer and
+	 * will return the buffer to be used for future operations
+	 * 
+	 * @param value
+	 * @param buffer
+	 * @param ec
+	 */
+	public ByteBuffer getBytes(Object value, ByteBuffer buffer) {
+
+		ByteConverter converter = converters.get(value.getClass());
+
+		if (converter == null) {
+
+			converter = determineConverter(value.getClass());
+
+			converters.put(value.getClass(), converter);
+		}
+
+		return converter.writeBytes(value, buffer, this);
+
 	}
 
 	/**
@@ -308,13 +347,13 @@ public class ByteConverterContext {
 	 * @param ec
 	 * @return
 	 */
-	public Object convertToObject(Bytes value, ExecutionContext ec,
-			AbstractClassMetaData meta, int fieldNumber) {
+	public Object getObject(Bytes value, AbstractClassMetaData meta,
+			int fieldNumber) {
 
 		AbstractMemberMetaData member = meta
 				.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
 
-		return convertToObject(value, ec, member.getType());
+		return getObject(value, member.getType());
 
 	}
 
@@ -331,25 +370,54 @@ public class ByteConverterContext {
 	 * 
 	 * @param value
 	 *            The bytes value
-	 * @param ec
 	 * @param targetType
 	 *            The class type of the target object
 	 * @return
 	 */
-	public Object convertToObject(Bytes value, ExecutionContext ec,
-			Class<?> targetType) {
+	public Object getObject(ByteBuffer buffer, Class<?> targetType) {
+		ByteConverter converter = converters.get(targetType);
+
+		if (converter != null) {
+			return convertToObject(converter, buffer);
+		}
+
+		converter = determineConverter(targetType);
+
+		converters.put(targetType, converter);
+
+		return convertToObject(converter, buffer);
+	}
+
+	/**
+	 * Convert the bytes to a value using the defined converters.
+	 * 
+	 * <ol>
+	 * <li>ByteConverter from converter Mapping</li>
+	 * <li>ByteAware implementation</li>
+	 * <li>ObjectLongConverter which is cached</li>
+	 * <li>ObjectStringConverter which is cached</li>
+	 * <li>Serialization using the serializer which is cached</li>
+	 * </ol>
+	 * 
+	 * @param value
+	 *            The bytes value
+	 * @param targetType
+	 *            The class type of the target object
+	 * @return
+	 */
+	public Object getObject(Bytes value, Class<?> targetType) {
 
 		ByteConverter converter = converters.get(targetType);
 
 		if (converter != null) {
-			return convert(converter, value);
+			return convertToObject(converter, value);
 		}
 
-		converter = determineConverter(targetType, ec.getTypeManager());
+		converter = determineConverter(targetType);
 
 		converters.put(targetType, converter);
 
-		return convert(converter, value);
+		return convertToObject(converter, value);
 
 	}
 
@@ -370,8 +438,7 @@ public class ByteConverterContext {
 	 * @param clazz
 	 * @return
 	 */
-	private ByteConverter determineConverter(Class<?> clazz,
-			TypeManager typeManager) {
+	private ByteConverter determineConverter(Class<?> clazz) {
 
 		ByteConverter converter = converters.get(clazz);
 
@@ -404,6 +471,29 @@ public class ByteConverterContext {
 	}
 
 	/**
+	 * Get the key class (when used with converters) for the given classes meta
+	 * data
+	 * 
+	 * @param ec
+	 * @param cmd
+	 * @return
+	 */
+	public Class<?> getKeyClass(ExecutionContext ec, AbstractClassMetaData cmd) {
+		ApiAdapter adapter = ec.getApiAdapter();
+
+		if (!adapter.isSingleFieldIdentityClass(cmd.getObjectidClass())) {
+			throw new DatastoreFieldDefinitionException(
+					"multiple field identity creation is currently unsupported in indexing");
+		}
+
+		AbstractMemberMetaData member = cmd
+				.getMetaDataForManagedMemberAtAbsolutePosition(cmd
+						.getPKMemberPositions()[0]);
+
+		return member.getType();
+	}
+
+	/**
 	 * Object for the identity in the AbstractClassMetaData's class. Try and
 	 * build it from the string
 	 * 
@@ -415,24 +505,17 @@ public class ByteConverterContext {
 	public Object getObjectIdentity(ExecutionContext ec,
 			Class<?> candidateClass, Bytes value) {
 
-		ApiAdapter adapter = ec.getApiAdapter();
-
 		AbstractClassMetaData cmd = ec.getMetaDataManager()
 				.getMetaDataForClass(candidateClass,
 						ec.getClassLoaderResolver());
 
-		if (!adapter.isSingleFieldIdentityClass(cmd.getObjectidClass())) {
-			throw new DatastoreFieldDefinitionException(
-					"multiple field identity creation is currently unsupported in indexing");
-		}
-		// assume only one identity field
-
+		Class<?> keyType = getKeyClass(ec, cmd);
+		
 		try {
 			// if the class of the pk is a primitive we'll want to get the value
 			// then set it as a string
 
-			Object targetId = convertToObject(value, ec, cmd,
-					cmd.getPKMemberPositions()[0]);
+			Object targetId = getObject(value, keyType);
 
 			return ec.newObjectId(candidateClass, targetId);
 
@@ -452,77 +535,79 @@ public class ByteConverterContext {
 	 * @return
 	 * @see determineConverter
 	 */
-	public String getValidationClass(Class<?> fieldClass, TypeManager manager) {
+	public String getValidationClass(Class<?> fieldClass) {
 
-		ByteConverter converter = determineConverter(fieldClass, manager);
+		ByteConverter converter = determineConverter(fieldClass);
 
 		return converter.getComparatorType();
 	}
 
 	public Bytes getBytes(Boolean value) {
-		return Bytes.fromByteBuffer(convert(this.boolConverter, value));
+		return Bytes.fromByteBuffer(convertToBytes(this.boolConverter, value));
 	}
 
 	public Boolean getBoolean(Bytes bytes) {
-		return (Boolean) convert(this.boolConverter, bytes);
+		return (Boolean) convertToObject(this.boolConverter, bytes);
 	}
 
 	public Bytes getBytes(Short value) {
-		return Bytes.fromByteBuffer(convert(this.shortConverter, value));
+		return Bytes.fromByteBuffer(convertToBytes(this.shortConverter, value));
 	}
 
 	public Short getShort(Bytes bytes) {
-		return (Short) convert(this.shortConverter, bytes);
+		return (Short) convertToObject(this.shortConverter, bytes);
 	}
 
 	public Bytes getBytes(Integer value) {
-		return Bytes.fromByteBuffer(convert(this.intConverter, value));
+		return Bytes.fromByteBuffer(convertToBytes(this.intConverter, value));
 
 	}
 
 	public Integer getInteger(Bytes bytes) {
-		return (Integer) convert(this.intConverter, bytes);
+		return (Integer) convertToObject(this.intConverter, bytes);
 	}
 
 	public Bytes getBytes(Double value) {
-		return Bytes.fromByteBuffer(convert(this.doubleConverter, value));
+		return Bytes
+				.fromByteBuffer(convertToBytes(this.doubleConverter, value));
 	}
 
 	public Double getDouble(Bytes bytes) {
-		return (Double) convert(this.doubleConverter, bytes);
+		return (Double) convertToObject(this.doubleConverter, bytes);
 	}
 
 	public Bytes getBytes(Long value) {
-		return Bytes.fromByteBuffer(convert(this.longConverter, value));
+		return Bytes.fromByteBuffer(convertToBytes(this.longConverter, value));
 
 	}
 
 	public Long getLong(Bytes bytes) {
-		return (Long) convert(this.longConverter, bytes);
+		return (Long) convertToObject(this.longConverter, bytes);
 	}
 
 	public Bytes getBytes(Float value) {
-		return Bytes.fromByteBuffer(convert(this.floatConverter, value));
+		return Bytes.fromByteBuffer(convertToBytes(this.floatConverter, value));
 	}
 
 	public Float getFloat(Bytes bytes) {
-		return (Float) convert(this.floatConverter, bytes);
+		return (Float) convertToObject(this.floatConverter, bytes);
 	}
 
 	public Bytes getBytes(String value) {
-		return Bytes.fromByteBuffer(convert(this.stringConverter, value));
+		return Bytes
+				.fromByteBuffer(convertToBytes(this.stringConverter, value));
 	}
 
 	public String getString(Bytes bytes) {
-		return (String) convert(this.stringConverter, bytes);
+		return (String) convertToObject(this.stringConverter, bytes);
 	}
 
 	public Bytes getBytes(Character value) {
-		return Bytes.fromByteBuffer(convert(this.charConverter, value));
+		return Bytes.fromByteBuffer(convertToBytes(this.charConverter, value));
 	}
 
 	public Character getCharacter(Bytes bytes) {
-		return (Character) convert(this.charConverter, bytes);
+		return (Character) convertToObject(this.charConverter, bytes);
 	}
 
 	/**
@@ -533,7 +618,7 @@ public class ByteConverterContext {
 	 * @return
 	 */
 	private Bytes convertPelops(ByteConverter converter, Object value) {
-		return Bytes.fromByteBuffer(convert(converter, value));
+		return Bytes.fromByteBuffer(convertToBytes(converter, value));
 	}
 
 	/**
@@ -545,14 +630,26 @@ public class ByteConverterContext {
 	 * @param value
 	 * @return
 	 */
-	private ByteBuffer convert(ByteConverter converter, Object value) {
-		ByteBuffer buff = converter.writeBytes(value, null);
+	private ByteBuffer convertToBytes(ByteConverter converter, Object value) {
+		ByteBuffer buff = converter.writeBytes(value, null, this);
 
 		if (buff != null) {
-			buff.rewind();
+			buff.reset();
 		}
 
 		return buff;
+	}
+
+	/**
+	 * Write to the given buffer but do not rewind it.
+	 * 
+	 * @param converter
+	 * @param value
+	 * @return
+	 */
+	private ByteBuffer convertToBytes(ByteConverter converter, Object value,
+			ByteBuffer buffer) {
+		return converter.writeBytes(value, buffer, this);
 	}
 
 	/**
@@ -562,12 +659,27 @@ public class ByteConverterContext {
 	 * @param bytes
 	 * @return
 	 */
-	private Object convert(ByteConverter converter, Bytes bytes) {
-		if(bytes == null){
+	private Object convertToObject(ByteConverter converter, Bytes bytes) {
+		if (bytes == null) {
 			return null;
 		}
-		
-		return converter.getObject(bytes.getBytes());
+
+		return convertToObject(converter, bytes.getBytes());
+	}
+
+	/**
+	 * Convert the bytes with the underlying buffer
+	 * 
+	 * @param converter
+	 * @param bytes
+	 * @return
+	 */
+	private Object convertToObject(ByteConverter converter, ByteBuffer bytes) {
+		if (bytes == null) {
+			return null;
+		}
+
+		return converter.getObject(bytes, this);
 	}
 
 }

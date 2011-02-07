@@ -32,7 +32,7 @@ public class BooleanConverter implements ByteConverter {
 	private static final byte FALSE = 0;
 	
 	@Override
-	public Boolean getObject(ByteBuffer buffer) {
+	public Boolean getObject(ByteBuffer buffer, ByteConverterContext context) {
 		if(buffer == null){
 			return null;
 		}
@@ -41,7 +41,7 @@ public class BooleanConverter implements ByteConverter {
 	}
 
 	@Override
-	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer, ByteConverterContext context) {
 		ByteBuffer checked = check(buffer, 1);
 		
 		if((Boolean) value){

@@ -38,20 +38,20 @@ public class ByteAwareConverter implements ByteConverter {
 	}
 
 	@Override
-	public Object getObject(ByteBuffer buffer) {
+	public Object getObject(ByteBuffer buffer, ByteConverterContext context) {
 
 		ByteAware instance = createInstance();
 
-		instance.parseBytes(buffer);
+		instance.parseBytes(buffer, context);
 
 		return instance;
 
 	}
 
 	@Override
-	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer, ByteConverterContext context) {
 
-		return ((ByteAware) value).writeBytes(buffer);
+		return ((ByteAware) value).writeBytes(buffer, context);
 
 	}
 

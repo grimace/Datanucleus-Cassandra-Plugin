@@ -46,18 +46,18 @@ public class ObjectLongWrapperConverter implements ByteConverter {
 	}
 
 	@Override
-	public Object getObject(ByteBuffer buffer) {
+	public Object getObject(ByteBuffer buffer, ByteConverterContext context) {
 		if (buffer == null) {
 			return null;
 		}
-		return dnLongConverter.toObject((Long) longConverter.getObject(buffer));
+		return dnLongConverter.toObject((Long) longConverter.getObject(buffer, context));
 	}
 
 	@Override
-	public ByteBuffer writeBytes(Object value, ByteBuffer buffer) {
+	public ByteBuffer writeBytes(Object value, ByteBuffer buffer, ByteConverterContext context) {
 		Long longVal = dnLongConverter.toLong(value);
 
-		return longConverter.writeBytes(longVal, buffer);
+		return longConverter.writeBytes(longVal, buffer, context);
 
 	}
 

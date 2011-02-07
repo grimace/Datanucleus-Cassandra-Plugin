@@ -31,7 +31,7 @@ public class CharacterConverter implements ByteConverter {
 	private static final int SIZE = Character.SIZE / Byte.SIZE;
 	
 	@Override
-	public Character getObject(ByteBuffer buff) {
+	public Character getObject(ByteBuffer buff, ByteConverterContext context) {
 		if(buff == null || buff.remaining() < SIZE){
 			return null;
 		}
@@ -39,7 +39,7 @@ public class CharacterConverter implements ByteConverter {
 	}
 
 	@Override
-	public ByteBuffer writeBytes(Object value, ByteBuffer buff) {
+	public ByteBuffer writeBytes(Object value, ByteBuffer buff, ByteConverterContext context) {
 		ByteBuffer returned = check(buff, SIZE);
 		
 		return returned.putChar((Character) value);

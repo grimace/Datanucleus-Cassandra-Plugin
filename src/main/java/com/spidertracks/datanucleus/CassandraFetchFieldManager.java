@@ -19,7 +19,6 @@ package com.spidertracks.datanucleus;
 
 import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnName;
 
-import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,6 +30,7 @@ import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.api.ApiAdapter;
 import org.datanucleus.exceptions.NucleusDataStoreException;
 import org.datanucleus.exceptions.NucleusException;
+import org.datanucleus.exceptions.NucleusObjectNotFoundException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
 import org.datanucleus.metadata.Relation;
@@ -39,8 +39,13 @@ import org.datanucleus.store.ObjectProvider;
 import org.datanucleus.store.fieldmanager.AbstractFieldManager;
 import org.datanucleus.store.types.sco.SCOUtils;
 import org.scale7.cassandra.pelops.Bytes;
+import org.scale7.cassandra.pelops.Selector;
 
+import com.spidertracks.datanucleus.collection.CassEntry;
+import com.spidertracks.datanucleus.collection.ReadCollection;
+import com.spidertracks.datanucleus.collection.ReadMap;
 import com.spidertracks.datanucleus.convert.ByteConverterContext;
+import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 /**
  * @author Todd Nine
@@ -54,22 +59,27 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 	private ByteConverterContext byteContext;
 	private ExecutionContext context;
 	private ClassLoaderResolver clr;
-	
-	
+	private String columnFamily;
+	private Bytes rowKey;
+	private Selector selector;
 
 	/**
 	 * @param columns
 	 * @param metaData
 	 */
-	public CassandraFetchFieldManager(List<Column> columns, ObjectProvider op) {
+	public CassandraFetchFieldManager(List<Column> columns, ObjectProvider op,
+			String columnFamily, Bytes rowKey, Selector selector) {
 		super();
 
 		this.objectProvider = op;
 		this.metaData = op.getClassMetaData();
 		this.context = op.getExecutionContext();
 		this.clr = this.context.getClassLoaderResolver();
-		this.byteContext =  ((CassandraStoreManager)context.getStoreManager()).getByteConverterContext();
-		
+		this.byteContext = ((CassandraStoreManager) context.getStoreManager())
+				.getByteConverterContext();
+		this.columnFamily = columnFamily;
+		this.rowKey = rowKey;
+		this.selector = selector;
 
 		// rather than iterate over every field call for O(n) it's faster to
 		// take our O(n) hit up front then perform an O(1) lookup. Sorting and
@@ -77,10 +87,9 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 		this.columns = new HashMap<Bytes, Bytes>();
 
 		for (Column column : columns) {
-			this.columns.put(Bytes.fromBytes(column.getName()), Bytes.fromBytes(column.getValue()));
+			this.columns.put(Bytes.fromBytes(column.getName()),
+					Bytes.fromBytes(column.getValue()));
 		}
-
-		
 
 	}
 
@@ -91,8 +100,6 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 			Bytes columnName = getColumnName(metaData, fieldNumber);
 			Bytes value = this.columns.get(columnName);
-
-		
 
 			return (Boolean) byteContext.getBoolean(value);
 
@@ -108,8 +115,6 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 			Bytes columnName = getColumnName(metaData, fieldNumber);
 			Bytes value = this.columns.get(columnName);
 
-	
-
 			return value.toByte();
 
 		} catch (Exception e) {
@@ -123,7 +128,6 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 			Bytes columnName = getColumnName(metaData, fieldNumber);
 			Bytes value = this.columns.get(columnName);
-
 
 			return (Character) byteContext.getCharacter(value);
 
@@ -139,7 +143,6 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 			Bytes columnName = getColumnName(metaData, fieldNumber);
 			Bytes value = this.columns.get(columnName);
 
-		
 			return (Double) byteContext.getDouble(value);
 
 		} catch (Exception e) {
@@ -168,7 +171,6 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 			Bytes columnName = getColumnName(metaData, fieldNumber);
 			Bytes column = this.columns.get(columnName);
 
-	
 			return (Integer) byteContext.getInteger(column);
 
 		} catch (Exception e) {
@@ -198,11 +200,6 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 			Bytes columnName = getColumnName(metaData, fieldNumber);
 			Bytes column = columns.get(columnName);
 
-			// No object defined
-			if (column == null) {
-				return null;
-			}
-
 			AbstractMemberMetaData fieldMetaData = this.metaData
 					.getMetaDataForManagedMemberAtAbsolutePosition(fieldNumber);
 
@@ -219,13 +216,24 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 							"Embedded objects are currently unimplemented.");
 				}
 
-				Serializable key = (Serializable) byteContext.convertToObject(column, this.context, Serializable.class);
+				// No object defined
+				if (column == null) {
+					return null;
+				}
 
-				Object object = context.findObject(key, false, false,
-						fieldMetaData.getTypeName());
+				Object identity = byteContext.getObjectIdentity(context,
+						fieldMetaData.getType(), column);
+				try {
 
-				return objectProvider.wrapSCOField(fieldNumber, object, false,
-						false, true);
+					Object object = context.findObject(identity, true, false,
+							fieldMetaData.getTypeName());
+
+					return objectProvider.wrapSCOField(fieldNumber, object,
+							false, false, true);
+				} catch (NucleusObjectNotFoundException nonfe) {
+					// swallow. TODO remove the lazy reference if record is over
+					// tombstone time
+				}
 
 			} else if (relationType == Relation.MANY_TO_MANY_BI
 					|| relationType == Relation.ONE_TO_MANY_BI
@@ -234,12 +242,14 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 				if (Collection.class.isAssignableFrom(fieldMetaData.getType())) {
 
 					Collection<Object> coll;
+					Class<?> elementClass = clr.classForName(fieldMetaData
+							.getCollection().getElementType());
 
 					try {
 						Class<?> instanceType = SCOUtils
-								.getContainerInstanceType(fieldMetaData
-										.getType(), fieldMetaData
-										.getOrderMetaData() != null);
+								.getContainerInstanceType(
+										fieldMetaData.getType(),
+										fieldMetaData.getOrderMetaData() != null);
 						coll = (Collection<Object>) instanceType.newInstance();
 					} catch (Exception e) {
 						throw new NucleusDataStoreException(e.getMessage(), e);
@@ -249,13 +259,24 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 					// get our list of Strings
 
-					List<Object> serializedIdList = (List<Object>) byteContext.convertToObject(column, context, this.metaData, fieldNumber);
+					ReadCollection columnFetcher = new ReadCollection(
+							byteContext, columnFamily, rowKey, columnName,
+							context, elementClass);
 
-					for (Object key : serializedIdList) {
+					// TODO use context.getFetchPlan().getFetchSize()
+					columnFetcher.fetchColumns(100, null, selector);
 
-						Object element = context.findObject(key, false, false,
-								fieldMetaData.getTypeName());
-						coll.add(element);
+					for (Object key : columnFetcher) {
+
+						try {
+							Object element = context.findObject(key, true,
+									false, fieldMetaData.getTypeName());
+
+							coll.add(element);
+						} catch (NucleusObjectNotFoundException nonfe) {
+							// swallow. TODO remove the lazy reference if record
+							// is over tombstone time
+						}
 					}
 
 					return objectProvider.wrapSCOField(fieldNumber, coll,
@@ -266,9 +287,9 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 					try {
 						Class<?> instanceType = SCOUtils
-								.getContainerInstanceType(fieldMetaData
-										.getType(), fieldMetaData
-										.getOrderMetaData() != null);
+								.getContainerInstanceType(
+										fieldMetaData.getType(),
+										fieldMetaData.getOrderMetaData() != null);
 						map = (Map<Object, Object>) instanceType.newInstance();
 					} catch (Exception e) {
 						throw new NucleusDataStoreException(e.getMessage(), e);
@@ -277,35 +298,70 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 					ApiAdapter adapter = objectProvider.getExecutionContext()
 							.getApiAdapter();
 
-					Map<Object, Object> serializedMap = (Map<Object, Object>) byteContext.convertToObject(column, context, Map.class);
-
 					Class<?> keyClass = clr.classForName(fieldMetaData.getMap()
 							.getKeyType());
-					Class<?> valueClass = clr.classForName(fieldMetaData.getMap()
-							.getValueType());
+					Class<?> valueClass = clr.classForName(fieldMetaData
+							.getMap().getValueType());
 
-					for (Object mapKey : serializedMap.keySet()) {
+					Class<?> storedKeyClass = keyClass;
+					Class<?> storedValueClass = valueClass;
 
-						Object key = null;
+					boolean pcKey = adapter.isPersistable(keyClass);
+					boolean pcValue = adapter.isPersistable(valueClass);
 
-						if (adapter.isPersistable(keyClass)) {
-							key = context.findObject(mapKey, false, false,
-									fieldMetaData.getTypeName());
-						} else {
-							key = mapKey;
+					if (pcKey) {
+						storedKeyClass = byteContext.getKeyClass(
+								context,
+								fieldMetaData.getMap().getKeyClassMetaData(clr,
+										context.getMetaDataManager()));
+					}
+
+					if (pcValue) {
+						storedValueClass = byteContext.getKeyClass(
+								context,
+								fieldMetaData.getMap().getValueClassMetaData(
+										clr, context.getMetaDataManager()));
+					}
+
+					// TODO use context.getFetchPlan().getFetchSize()
+					ReadMap mapReader = new ReadMap(byteContext, columnFamily,
+							rowKey, columnName, storedKeyClass,
+							storedValueClass);
+					mapReader.fetchColumns(100, null, selector);
+
+					for (CassEntry entry : mapReader) {
+
+						try {
+							Object key = null;
+
+							if (pcKey) {
+
+								key = context.findObject(
+										context.newObjectId(keyClass,
+												entry.getKey()), true, false,
+										fieldMetaData.getTypeName());
+							} else {
+								key = entry.getKey();
+							}
+
+							Object value = null;
+
+							if (pcValue) {
+								value = context.findObject(
+										context.newObjectId(valueClass,
+												entry.getValue()), true, false,
+										fieldMetaData.getTypeName());
+							} else {
+								value = entry.getValue();
+							}
+
+							map.put(key, value);
+						} catch (NucleusObjectNotFoundException nonfe) {
+							// swallow. TODO remove the lazy reference if record
+							// is over
+							// tombstone time
 						}
 
-						Object mapValue = serializedMap.get(key);
-						Object value = null;
-
-						if (adapter.isPersistable(valueClass)) {
-							value = context.findObject(mapValue, false, false,
-									fieldMetaData.getTypeName());
-						} else {
-							value = mapValue;
-						}
-
-						map.put(key, value);
 					}
 
 					return objectProvider.wrapSCOField(fieldNumber, map, false,
@@ -313,17 +369,31 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 				} else if (fieldMetaData.getType().isArray()) {
 
-					List<Object> keys = (List<Object>) byteContext.convertToObject(column, context, List.class);
+					ReadMap mapReader = new ReadMap(byteContext, columnFamily,
+							rowKey, columnName, Integer.class,
+							byteContext.getKeyClass(context, metaData));
+					mapReader.fetchColumns(100, null, selector);
 
+					int columns = mapReader.getColumnCount();
+
+					// TODO make this size more
 					Object array = Array.newInstance(fieldMetaData.getType()
-							.getComponentType(), keys.size());
+							.getComponentType(), columns);
 
-					for (int i = 0; i < keys.size(); i++) {
+					Class<?> elementClass = clr.classForName(fieldMetaData
+							.getArray().getElementType());
 
-						Object element = context.findObject(keys.get(i), false,
-								false, fieldMetaData.getTypeName());
+					for (int i = 0; mapReader.hasNext(); i++) {
 
-						Array.set(array, Integer.valueOf(i), element);
+						CassEntry entry = mapReader.next();
+
+						Object id = context.newObjectId(elementClass,
+								entry.getValue());
+
+						Object element = context.findObject(id, true, false,
+								fieldMetaData.getTypeName());
+
+						Array.set(array, (Integer) entry.getKey(), element);
 					}
 
 					return objectProvider.wrapSCOField(fieldNumber, array,
@@ -332,7 +402,12 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 			}
 
-			return byteContext.convertToObject(column, context, this.metaData, fieldNumber);
+			// No object defined
+			if (column == null) {
+				return null;
+			}
+
+			return byteContext.getObject(column, this.metaData, fieldNumber);
 
 		} catch (Exception e) {
 			throw new NucleusException(e.getMessage(), e);

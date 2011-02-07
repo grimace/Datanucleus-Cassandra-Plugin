@@ -34,7 +34,7 @@ import com.spidertracks.datanucleus.model.BaseEntity;
  * An object with a collection to many objects
  * @author Todd Nine 
  */
-@PersistenceCapable(table = "Pack", identityType = IdentityType.APPLICATION)
+@PersistenceCapable(table = "Pack", identityType = IdentityType.APPLICATION, detachable="true")
 @Inheritance(strategy = InheritanceStrategy.NEW_TABLE)
 public class Pack extends BaseEntity implements Serializable {
 	

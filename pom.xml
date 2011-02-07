@@ -212,19 +212,11 @@
 					</metadataDirectory>
 					<mappingIncludes>**/model/*.class</mappingIncludes>
 					<log4jConfiguration>${basedir}/src/test/resources/log4j.properties
-					</log4jConfiguration>
+						</log4jConfiguration>
 					<verbose>true</verbose>
 					<enhancerName>ASM</enhancerName>
 					<!-- <props>${basedir}/datanucleus.properties</props> -->
-
 				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>org.datanucleus</groupId>
-						<artifactId>datanucleus-core</artifactId>
-						<version>${datanucleus.version}</version>
-					</dependency>
-				</dependencies>
 				<executions>
 					<execution>
 						<phase>process-test-classes</phase>
@@ -233,7 +225,26 @@
 						</goals>
 					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.datanucleus</groupId>
+						<artifactId>datanucleus-core</artifactId>
+						<version>${datanucleus.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.datanucleus</groupId>
+						<artifactId>datanucleus-enhancer</artifactId>
+						<version>${datanucleus.plugin.version}</version>
+						<scope>provided</scope>
+					</dependency>
+					<dependency>
+						<groupId>org.datanucleus</groupId>
+						<artifactId>datanucleus-rdbms</artifactId>
+						<version>${datanucleus.version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
+			
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -242,7 +253,6 @@
 				<configuration>
 					<argLine>-Xms256m -Xmx512m -ea</argLine>
 					<forkMode>always</forkMode>
-
 				</configuration>
 			</plugin>
 

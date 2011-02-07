@@ -30,6 +30,7 @@ import org.apache.cassandra.thrift.Column;
 import org.datanucleus.ClassLoaderResolver;
 import org.datanucleus.api.ApiAdapter;
 import org.datanucleus.exceptions.NucleusDataStoreException;
+import org.datanucleus.exceptions.NucleusException;
 import org.datanucleus.exceptions.NucleusObjectNotFoundException;
 import org.datanucleus.metadata.AbstractClassMetaData;
 import org.datanucleus.metadata.AbstractMemberMetaData;
@@ -52,7 +53,7 @@ import com.spidertracks.datanucleus.mutate.ExecutionContextDelete;
  * Persistence handler for our DN plugin
  * 
  * @author Todd Nine
- *
+ * 
  */
 public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
@@ -73,123 +74,117 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 	@Override
 	public void deleteObject(ObjectProvider op) {
-		try {
 
-			Bytes key = byteContext.getRowKey(op);
+		Bytes key = byteContext.getRowKey(op);
 
-			String columnFamily = getColumnFamily(op.getClassMetaData());
+		String columnFamily = getColumnFamily(op.getClassMetaData());
 
-			ExecutionContext ec = op.getExecutionContext();
+		ExecutionContext ec = op.getExecutionContext();
 
-			ExecutionContextDelete delete = this.batchManager.beginDelete(ec,
-					op);
+		ExecutionContextDelete delete = this.batchManager.beginDelete(ec, op);
 
-			// we've already visited this object, do nothing
-			if (!delete.addDeletion(op, key, columnFamily)) {
-				return;
-			}
+		// we've already visited this object, do nothing
+		if (!delete.addDeletion(op, key, columnFamily)) {
+			return;
+		}
 
-			// delete our dependent objects as well.
-			AbstractClassMetaData metaData = op.getClassMetaData();
+		// delete our dependent objects as well.
+		AbstractClassMetaData metaData = op.getClassMetaData();
 
+		int[] fields = metaData.getAllMemberPositions();
 
-			int[] fields = metaData.getAllMemberPositions();
+		for (int current : fields) {
+			AbstractMemberMetaData fieldMetaData = metaData
+					.getMetaDataForManagedMemberAtAbsolutePosition(current);
 
-			for (int current : fields) {
-				AbstractMemberMetaData fieldMetaData = metaData
-						.getMetaDataForManagedMemberAtAbsolutePosition(current);
+			// if we're a collection, delete each element
+			// recurse to delete this object if it's marked as dependent
+			if (fieldMetaData.isDependent()
+					|| (fieldMetaData.getCollection() != null && fieldMetaData
+							.getCollection().isDependentElement())) {
 
-				
-				
+				// here we have the field value
+				Object value = op.provideField(current);
 
-				
-				
-				// if we're a collection, delete each element
-				// recurse to delete this object if it's marked as dependent
-				if (fieldMetaData.isDependent()
-						|| (fieldMetaData.getCollection() != null && fieldMetaData
-								.getCollection().isDependentElement())) {
-					
-					// here we have the field value
-					Object value = op.provideField(current);
-					
-					if (value == null) {
-						continue;
-					}
+				if (value == null) {
+					continue;
+				}
 
-					ClassLoaderResolver clr = ec.getClassLoaderResolver();
+				ClassLoaderResolver clr = ec.getClassLoaderResolver();
 
-					int relationType = fieldMetaData.getRelationType(clr);
+				int relationType = fieldMetaData.getRelationType(clr);
 
-					// check if this is a relationship
+				// check if this is a relationship
 
-					if (relationType == Relation.ONE_TO_ONE_BI
-							|| relationType == Relation.ONE_TO_ONE_UNI
-							|| relationType == Relation.MANY_TO_ONE_BI) {
-						// Persistable object - persist the related object and
-						// store the
-						// identity in the cell
+				if ((relationType == Relation.ONE_TO_ONE_BI
+						|| relationType == Relation.ONE_TO_ONE_UNI || relationType == Relation.MANY_TO_ONE_BI)
+						&& fieldMetaData.isDependent()) {
+					// Persistable object - persist the related object and
+					// store the
+					// identity in the cell
 
-						ec.deleteObjectInternal(value);
-					}
+					ec.deleteObjectInternal(value);
+				}
 
-					else if (relationType == Relation.MANY_TO_MANY_BI
-							|| relationType == Relation.ONE_TO_MANY_BI
-							|| relationType == Relation.ONE_TO_MANY_UNI) {
-						// Collection/Map/Array
+				else if ((relationType == Relation.MANY_TO_MANY_BI
+						|| relationType == Relation.ONE_TO_MANY_BI || relationType == Relation.ONE_TO_MANY_UNI)
+						&& fieldMetaData.isDependent()) {
+					// Collection/Map/Array
 
-						if (fieldMetaData.hasCollection()) {
+					if (fieldMetaData.hasCollection()) {
 
-							for (Object element : (Collection<?>) value) {
-								// delete the object
-								ec.deleteObjectInternal(element);
-							}
-
-						} else if (fieldMetaData.hasMap()) {
-							ApiAdapter adapter = ec.getApiAdapter();
-
-							Map<?, ?> map = ((Map<?, ?>) value);
-							Object mapValue;
-
-							// get each element and persist it.
-							for (Object mapKey : map.keySet()) {
-
-								mapValue = map.get(mapKey);
-
-								// handle the case if our key is a persistent
-								// class
-								// itself
-								if (adapter.isPersistable(mapKey)) {
-									ec.deleteObjectInternal(mapKey);
-
-								}
-								// persist the value if it can be persisted
-								if (adapter.isPersistable(mapValue)) {
-									ec.deleteObjectInternal(mapValue);
-								}
-
-							}
-
-						} else if (fieldMetaData.hasArray()) {
-							Object persisted = null;
-
-							for (int i = 0; i < Array.getLength(value); i++) {
-								// persist the object
-								persisted = Array.get(value, i);
-								ec.deleteObjectInternal(persisted);
-							}
+						for (Object element : (Collection<?>) value) {
+							// delete the object
+							ec.deleteObjectInternal(element);
 						}
 
+					} else if (fieldMetaData.hasMap()) {
+						ApiAdapter adapter = ec.getApiAdapter();
+
+						Map<?, ?> map = ((Map<?, ?>) value);
+						Object mapValue;
+
+						// get each element and persist it.
+						for (Object mapKey : map.keySet()) {
+
+							mapValue = map.get(mapKey);
+
+							// handle the case if our key is a persistent
+							// class
+							// itself
+							if (adapter.isPersistable(mapKey)) {
+								ec.deleteObjectInternal(mapKey);
+
+							}
+							// persist the value if it can be persisted
+							if (adapter.isPersistable(mapValue)) {
+								ec.deleteObjectInternal(mapValue);
+							}
+
+						}
+
+					} else if (fieldMetaData.hasArray()
+							&& fieldMetaData.isDependent()) {
+						Object persisted = null;
+
+						for (int i = 0; i < Array.getLength(value); i++) {
+							// persist the object
+							persisted = Array.get(value, i);
+							ec.deleteObjectInternal(persisted);
+						}
 					}
 
 				}
 
-				
-
 			}
 
+		}
+
+		try {
 			this.batchManager.endDelete(ec);
 
+		} catch (NucleusException ne) {
+			throw ne;
 		} catch (Exception e) {
 			throw new NucleusDataStoreException(e.getMessage(), e);
 		}
@@ -197,37 +192,33 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 	@Override
 	public void fetchObject(ObjectProvider op, int[] fieldNumbers) {
-		try {
-			AbstractClassMetaData metaData = op.getClassMetaData();
+		AbstractClassMetaData metaData = op.getClassMetaData();
 
-			Bytes key = byteContext.getRowKey(op);
+		Bytes key = byteContext.getRowKey(op);
+		String columnFamily = getColumnFamily(metaData);
 
-			Selector selector = Pelops.createSelector(manager.getPoolName());
+		Selector selector = Pelops.createSelector(manager.getPoolName());
 
-			List<Column> columns = selector.getColumnsFromRow(
-					getColumnFamily(metaData), key,
-					getFetchColumnList(metaData, fieldNumbers), Consistency.get());
+		List<Column> columns = selector.getColumnsFromRow(columnFamily, key,
+				getFetchColumnList(metaData, fieldNumbers), Consistency.get());
 
-			// nothing to do
-			if (columns == null || columns.size() == 0) {
-				// check if the pk field was requested. If so, throw an
-				// exception b/c the object doesn't exist
-				pksearched(metaData, fieldNumbers);
-				
-				//do nothing if we didn't fail the check above.  Since cassandra has no concept of transactions the DN transaction is attempting
-				//to load and flush rows that no longer exist.
-				return;
+		// nothing to do
+		if (columns == null || columns.size() == 0) {
+			// check if the pk field was requested. If so, throw an
+			// exception b/c the object doesn't exist
+			pksearched(metaData, fieldNumbers);
 
-			}
+			// do nothing if we didn't fail the check above. Since cassandra has
+			// no concept of transactions the DN transaction is attempting
+			// to load and flush rows that no longer exist.
+			return;
 
-			CassandraFetchFieldManager manager = new CassandraFetchFieldManager(
-					columns, op);
-
-			op.replaceFields(fieldNumbers, manager);
-
-		} catch (Exception e) {
-			throw new NucleusDataStoreException(e.getMessage(), e);
 		}
+
+		CassandraFetchFieldManager manager = new CassandraFetchFieldManager(
+				columns, op, columnFamily, key, selector);
+
+		op.replaceFields(fieldNumbers, manager);
 
 	}
 
@@ -310,7 +301,10 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 			this.batchManager.endWrite(ec);
 
+		} catch (NucleusException ne) {
+			throw ne;
 		} catch (Exception e) {
+
 			throw new NucleusDataStoreException(e.getMessage(), e);
 		}
 
