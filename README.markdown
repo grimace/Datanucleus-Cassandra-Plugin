@@ -163,15 +163,18 @@ Reporting Bugs
 
 If you find a bug.  Please fork the code, create a test case, and submit a pull request with the issue.  This will allow me to quickly determine the cause and resolve the issue.
 
+Changes
+-------
+
+This will be the final change to the underlying storage mechanism of sets.  Collections now use a <fieldname>0x00<value> format, and maps use a <fieldname>0x00<key>:<value> storage format
+This will be the format that will ultimately be used for paging proxies.
 
 Roadmap
 -------
 
 1. Upgrade when latest Datanucleus 2.2 after this release
 2. Upgrade as Pelops client improves
-3. Make inheritance when querying perform more efficiently
-4. Make paging/iteration possible on large associative sets.  Will require a significant change to the way associations are stored in Cassandra, but should allow n to n sets in the order
-of thousands without loading them all into memory.
+3. Make paging/iteration possible on large associative sets.  The storage changes to support large sets is complete, however the paging size is not.
 
 Special Thanks
 --------------
