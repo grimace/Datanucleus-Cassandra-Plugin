@@ -116,9 +116,8 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 
 				// check if this is a relationship
 
-				if ((relationType == Relation.ONE_TO_ONE_BI
-						|| relationType == Relation.ONE_TO_ONE_UNI || relationType == Relation.MANY_TO_ONE_BI)
-						&& fieldMetaData.isDependent()) {
+				if (relationType == Relation.ONE_TO_ONE_BI
+						|| relationType == Relation.ONE_TO_ONE_UNI || relationType == Relation.MANY_TO_ONE_BI) {
 					// Persistable object - persist the related object and
 					// store the
 					// identity in the cell
@@ -126,9 +125,8 @@ public class CassandraPersistenceHandler extends AbstractPersistenceHandler {
 					ec.deleteObjectInternal(value);
 				}
 
-				else if ((relationType == Relation.MANY_TO_MANY_BI
-						|| relationType == Relation.ONE_TO_MANY_BI || relationType == Relation.ONE_TO_MANY_UNI)
-						&& fieldMetaData.isDependent()) {
+				else if (relationType == Relation.MANY_TO_MANY_BI
+						|| relationType == Relation.ONE_TO_MANY_BI || relationType == Relation.ONE_TO_MANY_UNI) {
 					// Collection/Map/Array
 
 					if (fieldMetaData.hasCollection()) {

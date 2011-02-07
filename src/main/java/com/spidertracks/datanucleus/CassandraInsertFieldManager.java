@@ -21,9 +21,7 @@ import static com.spidertracks.datanucleus.utils.MetaDataUtils.getColumnName;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import org.datanucleus.ClassLoaderResolver;

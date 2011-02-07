@@ -45,7 +45,6 @@ import com.spidertracks.datanucleus.collection.CassEntry;
 import com.spidertracks.datanucleus.collection.ReadCollection;
 import com.spidertracks.datanucleus.collection.ReadMap;
 import com.spidertracks.datanucleus.convert.ByteConverterContext;
-import com.spidertracks.datanucleus.utils.MetaDataUtils;
 
 /**
  * @author Todd Nine
@@ -225,7 +224,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 						fieldMetaData.getType(), column);
 				try {
 
-					Object object = context.findObject(identity, true, false,
+					Object object = context.findObject(identity, true, true,
 							fieldMetaData.getTypeName());
 
 					return objectProvider.wrapSCOField(fieldNumber, object,
@@ -270,7 +269,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 						try {
 							Object element = context.findObject(key, true,
-									false, fieldMetaData.getTypeName());
+									true, fieldMetaData.getTypeName());
 
 							coll.add(element);
 						} catch (NucleusObjectNotFoundException nonfe) {
@@ -338,7 +337,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 								key = context.findObject(
 										context.newObjectId(keyClass,
-												entry.getKey()), true, false,
+												entry.getKey()), true, true,
 										fieldMetaData.getTypeName());
 							} else {
 								key = entry.getKey();
@@ -349,7 +348,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 							if (pcValue) {
 								value = context.findObject(
 										context.newObjectId(valueClass,
-												entry.getValue()), true, false,
+												entry.getValue()), true, true,
 										fieldMetaData.getTypeName());
 							} else {
 								value = entry.getValue();
@@ -390,7 +389,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 						Object id = context.newObjectId(elementClass,
 								entry.getValue());
 
-						Object element = context.findObject(id, true, false,
+						Object element = context.findObject(id, true, true,
 								fieldMetaData.getTypeName());
 
 						Array.set(array, (Integer) entry.getKey(), element);

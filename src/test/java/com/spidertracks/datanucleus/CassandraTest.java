@@ -20,7 +20,6 @@ package com.spidertracks.datanucleus;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManagerFactory;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.scale7.cassandra.pelops.support.EmbeddedCassandraServer;
 
@@ -37,8 +36,7 @@ public abstract class CassandraTest {
 	public static String BASE_DIRECTORY = "target/cassandra";
 
 	public static final String KEYSPACE = "TestingKeyspace";
-
-	protected static EmbeddedCassandraServer cassandraServer;
+	
 	protected static PersistenceManagerFactory pmf;
 
 	/**
@@ -48,26 +46,35 @@ public abstract class CassandraTest {
 	 */
 	@BeforeClass
 	public static void setup() throws Exception {
-
-		if (cassandraServer == null) {
-			cassandraServer = new EmbeddedCassandraServer(RPC_LISTEN_ADDRESS,
-					RPC_PORT, BASE_DIRECTORY);
-			cassandraServer.start();
-
-			// wait until cassandra server starts up. could wait less time, but
-			// 2 seconds to be sure.
-			Thread.sleep(2000);
-		}
-
-		pmf = JDOHelper.getPersistenceManagerFactory("Test");
+		Server.INSTANCE.start();
+		pmf = Server.INSTANCE.getFactory();
 	}
 
-	@AfterClass
-	public static void teardown() throws Exception {
-		try {
-			cassandraServer.stop();
-		} catch (Error e) {
-			/* SWALLOW */
+	private enum Server {
+
+		INSTANCE;
+
+		protected EmbeddedCassandraServer cassandraServer;
+		protected PersistenceManagerFactory pmf;
+
+		public void start() throws Exception {
+			if (cassandraServer == null) {
+				cassandraServer = new EmbeddedCassandraServer(
+						RPC_LISTEN_ADDRESS, RPC_PORT, BASE_DIRECTORY);
+				cassandraServer.start();
+
+				// wait until cassandra server starts up. could wait less time,
+				// but
+				// 2 seconds to be sure.
+				Thread.sleep(2000);
+
+				pmf = JDOHelper.getPersistenceManagerFactory("Test");
+
+			}
+		}
+
+		public PersistenceManagerFactory getFactory() {
+			return pmf;
 		}
 	}
 }

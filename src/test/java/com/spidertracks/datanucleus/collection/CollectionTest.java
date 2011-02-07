@@ -28,7 +28,6 @@ import java.util.List;
 
 import javax.jdo.JDODataStoreException;
 import javax.jdo.PersistenceManager;
-import javax.jdo.Transaction;
 
 import org.datanucleus.exceptions.NucleusObjectNotFoundException;
 import org.junit.Test;
@@ -72,7 +71,7 @@ public class CollectionTest extends CassandraTest {
 		assertTrue(saved.getCards().contains(jackHearts));
 
 	}
-	
+
 	@Test
 	public void testBasicPeristAndLoadOneToManyOrphaned() throws Exception {
 
@@ -98,17 +97,16 @@ public class CollectionTest extends CassandraTest {
 		assertTrue(saved.getCards().contains(aceSpades));
 
 		assertTrue(saved.getCards().contains(jackHearts));
-		
-		//now delete the card
+
+		// now delete the card
 		PersistenceManager pm = pmf.getPersistenceManager();
 		Card stored = pm.getObjectById(Card.class, jackHearts.getId());
 		pm.deletePersistent(stored);
-		
+
 		pm = pmf.getPersistenceManager();
 		pm.evictAll();
-		
-		saved = pm.getObjectById(Pack.class,
-				pack.getId());
+
+		saved = pm.getObjectById(Pack.class, pack.getId());
 
 		assertEquals(pack, saved);
 
@@ -117,8 +115,6 @@ public class CollectionTest extends CassandraTest {
 		assertTrue(saved.getCards().contains(aceSpades));
 
 		assertFalse(saved.getCards().contains(jackHearts));
-		
-		
 
 	}
 
@@ -218,14 +214,11 @@ public class CollectionTest extends CassandraTest {
 
 		PersistenceManager pm2 = pmf.getPersistenceManager();
 
-		Transaction tx = pm2.currentTransaction();
-		tx.begin();
 		Pack saved = pm2.getObjectById(Pack.class, pack.getId());
 
 		List<Card> emptyList = saved.getCards();
 
-		tx.commit();
-
+		
 		assertNull(emptyList);
 
 	}
@@ -246,7 +239,6 @@ public class CollectionTest extends CassandraTest {
 		pmf.getPersistenceManager().makePersistent(pack);
 
 		PersistenceManager pm = pmf.getPersistenceManager();
-	
 
 		Pack saved = pm.getObjectById(Pack.class, pack.getId());
 
@@ -268,21 +260,18 @@ public class CollectionTest extends CassandraTest {
 				saved.getCards().indexOf(jackHearts));
 
 		assertEquals(pack, savedJackHearts.getPack());
-		
+
 		UUID packId = pack.getId();
 		UUID aceId = aceSpades.getId();
 		UUID jackId = jackHearts.getId();
 
 		// now perform a delete and ensure that everything is deleted
-		Transaction trans = pm.currentTransaction();
-		trans.begin();
 		pm.deletePersistent(saved);
-		trans.commit();
 
 		boolean deleted = false;
 
 		try {
-			pmf.getPersistenceManager().getObjectById(Pack.class,packId);
+			pmf.getPersistenceManager().getObjectById(Pack.class, packId);
 		} catch (JDODataStoreException n) {
 			deleted = n.getCause() instanceof NucleusObjectNotFoundException;
 		}
@@ -293,8 +282,7 @@ public class CollectionTest extends CassandraTest {
 
 		// now check the cards are gone as well
 		try {
-			pmf.getPersistenceManager().getObjectById(Card.class,
-					aceId);
+			pmf.getPersistenceManager().getObjectById(Card.class, aceId);
 		} catch (JDODataStoreException n) {
 			deleted = n.getCause() instanceof NucleusObjectNotFoundException;
 		}
@@ -303,8 +291,7 @@ public class CollectionTest extends CassandraTest {
 
 		deleted = false;
 		try {
-			pmf.getPersistenceManager().getObjectById(Card.class,
-					jackId);
+			pmf.getPersistenceManager().getObjectById(Card.class, jackId);
 
 		} catch (JDODataStoreException n) {
 			deleted = n.getCause() instanceof NucleusObjectNotFoundException;
