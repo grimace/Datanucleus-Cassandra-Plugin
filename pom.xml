@@ -252,7 +252,6 @@
 					it's own thread otherwise the embedded cassandra causes the tests to hang -->
 				<configuration>
 					<argLine>-Xms256m -Xmx512m -ea</argLine>
-					<forkMode>always</forkMode>
 				</configuration>
 			</plugin>
 
