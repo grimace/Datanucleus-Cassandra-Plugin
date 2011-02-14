@@ -355,7 +355,13 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 	@Override
 	public void storeStringField(int fieldNumber, String value) {
 		try {
-
+			
+			if(value == null)
+			{
+				mutator.deleteColumn(columnFamily, key, getColumnName(metaData, fieldNumber));
+				return;
+			}
+			
 			mutator.writeColumn(columnFamily, key, mutator.newColumn(
 					getColumnName(metaData, fieldNumber),
 					byteContext.getBytes(value)));
@@ -364,5 +370,4 @@ public class CassandraInsertFieldManager extends AbstractFieldManager {
 			throw new NucleusDataStoreException(e.getMessage(), e);
 		}
 	}
-
 }

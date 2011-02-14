@@ -224,8 +224,9 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 						fieldMetaData.getType(), column);
 				try {
 
-					Object object = context.findObject(identity, false, false,
-							fieldMetaData.getTypeName());
+					Object object = context.findObject(identity, false, true,
+
+					fieldMetaData.getTypeName());
 
 					return objectProvider.wrapSCOField(fieldNumber, object,
 							false, false, true);
@@ -269,7 +270,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 						try {
 							Object element = context.findObject(key, false,
-									false, fieldMetaData.getTypeName());
+									true, fieldMetaData.getTypeName());
 
 							coll.add(element);
 						} catch (NucleusObjectNotFoundException nonfe) {
@@ -277,8 +278,8 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 							// is over tombstone time
 						}
 					}
-					
-					if(coll.size() == 0){
+
+					if (coll.size() == 0) {
 						return null;
 					}
 
@@ -341,7 +342,8 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 
 								key = context.findObject(
 										context.newObjectId(keyClass,
-												entry.getKey()), false, false,
+												entry.getKey()), false, true,
+
 										fieldMetaData.getTypeName());
 							} else {
 								key = entry.getKey();
@@ -352,7 +354,8 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 							if (pcValue) {
 								value = context.findObject(
 										context.newObjectId(valueClass,
-												entry.getValue()), false, false,
+												entry.getValue()), false, true,
+
 										fieldMetaData.getTypeName());
 							} else {
 								value = entry.getValue();
@@ -366,11 +369,10 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 						}
 
 					}
-					
-					if(map.size() == 0){
+
+					if (map.size() == 0) {
 						return null;
 					}
-					
 
 					return objectProvider.wrapSCOField(fieldNumber, map, false,
 							false, true);
@@ -398,8 +400,7 @@ public class CassandraFetchFieldManager extends AbstractFieldManager {
 						Object id = context.newObjectId(elementClass,
 								entry.getValue());
 
-						Object element = context.findObject(id, false, false,
-								fieldMetaData.getTypeName());
+						Object element = context.findObject(id, false, true, fieldMetaData.getTypeName());
 
 						Array.set(array, (Integer) entry.getKey(), element);
 					}
