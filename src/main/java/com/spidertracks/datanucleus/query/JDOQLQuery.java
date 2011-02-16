@@ -253,6 +253,9 @@ public class JDOQLQuery extends AbstractJDOQLQuery {
 						.getClassNameFromDiscriminatorValue(descriminatorValue,
 								acmd.getDiscriminatorMetaData(), ec);
 
+				if (className == null) {
+					continue;
+				}
 				targetClass = clr.classForName(className);
 
 			}
